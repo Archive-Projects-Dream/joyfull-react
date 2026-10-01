@@ -1,3 +1,4 @@
+/*
 /turf/closed/mineral //
 	icon = MAP_SWITCH('_horizon/icons/turf/walls/rock/smoothrocks.dmi', '_horizon/icons/turf/walls/rock/mapping_wall.dmi')
 
@@ -74,3 +75,4 @@
 
 /turf/closed/mineral/random/moon //
 	icon = MAP_SWITCH('_horizon/icons/turf/walls/rock/moon.dmi', '_horizon/icons/turf/walls/rock/mapping_wall.dmi')
+*/

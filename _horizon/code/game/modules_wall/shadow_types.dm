@@ -1,8 +1,8 @@
 // MARK: Shadow-atom
 /atom/movable/atom_shadow
 	name = "shadow"
-	icon = '_horizon/icons/obj/solid_wall_mask.dmi'
-	icon_state = "wall-0"
+	icon = '_horizon/icons/obj/modular_shadow.dmi'
+	icon_state = "wall"
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
@@ -12,17 +12,13 @@
 /atom/movable/atom_shadow/door
 	icon = '_horizon/icons/obj/airlock_mask.dmi'
 
-// WALL
+// MARK: WALL
 /turf/closed/wall
 	var/atom/movable/atom_shadow/shadow
 
 /turf/closed/wall/Initialize(mapload)
 	. = ..()
 	shadow = new(src)
-
-/turf/closed/wall/set_smoothed_icon_state(new_junction)
-	. = ..()
-	shadow.icon_state = "wall-[smoothing_junction]"
 
 /turf/closed/wall/Destroy()
 	qdel(shadow)

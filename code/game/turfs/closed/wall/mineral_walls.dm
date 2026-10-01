@@ -12,28 +12,19 @@
 /turf/closed/wall/mineral/gold
 	name = "gold wall"
 	desc = "A wall with gold plating. Swag!"
-	icon = 'icons/turf/walls/gold_wall.dmi'
-	icon_state = "gold_wall-0"
-	base_icon_state = "gold_wall"
+	icon = '_horizon/icons/turf/walls/modules_wall/gold.dmi'
 	sheet_type = /obj/item/stack/sheet/mineral/gold
 	hardness = 65 //gold is soft
 	explosive_resistance = 0 //gold is a soft metal you dingus.
-	smoothing_groups = SMOOTH_GROUP_GOLD_WALLS + SMOOTH_GROUP_WALLS + SMOOTH_GROUP_CLOSED_TURFS
-	canSmoothWith = SMOOTH_GROUP_GOLD_WALLS
 	custom_materials = list(/datum/material/gold = SHEET_MATERIAL_AMOUNT*2)
 	rust_resistance = RUST_RESISTANCE_BASIC
 
 /turf/closed/wall/mineral/silver
 	name = "silver wall"
 	desc = "A wall with silver plating. Shiny!"
-	icon = 'icons/turf/walls/silver_wall.dmi'
-	icon_state = "silver_wall-0"
-	base_icon_state = "silver_wall"
+	icon = '_horizon/icons/turf/walls/modules_wall/silver.dmi'
 	sheet_type = /obj/item/stack/sheet/mineral/silver
 	hardness = 65 //silver is also soft according to moh's scale
-	smoothing_flags = SMOOTH_BITMASK
-	smoothing_groups = SMOOTH_GROUP_SILVER_WALLS + SMOOTH_GROUP_WALLS + SMOOTH_GROUP_CLOSED_TURFS
-	canSmoothWith = SMOOTH_GROUP_SILVER_WALLS
 	custom_materials = list(/datum/material/silver = SHEET_MATERIAL_AMOUNT*2)
 
 /turf/closed/wall/mineral/diamond
@@ -266,17 +257,13 @@
 /turf/closed/wall/mineral/titanium //has to use this path due to how building walls works
 	name = "wall"
 	desc = "A light-weight titanium wall used in shuttles."
-	icon = 'icons/turf/walls/shuttle_wall.dmi'
-	icon_state = "shuttle_wall-0"
-	base_icon_state = "shuttle_wall"
+	icon = '_horizon/icons/turf/walls/modules_wall/shuttle.dmi'
+	icon_state = "wall"
 	explosive_resistance = 3
 	flags_1 = CAN_BE_DIRTY_1
 	flags_ricochet = RICOCHET_SHINY | RICOCHET_HARD
 	sheet_type = /obj/item/stack/sheet/mineral/titanium
 	hardness = 40 //6 on moh's scale
-	smoothing_flags = SMOOTH_BITMASK | SMOOTH_DIAGONAL_CORNERS
-	smoothing_groups = SMOOTH_GROUP_TITANIUM_WALLS + SMOOTH_GROUP_WALLS + SMOOTH_GROUP_CLOSED_TURFS
-	canSmoothWith = SMOOTH_GROUP_SHUTTLE_PARTS + SMOOTH_GROUP_AIRLOCK + SMOOTH_GROUP_TITANIUM_WALLS
 	custom_materials = list(/datum/material/titanium = SHEET_MATERIAL_AMOUNT*2)
 	rust_resistance = RUST_RESISTANCE_TITANIUM
 
@@ -315,15 +302,10 @@
 /turf/closed/wall/mineral/plastitanium
 	name = "wall"
 	desc = "A durable wall made of an alloy of plasma and titanium."
-	icon = 'icons/turf/walls/plastitanium_wall.dmi'
-	icon_state = "plastitanium_wall-0"
-	base_icon_state = "plastitanium_wall"
+	icon = '_horizon/icons/turf/walls/modules_wall/plastitanium.dmi'
 	explosive_resistance = 4
 	sheet_type = /obj/item/stack/sheet/mineral/plastitanium
 	hardness = 25 //upgrade on titanium
-	smoothing_flags = SMOOTH_BITMASK | SMOOTH_DIAGONAL_CORNERS
-	smoothing_groups = SMOOTH_GROUP_PLASTITANIUM_WALLS + SMOOTH_GROUP_WALLS + SMOOTH_GROUP_CLOSED_TURFS
-	canSmoothWith = SMOOTH_GROUP_SHUTTLE_PARTS + SMOOTH_GROUP_AIRLOCK + SMOOTH_GROUP_PLASTITANIUM_WALLS + SMOOTH_GROUP_SYNDICATE_WALLS
 	custom_materials = list(/datum/material/alloy/plastitanium = SHEET_MATERIAL_AMOUNT*2)
 	rust_resistance = RUST_RESISTANCE_TITANIUM
 
@@ -358,27 +340,13 @@
 /turf/closed/wall/mineral/plastitanium/survival
 	name = "pod wall"
 	desc = "An easily-compressible wall used for temporary shelter."
-	icon = 'icons/turf/walls/survival_pod_walls.dmi'
-	icon_state = "survival_pod_walls-0"
-	base_icon_state = "survival_pod_walls"
+	icon = '_horizon/icons/turf/walls/modules_wall/EvaWall.dmi'
 	sheet_type = /obj/item/stack/wall_filling/plastitanium/survivalpod
 	sheet_amount = 1
-	smoothing_flags = SMOOTH_BITMASK | SMOOTH_DIAGONAL_CORNERS
-	smoothing_groups = SMOOTH_GROUP_PLASTITANIUM_WALLS + SMOOTH_GROUP_WALLS + SMOOTH_GROUP_CLOSED_TURFS
-	canSmoothWith = SMOOTH_GROUP_SHUTTLE_PARTS + SMOOTH_GROUP_AIRLOCK + SMOOTH_GROUP_WINDOW_FULLTILE + SMOOTH_GROUP_TITANIUM_WALLS
 	rust_resistance = RUST_RESISTANCE_TITANIUM
 
-/turf/closed/wall/mineral/plastitanium/survival/nodiagonal
-	icon = 'icons/turf/walls/survival_pod_walls.dmi'
-	icon_state = "survival_pod_walls-0"
-	base_icon_state = "survival_pod_walls"
-	smoothing_flags = SMOOTH_BITMASK
-	rust_resistance = RUST_RESISTANCE_TITANIUM
-
+/turf/closed/wall/mineral/plastitanium/survival/nodiagonal //Понабирают всяких долбаёбав
 /turf/closed/wall/mineral/plastitanium/survival/pod
-	smoothing_groups = SMOOTH_GROUP_SURVIVAL_TITANIUM_POD + SMOOTH_GROUP_TITANIUM_WALLS + SMOOTH_GROUP_WALLS + SMOOTH_GROUP_CLOSED_TURFS
-	canSmoothWith = SMOOTH_GROUP_SURVIVAL_TITANIUM_POD
-	rust_resistance = RUST_RESISTANCE_TITANIUM
 
 /turf/closed/wall/mineral/plastitanium/rust_turf(magic = FALSE)
 	if(HAS_TRAIT(src, TRAIT_RUSTY))

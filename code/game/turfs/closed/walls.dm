@@ -1,10 +1,14 @@
 /turf/closed/wall
 	name = "wall"
 	desc = "A huge chunk of iron used to separate rooms."
-	icon = 'icons/turf/walls/wall.dmi'
-	icon_state = "wall-0"
+	icon = '_horizon/icons/turf/walls/modules_wall/metal.dmi'
+	icon_state = "wall"
 	base_icon_state = "wall"
 	explosive_resistance = 1
+	special_icon = TRUE
+	smoothing_flags = NONE
+	smoothing_groups = null
+	canSmoothWith = null
 	rust_resistance = RUST_RESISTANCE_BASIC
 
 	thermal_conductivity = WALL_HEAT_TRANSFER_COEFFICIENT
@@ -13,10 +17,6 @@
 	baseturfs = /turf/open/floor/plating
 
 	flags_ricochet = RICOCHET_HARD
-
-	smoothing_flags = SMOOTH_BITMASK
-	smoothing_groups = SMOOTH_GROUP_WALLS + SMOOTH_GROUP_CLOSED_TURFS
-	canSmoothWith = SMOOTH_GROUP_WALLS
 
 	rcd_memory = RCD_MEMORY_WALL
 	///bool on whether this wall can be chiselled into

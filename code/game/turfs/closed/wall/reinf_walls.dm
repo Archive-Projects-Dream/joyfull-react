@@ -1,13 +1,10 @@
 /turf/closed/wall/r_wall
 	name = "reinforced wall"
 	desc = "A huge chunk of reinforced metal used to separate rooms."
-	icon = 'icons/turf/walls/reinforced_wall.dmi'
-	icon_state = "reinforced_wall-0"
-	base_icon_state = "reinforced_wall"
+	icon = '_horizon/icons/turf/walls/modules_wall/reinforce.dmi'
 	opacity = TRUE
 	density = TRUE
 	turf_flags = IS_SOLID
-	smoothing_flags = SMOOTH_BITMASK
 	hardness = 10
 	sheet_type = /obj/item/stack/sheet/plasteel
 	sheet_amount = 1
@@ -190,17 +187,6 @@
 				return TRUE
 	return FALSE
 
-/turf/closed/wall/r_wall/update_icon(updates=ALL)
-	. = ..()
-	if(d_state != INTACT)
-		smoothing_flags = NONE
-		return
-	if (!(updates & UPDATE_SMOOTHING))
-		return
-	smoothing_flags = SMOOTH_BITMASK
-	QUEUE_SMOOTH_NEIGHBORS(src)
-	QUEUE_SMOOTH(src)
-
 // We don't react to smoothing changing here because this else exists only to "revert" intact changes
 /turf/closed/wall/r_wall/update_icon_state()
 	if(d_state != INTACT)
@@ -250,25 +236,14 @@
 /turf/closed/wall/r_wall/plastitanium
 	name = /turf/closed/wall/mineral/plastitanium::name
 	desc = "An extra durable wall made of an alloy of plasma and titanium, reinforced with plasteel rods."
-	icon = 'icons/turf/walls/plastitanium_wall.dmi'
-	icon_state = "plastitanium_wall-0"
-	base_icon_state = "plastitanium_wall"
+	icon = '_horizon/icons/turf/walls/modules_wall/survival_pod_walls.dmi'
 	sheet_type = /obj/item/stack/sheet/mineral/plastitanium
 	hardness = 25 //plastitanium
 	turf_flags = IS_SOLID
-	smoothing_flags = SMOOTH_BITMASK | SMOOTH_DIAGONAL_CORNERS
-	smoothing_groups = SMOOTH_GROUP_WALLS + SMOOTH_GROUP_CLOSED_TURFS + SMOOTH_GROUP_SYNDICATE_WALLS
-	canSmoothWith = SMOOTH_GROUP_SHUTTLE_PARTS + SMOOTH_GROUP_AIRLOCK + SMOOTH_GROUP_PLASTITANIUM_WALLS + SMOOTH_GROUP_SYNDICATE_WALLS
 	rust_resistance = RUST_RESISTANCE_TITANIUM
 
 /turf/closed/wall/r_wall/plastitanium/nodiagonal
-	icon = MAP_SWITCH('icons/turf/walls/plastitanium_wall.dmi', 'icons/turf/walls/misc_wall.dmi')
-	icon_state = MAP_SWITCH("plastitanium_wall-0", "plastitanium_nd")
-	smoothing_flags = SMOOTH_BITMASK
-
 /turf/closed/wall/r_wall/plastitanium/overspace
-	icon = MAP_SWITCH('icons/turf/walls/plastitanium_wall.dmi', 'icons/turf/walls/misc_wall.dmi')
-	icon_state = MAP_SWITCH("plastitanium_wall-0", "plastitanium_overspace")
 	fixed_underlay = list("space" = TRUE)
 
 /turf/closed/wall/r_wall/plastitanium/syndicate
@@ -280,11 +255,5 @@
 	return FALSE
 
 /turf/closed/wall/r_wall/plastitanium/syndicate/nodiagonal
-	icon = MAP_SWITCH('icons/turf/walls/plastitanium_wall.dmi', 'icons/turf/walls/misc_wall.dmi')
-	icon_state = MAP_SWITCH("plastitanium_wall-0", "plastitanium_nd")
-	smoothing_flags = SMOOTH_BITMASK
-
 /turf/closed/wall/r_wall/plastitanium/syndicate/overspace
-	icon = MAP_SWITCH('icons/turf/walls/plastitanium_wall.dmi', 'icons/turf/walls/misc_wall.dmi')
-	icon_state = MAP_SWITCH("plastitanium_wall-0", "plastitanium_overspace")
 	fixed_underlay = list("space" = TRUE)

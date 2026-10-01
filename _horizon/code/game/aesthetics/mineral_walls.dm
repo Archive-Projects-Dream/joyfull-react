@@ -1,3 +1,4 @@
+/*
 /turf/closed/wall
 	icon = '_horizon/icons/turf/walls/wall.dmi'
 	smoothing_flags = SMOOTH_BITMASK
@@ -89,3 +90,4 @@
 */
 /turf/closed/wall/r_wall
 	icon = '_horizon/icons/turf/walls/rwalls/reinforced_wall.dmi'
+*/
