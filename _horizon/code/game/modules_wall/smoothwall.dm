@@ -26,9 +26,6 @@ GLOBAL_LIST_INIT(base_tiles, list(
 	/obj/structure/window/reinforced/tinted/fulltile,
 ))
 
-/// Same trick for the simple walls - they only ever tile with themselves.
-GLOBAL_LIST_INIT(simple_wall_tiles, list(/turf/closed/wall/simple))
-
 /// tiles_with list instance -> assoc typecache (every subtype -> TRUE).
 /// Turns the old "istype() per path per neighbour per direction" chain into
 /// one O(1) hash lookup per atom we look at.

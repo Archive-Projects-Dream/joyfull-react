@@ -41,7 +41,7 @@
 	icon_state = "blank"
 
 	for(var/i in 1 to 4)
-		overlays += get_wall_object(icon, "wall[wall_connections[i]]", 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
+		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
 GLOBAL_LIST_EMPTY(closed_blend_caches)
 
@@ -121,6 +121,16 @@ GLOBAL_LIST_EMPTY(closed_blend_caches)
 #undef CORNER_COUNTERCLOCKWISE
 #undef CORNER_DIAGONAL
 #undef CORNER_CLOCKWISE
+
+/*
+ * Connector walls: corner state -> overlay icon state name. Types with
+ * diagonal = TRUE swap the isolated corner (0) and the L-junction corner
+ * (5) for the smoother -diagonal variants.
+ */
+/turf/closed/proc/corner_icon_state(corner)
+	if(diagonal && (corner == "0" || corner == "5"))
+		return "wall[corner]-diagonal"
+	return "wall[corner]"
 
 /turf/closed/mineral/update_icon()
 	. = ..()

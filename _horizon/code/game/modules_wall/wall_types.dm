@@ -2,6 +2,8 @@
 	/// when walls smooth with one another, the type of junction each wall is.
 	var/list/wall_connections = list("0", "0", "0", "0")
 	var/special_icon
+	/// Special wall0-diagonal and wall5-diagonal states
+	var/diagonal = FALSE
 
 	/*
 	 * blend_turfs - Turfs to blending with
