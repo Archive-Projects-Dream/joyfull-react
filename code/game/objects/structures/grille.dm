@@ -60,7 +60,6 @@
 	else
 		icon = '_horizon/icons/obj/smooth_structures/grille_simple.dmi'
 
-	var/old_smoothing_flags = smoothing_flags
 	if(broken)
 		icon = '_horizon/icons/obj/smooth_structures/grille_broken.dmi'
 		icon_state = "brokengrille"

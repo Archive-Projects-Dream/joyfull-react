@@ -39,16 +39,24 @@
 	icon = '_horizon/icons/obj/smooth_structures/grille_simple.dmi'
 	icon_state = "grille0"
 	plane = ABOVE_WALL_PLANE
-	tiles_with = BASED_TILES
-	// F4CK SMOTHING-SYSTEM
-	smoothing_flags = NONE
+	smoothing_flags = SMOOTH_BITMASK_CARDINALS
 	smoothing_groups = null
 	canSmoothWith = null
 
 /obj/structure/grille/Initialize(mapload)
+	tiles_with = BASED_TILES
 	. = ..()
+	QUEUE_SMOOTH(src)
+	if(!mapload)
+		relativewall_neighbours()
+
+/obj/structure/grille/smooth_icon()
+	smoothing_flags &= ~SMOOTH_QUEUED
 	relativewall()
+
+/obj/structure/grille/Destroy()
 	relativewall_neighbours()
+	return ..()
 
 /obj/structure/grille/handle_icon_junction(junction)
 	icon_state = "grille[junction]"
