@@ -39,7 +39,7 @@
 	icon = '_horizon/icons/obj/smooth_structures/grille_simple.dmi'
 	icon_state = "grille0"
 	plane = ABOVE_WALL_PLANE
-	smoothing_flags = SMOOTH_BITMASK_CARDINALS
+	smoothing_flags = SMOOTH_CONNECTOR
 	smoothing_groups = null
 	canSmoothWith = null
 

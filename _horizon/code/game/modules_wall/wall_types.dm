@@ -24,19 +24,20 @@
 	icon = '_horizon/icons/turf/walls/modules_wall/survival_pod_walls.dmi'
 	icon_state = "wall"
 	special_icon = TRUE
+	smoothing_flags = SMOOTH_CONNECTOR
 
 /turf/closed/wall/concrete
 	icon = '_horizon/icons/turf/walls/modules_wall/concentrate.dmi'
 	icon_state = "wall"
 	special_icon = TRUE
-	smoothing_flags = SMOOTH_BITMASK_CARDINALS
+	smoothing_flags = SMOOTH_CONNECTOR
 	smoothing_groups = NONE
 	canSmoothWith = NONE
 
 /turf/closed/mineral
 	icon_state = "wall"
 	special_icon = TRUE
-	smoothing_flags = SMOOTH_BITMASK_CARDINALS
+	smoothing_flags = SMOOTH_CONNECTOR
 	smoothing_groups = NONE
 	canSmoothWith = NONE
 	blend_turfs = list(/turf/closed/mineral)

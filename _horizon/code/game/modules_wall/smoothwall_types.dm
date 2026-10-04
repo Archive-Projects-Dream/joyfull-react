@@ -6,7 +6,7 @@
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
-	smoothing_flags = SMOOTH_BITMASK_CARDINALS
+	smoothing_flags = SMOOTH_CONNECTOR
 	smooth_diagonals = TRUE
 
 /atom/movable/atom_shadow/Initialize(mapload)

@@ -15,10 +15,16 @@
 	return make_mutable_appearance_directional(vis, dir)
 
 /*
- * Connector walls ride the SSicon_smooth queue: /turf/Initialize queues every
- * USES_SMOOTHING turf, and these overrides do the connection rebuild once
- * the whole map exists (at mapload) or under the tick budget (at runtime).
- * SMOOTH_BITMASK_CARDINALS on the special_icon types is just the queue ticket.
+ * Connector walls ride the SSicon_smooth queue. SMOOTH_CONNECTOR is the queue
+ * ticket: every entry into the queue is gated on `smoothing_flags &
+ * USES_SMOOTHING` (/turf/Initialize, QUEUE_SMOOTH, QUEUE_SMOOTH_NEIGHBORS),
+ * and the same gate drives the UPDATE_SMOOTHING re-queue hooks (shuttle
+ * rotation, holodeck and friends). Drop the flag and nothing ever calls
+ * update_connections(): at mapload the wall keeps its raw "wall" state, and
+ * later neighbour changes never refresh the corners. The standard bitmask
+ * semantics never run for these types - smooth_icon() is overridden and
+ * never calls ..() - the orange(src, 1) scan below is the payload, not the
+ * trigger.
  */
 /turf/closed/wall/smooth_icon()
 	if(!special_icon)
@@ -43,55 +49,42 @@
 	for(var/i in 1 to 4)
 		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
-GLOBAL_LIST_EMPTY(closed_blend_caches)
-
-/turf/closed/proc/blend_caches()
-	var/list/caches = GLOB.closed_blend_caches[type]
-	if(!caches)
-		caches = list(
-			"blend_turfs" = typecacheof(blend_turfs),
-			"noblend_turfs" = typecacheof(noblend_turfs),
-			"blend_objects" = typecacheof(blend_objects),
-			"noblend_objects" = typecacheof(noblend_objects),
-		)
-		GLOB.closed_blend_caches[type] = caches
-	return caches
-
 /*
- * One pass over the 3x3 neighbourhood instead of the old two orange() scans:
- * closed neighbours join through can_join_with() (inlined below, same
- * semantics), objects only matter on the cardinal sides. Blend matching is
- * a typecache lookup per atom rather than an istype() per blend path.
+ * One pass over the 3x3 neighbourhood: closed neighbours join through
+ * can_join_with(), objects only matter on the cardinal sides and only when
+ * blend_objects actually lists any.
  */
 /turf/closed/proc/update_connections(propagate = 0)
 	var/list/wall_dirs = list()
-	var/list/caches = blend_caches()
-	var/list/blend_turfs = caches["blend_turfs"]
-	var/list/noblend_turfs = caches["noblend_turfs"]
-	var/list/blend_objects = caches["blend_objects"]
-	var/list/noblend_objects = caches["noblend_objects"]
-	var/cardinal_only
 
 	for(var/turf/T in orange(src, 1))
-		cardinal_only = get_dir(src, T) in GLOB.cardinals
 		if(istype(T, /turf/closed))
 			var/turf/closed/W = T
-			if(W.type == type || !(noblend_turfs[W.type]) && blend_turfs[W.type])
+			if(W.type == type || can_join_with(W))
 				wall_dirs += get_dir(src, W)
 			if(propagate)
 				W.update_connections()
 				W.update_icon()
 			continue
-		if(!cardinal_only)
+		if(!length(blend_objects) || !(get_dir(src, T) in GLOB.cardinals))
 			continue
 		for(var/obj/O in T)
-			if(noblend_objects[O.type])
+			if(is_type_in_list(O, noblend_objects))
 				continue
-			if(blend_objects[O.type])
+			if(is_type_in_list(O, blend_objects))
 				wall_dirs += get_dir(src, T)
 				break
 
 	wall_connections = dirs_to_corner_states(wall_dirs)
+
+/// Closed-turf blending: same type always joins; otherwise the blend lists
+/// decide, noblend has priority over blend, subtypes included.
+/turf/closed/proc/can_join_with(turf/closed/W)
+	if(W.type == type)
+		return TRUE
+	if(is_type_in_list(W, noblend_turfs))
+		return FALSE
+	return is_type_in_list(W, blend_turfs)
 
 #define CORNER_NONE 0
 #define CORNER_COUNTERCLOCKWISE 1
@@ -141,6 +134,6 @@ GLOBAL_LIST_EMPTY(closed_blend_caches)
 	icon_state = "blank"
 	var/image/I
 	for(var/i in 1 to 4)
-		I = image(icon, "wall[wall_connections[i]]", dir = 1<<(i-1))
+		I = image(icon, corner_icon_state(wall_connections[i]), dir = 1<<(i-1))
 		I.plane = GAME_PLANE
 		overlays += I
