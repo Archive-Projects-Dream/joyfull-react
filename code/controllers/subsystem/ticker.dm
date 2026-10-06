@@ -601,8 +601,14 @@ SUBSYSTEM_DEF(ticker)
 			qdel(player)
 			ADD_TRAIT(living, TRAIT_NO_TRANSFORM, SS_TICKER_TRAIT)
 			if(living.client)
-				var/atom/movable/screen/splash/fade_out = new(null, null, living.client, TRUE)
-				fade_out.fade(TRUE)
+				// [HORIZON-ADD] The html lobby cross-fades into the game view itself
+				// when it hides, so the vanilla title splash must not be stacked on
+				// top of it (the player would briefly see the default title screen
+				// mid-transition). Transparent mode still wants the splash, because
+				// there the map is visible behind the semi-transparent lobby.
+				if(!living.client.lobby_menu || GLOB.lobby_background_transparent)
+					var/atom/movable/screen/splash/fade_out = new(null, null, living.client, TRUE)
+					fade_out.fade(TRUE)
 				living.client.init_verbs()
 				living.client.show_spawn_text_overlay()
 
