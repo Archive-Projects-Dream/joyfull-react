@@ -5,10 +5,6 @@
 	icon_state = "wall"
 	base_icon_state = "wall"
 	explosive_resistance = 1
-	special_icon = TRUE
-	smoothing_flags = NONE
-	smoothing_groups = null
-	canSmoothWith = null
 	rust_resistance = RUST_RESISTANCE_BASIC
 
 	thermal_conductivity = WALL_HEAT_TRANSFER_COEFFICIENT
@@ -17,6 +13,10 @@
 	baseturfs = /turf/open/floor/plating
 
 	flags_ricochet = RICOCHET_HARD
+
+	smoothing_flags = SMOOTH_CONNECTOR
+	smoothing_groups = NONE
+	canSmoothWith = NONE
 
 	rcd_memory = RCD_MEMORY_WALL
 	///bool on whether this wall can be chiselled into

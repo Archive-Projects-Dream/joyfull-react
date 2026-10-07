@@ -4,9 +4,6 @@
 	/// Special wall0-diagonal and wall5-diagonal states
 	var/diagonal = FALSE
 	var/special_icon = TRUE
-	smoothing_flags = SMOOTH_CONNECTOR
-	smoothing_groups = NONE
-	canSmoothWith = NONE
 
 	/*
 	 * blend_turfs - Turfs to blending with
