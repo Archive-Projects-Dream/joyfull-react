@@ -1,35 +1,28 @@
 // MARK: Shadow-atom
+
+/*
+	* FOV mask renderer, nothing more. The parent wall owns every junction
+	* decision: standard walls push their bitmask junction straight into our
+	* icon_state through set_smoothed_icon_state(), module (special_icon) walls
+	* hand us their corner list and call our update_icon() from theirs. No
+	* smoothing flags, no neighbour scans of our own - the mask is just the
+	* wall again, drawn on the FOV shadows plane.
+	*/
 /atom/movable/atom_shadow
 	name = "shadow"
-	icon = '_horizon/icons/obj/modular_shadow.dmi'
-	icon_state = "wall"
+	icon = '_horizon/icons/obj/solid_wall_mask.dmi'
+	icon_state = "wall-0"
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
-	smoothing_flags = SMOOTH_CONNECTOR
-	var/list/wall_connections = list("0", "0", "0", "0")
+	/// Mirrors the parent wall's special_icon: render four corner overlays
+	/// instead of a single junction state.
 	var/special_icon
-
-	/*
-	 * blend_turfs - Turfs to blending with
-	 * noblend_turfs - Turfs to avoid blending with
-	 * blend_objects - Objects which to blend with
-	 * noblend_objects - Objects to avoid blending with (such as children of listed blend objects).
-	 */
-	var/list/blend_turfs = list()
-	var/list/noblend_turfs = list()
-	var/list/blend_objects = list()
-	var/list/noblend_objects = list()
-
-
-/atom/movable/atom_shadow/setDir(newDir)
-	..()
-	QUEUE_SMOOTH(src)
+	/// Corner states, shared list owned by the parent wall (module walls only).
+	var/list/wall_connections = list("0", "0", "0", "0")
 
 /atom/movable/atom_shadow/door
 	icon = '_horizon/icons/obj/airlock_mask.dmi'
-	smoothing_flags = NONE
-	special_icon = FALSE
 
 // WALL
 /turf/closed/wall
@@ -37,10 +30,22 @@
 
 /turf/closed/wall/Initialize(mapload)
 	. = ..()
+	if(. == INITIALIZE_HINT_QDEL)
+		return
 	shadow = new(src)
+	if(special_icon)
+		shadow.special_icon = TRUE
+		shadow.icon = '_horizon/icons/obj/modular_shadow.dmi'
+
+// Standard walls: the bitmask junction doubles as the mask's icon_state, so
+// the silhouette the FOV filters see is exactly the wall the player sees.
+/turf/closed/wall/set_smoothed_icon_state(new_junction)
+	. = ..()
+	if(shadow)
+		shadow.icon_state = "wall-[smoothing_junction]"
 
 /turf/closed/wall/Destroy()
-	shadow?.Destroy()
+	qdel(shadow)
 	return ..()
 
 // MARK: Door Airlock
@@ -53,10 +58,13 @@
 		shadow = new(loc)
 		shadow.icon_state = icon_state
 		shadow.dir = dir
+		if(!mapload)
+			QUEUE_SMOOTH_NEIGHBORS(src) //walls around a runtime-spawned door need to see it
 
 /obj/machinery/door/setDir(newdir)
 	. = ..()
-	shadow?.dir = newdir
+	if(shadow)
+		shadow.dir = newdir
 
 /obj/machinery/door/airlock/update_icon(updates = ALL)
 	. = ..()
@@ -72,8 +80,8 @@
 				shadow.icon_state = "closed"
 
 /obj/machinery/door/Destroy()
-	if(shadow)
-		shadow.Destroy()
+	qdel(shadow)
+	QUEUE_SMOOTH_NEIGHBORS(src)
 	return ..()
 
 /obj/machinery/door/poddoor/update_icon(updates = ALL)

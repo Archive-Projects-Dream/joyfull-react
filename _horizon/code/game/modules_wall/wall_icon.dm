@@ -37,12 +37,12 @@ GLOBAL_LIST_EMPTY(wall_object_cache)
 	if(!special_icon)
 		return ..() //standard bitmask walls keep their normal smoothing
 	smoothing_flags &= ~SMOOTH_QUEUED
-	update_connections(FALSE)
+	update_connections()
 	update_icon()
 
 /turf/closed/mineral/smooth_icon()
 	smoothing_flags &= ~SMOOTH_QUEUED
-	update_connections(FALSE)
+	update_connections()
 	update_icon()
 
 /turf/closed/wall/update_icon()
@@ -56,16 +56,19 @@ GLOBAL_LIST_EMPTY(wall_object_cache)
 	for(var/i in 1 to 4)
 		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
-/turf/closed/proc/update_connections(propagate = 0)
+	// The mask is this wall again on the FOV shadows plane: hand over the
+	// corner list we just built and let it re-render from the same numbers.
+	if(shadow)
+		shadow.wall_connections = wall_connections
+		shadow.update_icon()
+
+/turf/closed/proc/update_connections()
 	var/list/wall_dirs = list()
 	for(var/turf/T in orange(src, 1))
 		if(istype(T, /turf/closed))
 			var/turf/closed/W = T
 			if(W.type == type || can_join_with(W))
 				wall_dirs += get_dir(src, W)
-			if(propagate)
-				W.update_connections()
-				W.update_icon()
 			continue
 		if(!length(blend_objects) || !(get_dir(src, T) in GLOB.cardinals))
 			continue
@@ -126,58 +129,21 @@ GLOBAL_LIST_EMPTY(wall_object_cache)
 
 	overlays.Cut()
 	icon_state = "blank"
-	var/image/I
+
 	for(var/i in 1 to 4)
-		I = image(icon, corner_icon_state(wall_connections[i]), dir = 1<<(i-1))
-		I.plane = GAME_PLANE
-		overlays += I
+		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = GAME_PLANE, offset_spokesman = src)
 
 // MARK: Shadow
-/atom/movable/atom_shadow/smooth_icon()
-	if(!special_icon)
-		return ..() //standard bitmask walls keep their normal smoothing
-	smoothing_flags &= ~SMOOTH_QUEUED
-	update_connections(FALSE)
-	update_icon()
-
+/*
+	* Only ever called by the parent module wall, with its own corner list in
+	* wall_connections. TODO: modular_shadow.dmi has no wall0/wall5-diagonal
+	* states yet - until it does, the mask always draws the plain corners.
+	*/
 /atom/movable/atom_shadow/update_icon()
 	. = ..()
-	if(!special_icon)
-		return
 
 	overlays.Cut()
 	icon_state = "blank"
 
 	for(var/i in 1 to 4)
 		overlays += get_wall_object(icon, "wall[wall_connections[i]]", 1<<(i-1), plane = plane, offset_spokesman = src)
-
-	// В будующем добавить: проверять на диагональ добавить оверлей, чтоб если wall2 накладывался всегда если есть по диагонали.
-
-/atom/movable/atom_shadow/proc/update_connections(propagate = 0)
-	var/list/wall_dirs = list()
-	for(var/turf/T in orange(src, 1))
-		if(istype(T, /turf/closed))
-			var/turf/closed/W = T
-			if(W.type == type || can_join_with(W))
-				wall_dirs += get_dir(src, W)
-			if(propagate)
-				W.update_connections()
-				W.update_icon()
-			continue
-		if(!length(blend_objects) || !(get_dir(src, T) in GLOB.cardinals))
-			continue
-		for(var/obj/O in T)
-			if(is_type_in_list(O, noblend_objects))
-				continue
-			if(is_type_in_list(O, blend_objects))
-				wall_dirs += get_dir(src, T)
-				break
-
-	wall_connections = dirs_to_corner_states(wall_dirs)
-
-/atom/movable/atom_shadow/proc/can_join_with(turf/closed/W)
-	if(W.type == type)
-		return TRUE
-	if(is_type_in_list(W, noblend_turfs))
-		return FALSE
-	return is_type_in_list(W, blend_turfs)
