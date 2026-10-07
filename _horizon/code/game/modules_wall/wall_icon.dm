@@ -120,4 +120,4 @@
 	icon_state = "blank"
 
 	for(var/i in 1 to 4)
-		overlays += get_wall_object(icon, "wall[shadow_connections[i]]", 1<<(i-1), plane = plane, offset_spokesman = src)
+		overlays += get_wall_object(icon, "wall[shadow_connections[i]]", 1<<(i-1), plane = ATOMS_FOV_SHADOWS_PLANE, offset_spokesman = src)

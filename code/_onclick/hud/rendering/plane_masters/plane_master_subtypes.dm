@@ -665,14 +665,14 @@
 	render_relay_planes = list()
 	color = list(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,2)
 
-/*
-// Под дебаг теней / For debug shadows
+
+// MARK: Под дебаг теней / For debug shadows
 /atom/movable/screen/plane_master/wall_fov/show_to(mob/mymob)
 	..()
 	if(!isobserver(mymob))
 		return
 	hide_from(mymob)
-*/
+
 
 /atom/movable/screen/plane_master/wall_fov/proc/set_displace_offset(dx, dy, duration)
 	var/filter = get_filter("wall_displace")

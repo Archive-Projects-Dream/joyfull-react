@@ -4,6 +4,9 @@
 	/// Special wall0-diagonal and wall5-diagonal states
 	var/diagonal = FALSE
 	var/special_icon = TRUE
+	smoothing_flags = SMOOTH_CONNECTOR
+	smoothing_groups = null
+	canSmoothWith = null
 
 	/*
 	 * blend_turfs - Turfs to blending with
@@ -13,8 +16,8 @@
 	 */
 	var/list/blend_turfs = list(/turf/closed)
 	var/list/noblend_turfs = list(/turf/closed/mineral)
-	var/list/blend_objects = list()
-	var/list/noblend_objects = list()
+	var/list/blend_objects = list(/obj/structure/window/reinforced/fulltile, /obj/machinery/door)
+	var/list/noblend_objects = list(/obj/machinery/door/airlock/public/glass)
 
 /turf/closed/wall/setDir(newDir)
 	..()
@@ -26,12 +29,3 @@
 
 /turf/closed/wall/concrete
 	icon = '_horizon/icons/turf/walls/modules_wall/concentrate.dmi'
-
-/turf/closed/mineral
-	icon = '_horizon/icons/turf/walls/modules_wall/stone2.dmi'
-	blend_turfs = list(/turf/closed/mineral)
-	noblend_turfs = list()
-
-/turf/closed/mineral/setDir(newDir)
-	..()
-	QUEUE_SMOOTH(src)
