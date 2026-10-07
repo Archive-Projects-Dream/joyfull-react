@@ -38,7 +38,8 @@
 	for(var/i in 1 to 4)
 		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
-	shadow.shadow_connections = wall_connections
+	shadow.shadow_connections = wall_connections // the wall's corners are the shadow's corners
+	shadow.update_diagonals() // the diagonals are the only math the shadow owns
 	shadow.update_icon()
 
 /turf/closed/proc/corner_icon_state(corner)
@@ -48,22 +49,30 @@
 
 /turf/closed/proc/update_connections()
 	var/list/wall_dirs = list()
+	var/list/glass = list()
 	for(var/turf/T in orange(src, 1))
+		var/dir = get_dir(src, T)
 		if(istype(T, /turf/closed))
 			var/turf/closed/W = T
 			if(W.type == type || can_join_with(W))
-				wall_dirs += get_dir(src, W)
+				wall_dirs += dir
+				if(!W.opacity) // fakeglass & co: the wall merges with it, tag it for the shadow
+					glass += dir
 			continue
-		if(!length(blend_objects) || !(get_dir(src, T) in GLOB.cardinals))
+		if(!length(blend_objects) || !(dir in GLOB.cardinals))
 			continue
 		for(var/obj/O in T)
 			if(is_type_in_list(O, noblend_objects))
 				continue
 			if(is_type_in_list(O, blend_objects))
-				wall_dirs += get_dir(src, T)
+				wall_dirs += dir
+				var/obj/machinery/door/D = O
+				if(istype(D) ? D.glass : !O.opacity) // glass doors, see-through windows
+					glass += dir
 				break
 
 	wall_connections = dirs_to_corner_states(wall_dirs)
+	glass_dirs = glass
 
 /turf/closed/proc/can_join_with(turf/closed/W)
 	if(W.type == type)
@@ -113,11 +122,29 @@
 		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = GAME_PLANE, offset_spokesman = src)
 
 // MARK: Shadow
+/*
+ * The wall's corner states select the quadrant pipes; the wall2 pipes on
+ * top are for what the shadow sheet has no combined states for. The glass
+ * diagonal rule marks its corners in diag_connections, and a diagonal
+ * wall's wall0/wall5 corners would want sprites that only exist in the
+ * wall sheets - both get the same assembly: the base corner goes down
+ * first, then a wall2 pipe is layered on top of it.
+ */
 /atom/movable/atom_shadow/update_icon()
 	. = ..()
 
 	overlays.Cut()
 	icon_state = "blank"
 
+	var/list/corner_dirs = list(NORTHWEST, SOUTHEAST, NORTHEAST, SOUTHWEST)
 	for(var/i in 1 to 4)
 		overlays += get_wall_object(icon, "wall[shadow_connections[i]]", 1<<(i-1), plane = ATOMS_FOV_SHADOWS_PLANE, offset_spokesman = src)
+		if(corner_dirs[i] in diag_connections) // the glass diagonal: a wall2 pipe on top of the base corner
+			overlays += get_wall_object(icon, "wall2", 1<<(i-1), plane = ATOMS_FOV_SHADOWS_PLANE, offset_spokesman = src)
+
+	var/turf/closed/parent = loc
+	if(istype(parent) && parent.diagonal)
+		for(var/i in 1 to 4)
+			var/corner = shadow_connections[i]
+			if(corner == "0" || corner == "5")
+				overlays += get_wall_object(icon, "wall2", 1<<(i-1), plane = ATOMS_FOV_SHADOWS_PLANE, offset_spokesman = src)
