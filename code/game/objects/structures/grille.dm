@@ -48,32 +48,6 @@
 	if((updates & UPDATE_SMOOTHING) && (smoothing_flags & USES_SMOOTHING))
 		QUEUE_SMOOTH(src)
 
-// [HORIZON-EDIT]
-/obj/structure/grille/update_icon(updates=ALL)
-	. = ..()
-	if(QDELETED(src))
-		return
-
-	var/ratio = atom_integrity / max_integrity
-	if(ratio <= 0.5)
-		icon = '_horizon/icons/obj/smooth_structures/grille_damaged.dmi'
-	else
-		icon = '_horizon/icons/obj/smooth_structures/grille_simple.dmi'
-
-	if(broken)
-		icon = '_horizon/icons/obj/smooth_structures/grille_broken.dmi'
-		icon_state = "brokengrille"
-
-/*
-/obj/structure/grille/update_icon_state()
-	if (broken)
-		icon_state = "broken[base_icon_state]"
-	//else
-	//	icon_state = "[base_icon_state][((atom_integrity / max_integrity) <= 0.5) ? "50_[rand(0, 3)]" : null]"
-	return ..()
-*/
-// [/HORIZON-EDIT]
-
 /obj/structure/grille/examine(mob/user)
 	. = ..()
 	if(resistance_flags & INDESTRUCTIBLE)

@@ -34,9 +34,3 @@
 	plane = ABOVE_WALL_PLANE
 	smoothing_groups = SMOOTH_GROUP_AIRLOCK + SMOOTH_GROUP_WALLS
 	canSmoothWith = SMOOTH_GROUP_AIRLOCK + SMOOTH_GROUP_WALLS
-
-/obj/structure/grille
-	icon = '_horizon/icons/obj/smooth_structures/grille_simple.dmi'
-	icon_state = "grille0"
-	plane = ABOVE_WALL_PLANE
-	smoothing_flags = SMOOTH_BITMASK_CARDINALS

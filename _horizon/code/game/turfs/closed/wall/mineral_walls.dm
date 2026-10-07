@@ -1,5 +1,6 @@
 /turf/closed/wall
 	icon = '_horizon/icons/turf/walls/wall.dmi'
+	smoothing_flags = SMOOTH_BITMASK
 	smoothing_groups = SMOOTH_GROUP_WALLS + SMOOTH_GROUP_AIRLOCK + SMOOTH_GROUP_CLOSED_TURFS
 	canSmoothWith = SMOOTH_GROUP_WALLS + SMOOTH_GROUP_WINDOW_FULLTILE + SMOOTH_GROUP_AIRLOCK
 
@@ -57,7 +58,7 @@
 /turf/closed/wall/mineral/silver
 	icon = '_horizon/icons/turf/walls/silver_wall.dmi'
 
-/turf/closed/wall/mineral/snow	//
+/turf/closed/wall/mineral/snow  //
 	icon = '_horizon/icons/turf/walls/snow_wall.dmi'
 
 /turf/closed/wall/mineral/sandstone
