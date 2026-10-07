@@ -1,34 +1,35 @@
 // MARK: Shadow-atom
 /atom/movable/atom_shadow
 	name = "shadow"
-	icon = '_horizon/icons/obj/solid_wall_mask.dmi'
-	icon_state = "wall-0"
+	icon = '_horizon/icons/obj/modular_shadow.dmi'
+	icon_state = "wall"
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	smoothing_flags = SMOOTH_CONNECTOR
-	smooth_diagonals = TRUE
+	var/list/wall_connections = list("0", "0", "0", "0")
+	var/special_icon
 
-/atom/movable/atom_shadow/Initialize(mapload)
-	tiles_with = BASED_TILES
-	. = ..()
+	/*
+	 * blend_turfs - Turfs to blending with
+	 * noblend_turfs - Turfs to avoid blending with
+	 * blend_objects - Objects which to blend with
+	 * noblend_objects - Objects to avoid blending with (such as children of listed blend objects).
+	 */
+	var/list/blend_turfs = list()
+	var/list/noblend_turfs = list()
+	var/list/blend_objects = list()
+	var/list/noblend_objects = list()
+
+
+/atom/movable/atom_shadow/setDir(newDir)
+	..()
 	QUEUE_SMOOTH(src)
-	if(!mapload)
-		relativewall_neighbours()
 
-/atom/movable/atom_shadow/smooth_icon()
-	smoothing_flags &= ~SMOOTH_QUEUED
-	relativewall()
-
-/atom/movable/atom_shadow/handle_icon_junction(junction)
-	if(smoothing_junction == junction)
-		return
-	smoothing_junction = junction
-	icon_state = "wall-[junction]"
-
-/atom/movable/atom_shadow/Destroy()
-	relativewall_neighbours()
-	return ..()
+/atom/movable/atom_shadow/door
+	icon = '_horizon/icons/obj/airlock_mask.dmi'
+	smoothing_flags = NONE
+	special_icon = FALSE
 
 // WALL
 /turf/closed/wall
@@ -43,27 +44,15 @@
 	return ..()
 
 // MARK: Door Airlock
-/atom/movable/atom_shadow/door
-	icon = '_horizon/icons/obj/airlock_mask.dmi'
-
-/atom/movable/atom_shadow/door/smooth_icon()
-	smoothing_flags &= ~SMOOTH_QUEUED
-
-/atom/movable/atom_shadow/door/handle_icon_junction(junction)
-	return
-
 /obj/machinery/door
 	var/atom/movable/atom_shadow/door/shadow
 
 /obj/machinery/door/Initialize(mapload)
-	tiles_with = BASED_TILES
 	. = ..()
 	if(!glass)
 		shadow = new(loc)
 		shadow.icon_state = icon_state
 		shadow.dir = dir
-	else if(!mapload)
-		relativewall_neighbours()
 
 /obj/machinery/door/setDir(newdir)
 	. = ..()
@@ -85,8 +74,6 @@
 /obj/machinery/door/Destroy()
 	if(shadow)
 		shadow.Destroy()
-	else
-		relativewall_neighbours()
 	return ..()
 
 /obj/machinery/door/poddoor/update_icon(updates = ALL)
