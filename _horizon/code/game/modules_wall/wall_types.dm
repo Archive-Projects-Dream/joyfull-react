@@ -1,10 +1,7 @@
 /turf/closed
+	var/atom/movable/atom_shadow/shadow // Тень есть всегда на турфах закрытого типа.
 	/// when walls smooth with one another, the type of junction each wall is.
 	var/list/wall_connections = list("0", "0", "0", "0")
-	/// Connection dirs that run into glass (fakeglass turfs, glass doors,
-	/// see-through windows) - tagged by update_connections() for the shadow's
-	/// diagonal rule. Dirs, not corner states.
-	var/list/glass_dirs = list()
 	/// Special wall0-diagonal and wall5-diagonal states
 	var/diagonal = FALSE
 	var/special_icon = TRUE
@@ -22,6 +19,15 @@
 	var/list/noblend_turfs = list(/turf/closed/mineral)
 	var/list/blend_objects = list(/obj/structure/window/reinforced/fulltile, /obj/machinery/door)
 	var/list/noblend_objects = list(/obj/machinery/door/airlock/public/glass)
+
+
+/turf/closed/wall/Initialize(mapload)
+	. = ..()
+	shadow = new(src)
+
+/turf/closed/wall/Destroy()
+	qdel(shadow)
+	return ..()
 
 /turf/closed/wall/setDir(newDir)
 	..()

@@ -44,18 +44,6 @@
 /atom/movable/atom_shadow/door
 	icon = '_horizon/icons/obj/airlock_mask.dmi'
 
-// MARK: WALL
-/turf/closed/wall
-	var/atom/movable/atom_shadow/shadow
-
-/turf/closed/wall/Initialize(mapload)
-	. = ..()
-	shadow = new(src)
-
-/turf/closed/wall/Destroy()
-	qdel(shadow)
-	return ..()
-
 // MARK: Door Airlock
 /obj/machinery/door
 	var/atom/movable/atom_shadow/door/shadow

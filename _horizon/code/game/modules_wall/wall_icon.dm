@@ -72,7 +72,7 @@
 				break
 
 	wall_connections = dirs_to_corner_states(wall_dirs)
-	glass_dirs = glass
+	shadow.diag_connections = glass
 
 /turf/closed/proc/can_join_with(turf/closed/W)
 	if(W.type == type)
@@ -122,14 +122,6 @@
 		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = GAME_PLANE, offset_spokesman = src)
 
 // MARK: Shadow
-/*
- * The wall's corner states select the quadrant pipes; the wall2 pipes on
- * top are for what the shadow sheet has no combined states for. The glass
- * diagonal rule marks its corners in diag_connections, and a diagonal
- * wall's wall0/wall5 corners would want sprites that only exist in the
- * wall sheets - both get the same assembly: the base corner goes down
- * first, then a wall2 pipe is layered on top of it.
- */
 /atom/movable/atom_shadow/update_icon()
 	. = ..()
 
