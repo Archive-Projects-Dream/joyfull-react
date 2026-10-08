@@ -1,13 +1,12 @@
 /atom/movable/atom_shadow
 	name = "shadow"
-	icon = '_horizon/icons/obj/modular_shadow.dmi'
-	icon_state = "wall"
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 
 /atom/movable/atom_shadow/door
 	icon = '_horizon/icons/obj/airlock_mask.dmi'
+	icon_state = "closed"
 
 // MARK: Door Airlock
 /obj/machinery/door

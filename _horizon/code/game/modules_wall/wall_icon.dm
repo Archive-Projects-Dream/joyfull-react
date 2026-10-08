@@ -123,6 +123,8 @@
 
 // MARK: Shadow-atom
 /atom/movable/atom_shadow/wall
+	icon = '_horizon/icons/obj/modular_shadow.dmi'
+	icon_state = "wall"
 	var/list/shadow_connections = list("0", "0", "0", "0")
 	/// Corners carrying a wall2 pipe on top of the base state - the glass diagonal rule fills this.
 	var/list/diag_connections = list()
