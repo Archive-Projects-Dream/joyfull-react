@@ -1,5 +1,5 @@
 /turf/closed
-	var/atom/movable/atom_shadow/shadow // Тень есть всегда на турфах закрытого типа.
+	var/atom/movable/atom_shadow/wall/shadow // Тень есть всегда на турфах закрытого типа.
 	/// when walls smooth with one another, the type of junction each wall is.
 	var/list/wall_connections = list("0", "0", "0", "0")
 	/// Special wall0-diagonal and wall5-diagonal states
