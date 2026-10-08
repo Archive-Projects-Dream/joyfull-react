@@ -1,14 +1,15 @@
+// Base Asset
 /atom/movable/atom_shadow
 	name = "shadow"
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 
+// MARK: Door Airlock
 /atom/movable/atom_shadow/door
 	icon = '_horizon/icons/obj/airlock_mask.dmi'
 	icon_state = "closed"
 
-// MARK: Door Airlock
 /obj/machinery/door
 	var/atom/movable/atom_shadow/door/shadow
 
