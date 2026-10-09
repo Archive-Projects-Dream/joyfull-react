@@ -15,17 +15,18 @@
 
 /obj/machinery/door/Initialize(mapload)
 	. = ..()
-	if(!glass)
-		shadow = new(loc)
-		shadow.icon_state = icon_state
-		shadow.dir = dir
-		if(!mapload)
-			QUEUE_SMOOTH_NEIGHBORS(src) //walls around a runtime-spawned door need to see it
+	if(glass)
+		return
+
+	shadow = new(loc)
+	shadow.icon_state = icon_state
+	shadow.dir = dir
+	if(!mapload)
+		QUEUE_SMOOTH_NEIGHBORS(src) //walls around a runtime-spawned door need to see it
 
 /obj/machinery/door/setDir(newdir)
 	. = ..()
-	if(shadow)
-		shadow.dir = newdir
+	shadow.dir = newdir
 
 /obj/machinery/door/airlock/update_icon(updates = ALL)
 	. = ..()
@@ -47,5 +48,4 @@
 
 /obj/machinery/door/poddoor/update_icon(updates = ALL)
 	. = ..()
-	if(shadow)
-		shadow.icon_state = density ? "closed" : "open"
+	shadow.icon_state = density ? "closed" : "open"

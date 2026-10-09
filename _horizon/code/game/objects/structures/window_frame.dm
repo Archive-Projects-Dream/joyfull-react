@@ -1,16 +1,7 @@
-/*
- * The CM13-style framed windows: glass that keeps its frame.
- *
- * Taking the glass out - clean or shattered - always leaves the frame in
- * the wall opening, junctions and all. Two fresh sheets build the window
- * back into the frame; a wrench takes the frame itself apart into metal.
- * The glass is bolted in for good: it cannot be unanchored and carried off.
- */
-
 /obj/structure/window/framed
 	name = "framed window"
 	desc = "A glass window with a rod matrix inside a wall frame. It looks rather strong. Might take a few good hits to shatter it."
-	icon = '_horizon/icons/obj/smooth_structures/reinforced_window.dmi'
+	icon = '_horizon/icons/obj/smooth_structures/shuttle_window.dmi'
 	icon_state = "wall"
 	plane = ABOVE_WALL_PLANE
 	smoothing_flags = SMOOTH_CONNECTOR
@@ -29,53 +20,8 @@
 	glass_type = /obj/item/stack/sheet/rglass
 	glass_amount = 2
 	custom_materials = list(/datum/material/glass = SHEET_MATERIAL_AMOUNT * 2, /datum/material/iron = SHEET_MATERIAL_AMOUNT)
-	var/special_icon = TRUE
-	var/list/wall_connections = list("0", "0", "0", "0")
-	/// Objects the glass blends with cardinally - mirrors the wall's blend_objects.
-	var/list/blend_objects = list(/obj/structure/window/reinforced/fulltile, /obj/structure/window/framed, /obj/structure/window_frame, /obj/machinery/door)
-	var/list/noblend_objects = list()
 	/// The frame left in the opening whenever the glass goes.
 	var/window_frame = /obj/structure/window_frame
-
-/*
- * The glass twin of the wall's connector, the same one the reinforced
- * fulltile runs: one scan feeds the four corner frames.
- */
-/obj/structure/window/framed/smooth_icon()
-	if(!special_icon)
-		return ..()
-	smoothing_flags &= ~SMOOTH_QUEUED
-	update_connections()
-	update_icon(~UPDATE_SMOOTHING)
-
-/obj/structure/window/framed/proc/update_connections()
-	var/list/wall_dirs = list()
-	for(var/turf/T in orange(src, 1))
-		var/dir = get_dir(src, T)
-		if(istype(T, /turf/closed))
-			var/turf/closed/W = T
-			if((dir in GLOB.cardinals) && !is_type_in_list(src, W.noblend_objects) && is_type_in_list(src, W.blend_objects))
-				wall_dirs += dir
-			continue
-		if(dir in GLOB.cardinals) // objects blend cardinally only
-			for(var/obj/O in T)
-				if(is_type_in_list(O, noblend_objects))
-					continue
-				if(is_type_in_list(O, blend_objects))
-					wall_dirs += dir
-					break
-	wall_connections = dirs_to_corner_states(wall_dirs)
-
-/obj/structure/window/framed/update_icon()
-	. = ..()
-	if(!special_icon)
-		return
-
-	overlays.Cut()
-	icon_state = "blank"
-
-	for(var/i in 1 to 4)
-		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
 /// The glass is bolted into the frame for good - it only ever comes out the hard way.
 /obj/structure/window/framed/screwdriver_act(mob/living/user, obj/item/tool)
@@ -100,11 +46,10 @@
 /*
  * The frame: a hole in the wall that used to sport a large window.
  */
-
 /obj/structure/window_frame
 	name = "window frame"
 	desc = "A big hole in the wall that used to sport a large window. Can be vaulted through."
-	icon = '_horizon/icons/obj/smooth_structures/window_frame.dmi'
+	icon = '_horizon/icons/obj/smooth_structures/reinforced_window.dmi'
 	icon_state = "wall"
 	plane = ABOVE_WALL_PLANE
 	layer = ABOVE_OBJ_LAYER
@@ -119,7 +64,8 @@
 	canSmoothWith = null
 	var/special_icon = TRUE
 	var/list/wall_connections = list("0", "0", "0", "0")
-	/// Objects the frame blends with cardinally - mirrors the wall's blend_objects.
+	var/list/blend_turfs = list(/turf/closed)
+	var/list/noblend_turfs = list(/turf/closed/mineral)
 	var/list/blend_objects = list(/obj/structure/window/reinforced/fulltile, /obj/structure/window/framed, /obj/structure/window_frame, /obj/machinery/door)
 	var/list/noblend_objects = list()
 	/// The window built back into the frame once it is fed glass.
@@ -136,46 +82,6 @@
 	set_density(FALSE)
 	air_update_turf(TRUE, FALSE)
 	return ..()
-
-/*
- * The frame runs the same connector twin: one scan feeds the four corner
- * frames, the empty hole edition.
- */
-/obj/structure/window_frame/smooth_icon()
-	if(!special_icon)
-		return ..()
-	smoothing_flags &= ~SMOOTH_QUEUED
-	update_connections()
-	update_icon(~UPDATE_SMOOTHING)
-
-/obj/structure/window_frame/proc/update_connections()
-	var/list/wall_dirs = list()
-	for(var/turf/T in orange(src, 1))
-		var/dir = get_dir(src, T)
-		if(istype(T, /turf/closed))
-			var/turf/closed/W = T
-			if((dir in GLOB.cardinals) && !is_type_in_list(src, W.noblend_objects) && is_type_in_list(src, W.blend_objects))
-				wall_dirs += dir
-			continue
-		if(dir in GLOB.cardinals) // objects blend cardinally only
-			for(var/obj/O in T)
-				if(is_type_in_list(O, noblend_objects))
-					continue
-				if(is_type_in_list(O, blend_objects))
-					wall_dirs += dir
-					break
-	wall_connections = dirs_to_corner_states(wall_dirs)
-
-/obj/structure/window_frame/update_icon()
-	. = ..()
-	if(!special_icon)
-	        return
-
-	overlays.Cut()
-	icon_state = "blank"
-
-	for(var/i in 1 to 4)
-		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
 /// Two fresh sheets build the window back in; the frame hands its tile over.
 /obj/structure/window_frame/item_interaction(mob/living/user, obj/item/tool, list/modifiers)

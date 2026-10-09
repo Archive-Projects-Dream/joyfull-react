@@ -1,3 +1,68 @@
+// MARK: Wall
+/turf/closed/smooth_icon()
+	if(!special_icon)
+		return ..() //standard bitmask walls keep their normal smoothing
+	smoothing_flags &= ~SMOOTH_QUEUED
+	update_connections()
+	update_icon()
+
+	if(shadow)
+		shadow.shadow_connections = wall_connections // the wall's corners are the shadow's corners
+		shadow.update_diagonals() // the diagonals are the only math the shadow owns
+		shadow.update_icon()
+
+/turf/closed/update_icon()
+	if(!special_icon)
+		return ..()
+
+	overlays.Cut()
+	icon_state = "blank"
+
+	for(var/i in 1 to 4)
+		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i], diagonal), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
+
+/turf/closed/proc/update_connections()
+	var/list/wall_dirs = list()
+	var/list/glass = list()
+	for(var/direction in GLOB.alldirs)
+		var/turf/current = get_step(src, direction)
+		if(istype(current, /turf/closed))
+			var/turf/closed/current_wall = current
+			if(can_join_with(current_wall))
+				wall_dirs += direction
+				if(!current_wall.opacity) // fakeglass & co: the wall merges with it, tag it for the shadow
+					glass += direction
+			continue
+		if(!(direction in GLOB.cardinals))
+			continue
+		for(var/obj/thing in current)
+			if(can_join_with_object(thing))
+				wall_dirs += direction
+				var/obj/machinery/door/current_door = thing
+				if(istype(current_door) ? current_door.glass : !thing.opacity) // glass doors, see-through windows
+					glass += direction
+				break
+
+	wall_connections = dirs_to_corner_states(wall_dirs)
+	shadow.diag_connections = glass
+
+/turf/closed/proc/can_join_with(turf/closed/W)
+	if(W.type == type)
+		return TRUE
+	if(is_type_in_list(W, noblend_turfs))
+		return FALSE
+	if(is_type_in_list(W, blend_turfs))
+		return TRUE
+	return FALSE
+
+/turf/closed/proc/can_join_with_object(obj/target)
+	if(is_type_in_list(target, noblend_objects))
+		return FALSE
+	if(is_type_in_list(target, blend_objects))
+		return TRUE
+	return FALSE
+
+// MARK: Helpers
 /mutable_appearance/frill
 	appearance_flags = TILE_BOUND | RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM
 
@@ -13,65 +78,6 @@
 	else
 		vis.plane = plane
 	return make_mutable_appearance_directional(vis, dir)
-
-// MARK: Wall
-/turf/closed/smooth_icon()
-	if(!special_icon)
-		return ..() //standard bitmask walls keep their normal smoothing
-	smoothing_flags &= ~SMOOTH_QUEUED
-	update_connections()
-	update_icon()
-
-	if(shadow) // only walls own a mask - bare turfs render without one
-		shadow.shadow_connections = wall_connections // the wall's corners are the shadow's corners
-		shadow.update_diagonals() // the diagonals are the only math the shadow owns
-		shadow.update_icon()
-
-/turf/closed/update_icon()
-	. = ..()
-	if(!special_icon)
-		return
-
-	overlays.Cut()
-	icon_state = "blank"
-
-	for(var/i in 1 to 4)
-		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i], diagonal), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
-
-/turf/closed/proc/update_connections()
-	var/list/wall_dirs = list()
-	var/list/glass = list()
-	for(var/turf/T in orange(src, 1))
-		var/dir = get_dir(src, T)
-		if(istype(T, /turf/closed))
-			var/turf/closed/W = T
-			if(W.type == type || can_join_with(W))
-				wall_dirs += dir
-				if(!W.opacity) // fakeglass & co: the wall merges with it, tag it for the shadow
-					glass += dir
-			continue
-		if(!length(blend_objects) || !(dir in GLOB.cardinals))
-			continue
-		for(var/obj/O in T)
-			if(is_type_in_list(O, noblend_objects))
-				continue
-			if(is_type_in_list(O, blend_objects))
-				wall_dirs += dir
-				var/obj/machinery/door/D = O
-				if(istype(D) ? D.glass : !O.opacity) // glass doors, see-through windows
-					glass += dir
-				break
-
-	wall_connections = dirs_to_corner_states(wall_dirs)
-	if(shadow)
-		shadow.diag_connections = glass
-
-/turf/closed/proc/can_join_with(turf/closed/W)
-	if(W.type == type)
-		return TRUE
-	if(is_type_in_list(W, noblend_turfs))
-		return FALSE
-	return is_type_in_list(W, blend_turfs)
 
 #define CORNER_NONE 0
 #define CORNER_COUNTERCLOCKWISE 1
@@ -102,10 +108,6 @@
 #undef CORNER_DIAGONAL
 #undef CORNER_CLOCKWISE
 
-/**
- * The corner state name every frame family shares - walls add the
- * two diagonal-only states, the glass renders the plain states.
- */
 /proc/corner_icon_state(corner, diagonal = FALSE)
 	if(diagonal && (corner == "0" || corner == "5"))
 		return "wall[corner]-diagonal"
@@ -117,6 +119,19 @@
 	icon_state = "wall"
 	var/list/shadow_connections = list("0", "0", "0", "0")
 	var/list/diag_connections = list()
+
+/atom/movable/atom_shadow/wall/update_icon()
+	. = ..()
+
+	overlays.Cut()
+	icon_state = "blank"
+
+	var/static/list/corner_dirs = list(NORTHWEST, SOUTHEAST, NORTHEAST, SOUTHWEST)
+	for(var/i in 1 to 4)
+		var/frame = 1<<(i-1)
+		overlays += get_wall_object(icon, "wall[shadow_connections[i]]", frame, plane = ATOMS_FOV_SHADOWS_PLANE, offset_spokesman = src)
+		if(corner_dirs[i] in diag_connections) // the glass diagonal: a wall2 pipe on top of the base corner
+			overlays += get_wall_object(icon, "wall2", frame, plane = ATOMS_FOV_SHADOWS_PLANE, offset_spokesman = src)
 
 /atom/movable/atom_shadow/wall/proc/update_diagonals()
 	if(!istype(loc, /turf/closed))
@@ -131,22 +146,175 @@
 
 /// Does the tile on that side of us hold a mask the shadow could link with?
 /atom/movable/atom_shadow/wall/proc/mask_at(dir)
-	var/turf/T = get_step(src, dir)
-	var/turf/closed/wall/WT = T
-	if(WT?.shadow)
+	var/turf/current_turf = get_step(src, dir)
+	var/turf/closed/wall/current_wall = current_turf
+	if(current_wall?.shadow)
 		return TRUE
-	var/obj/machinery/door/D = locate(/obj/machinery/door) in T
-	return D && D.shadow // solid doors own one, glass doors stay empty
+	var/obj/machinery/door/current_door = locate(/obj/machinery/door) in current_turf
+	return current_door && current_door.shadow // solid doors own one, glass doors stay empty
 
-/atom/movable/atom_shadow/wall/update_icon()
-	. = ..()
+// MARK: Window
+/obj/structure/window/smooth_icon()
+	if(!special_icon)
+		return ..()
+	smoothing_flags &= ~SMOOTH_QUEUED
+	update_connections()
+	update_icon(~UPDATE_SMOOTHING)
+
+/obj/structure/window/update_icon()
+	if(!special_icon)
+		return ..()
 
 	overlays.Cut()
 	icon_state = "blank"
 
-	var/static/list/corner_dirs = list(NORTHWEST, SOUTHEAST, NORTHEAST, SOUTHWEST)
 	for(var/i in 1 to 4)
-		var/frame = 1<<(i-1)
-		overlays += get_wall_object(icon, "wall[shadow_connections[i]]", frame, plane = ATOMS_FOV_SHADOWS_PLANE, offset_spokesman = src)
-		if(corner_dirs[i] in diag_connections) // the glass diagonal: a wall2 pipe on top of the base corner
-			overlays += get_wall_object(icon, "wall2", frame, plane = ATOMS_FOV_SHADOWS_PLANE, offset_spokesman = src)
+		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = ABOVE_WALL_PLANE, offset_spokesman = src)
+
+/obj/structure/window/proc/update_connections()
+	var/list/wall_dirs = list()
+	for(var/direction in GLOB.alldirs)
+		var/turf/current = get_step(src, direction)
+		if(istype(current, /turf/closed))
+			var/turf/closed/current_wall = current
+			if(can_join_with(current_wall))
+				wall_dirs += direction
+			continue
+		if(!(direction in GLOB.cardinals))
+			continue
+		for(var/obj/thing in current)
+			if(can_join_with_object(thing))
+				wall_dirs += direction
+				break
+	wall_connections = dirs_to_corner_states(wall_dirs)
+
+/obj/structure/window/proc/can_join_with(turf/closed/W)
+	if(W.type == type)
+		return TRUE
+	if(is_type_in_list(W, noblend_turfs))
+		return FALSE
+	if(is_type_in_list(W, blend_turfs))
+		return TRUE
+	return FALSE
+
+/obj/structure/window/proc/can_join_with_object(obj/target)
+	if(is_type_in_list(target, noblend_objects))
+		return FALSE
+	if(is_type_in_list(target, blend_objects))
+		return TRUE
+	return FALSE
+
+// MARK: Window frame
+/obj/structure/window_frame/smooth_icon()
+	if(!special_icon)
+		return ..()
+	smoothing_flags &= ~SMOOTH_QUEUED
+	update_connections()
+	update_icon(~UPDATE_SMOOTHING)
+
+/obj/structure/window_frame/update_icon()
+	if(!special_icon)
+		return ..()
+
+	overlays.Cut()
+	icon_state = "blank"
+
+	for(var/i in 1 to 4)
+		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
+
+/obj/structure/window_frame/proc/update_connections()
+	var/list/wall_dirs = list()
+	for(var/direction in GLOB.alldirs)
+		var/turf/current = get_step(src, direction)
+		if(istype(current, /turf/closed))
+			var/turf/closed/current_wall = current
+			if(can_join_with(current_wall))
+				wall_dirs += direction
+			continue
+		if(!(direction in GLOB.cardinals))
+			continue
+		for(var/obj/thing in current)
+			if(can_join_with_object(thing))
+				wall_dirs += direction
+				break
+	wall_connections = dirs_to_corner_states(wall_dirs)
+
+/obj/structure/window_frame/proc/can_join_with(turf/closed/W)
+	if(W.type == type)
+		return TRUE
+	if(is_type_in_list(W, noblend_turfs))
+		return FALSE
+	if(is_type_in_list(W, blend_turfs))
+		return TRUE
+	return FALSE
+
+/obj/structure/window_frame/proc/can_join_with_object(obj/target)
+	if(is_type_in_list(target, noblend_objects))
+		return FALSE
+	if(is_type_in_list(target, blend_objects))
+		return TRUE
+	return FALSE
+
+// MARK: Grille
+/obj/structure/grille
+	icon = '_horizon/icons/obj/smooth_structures/grille_simple.dmi'
+	icon_state = "wall"
+	var/list/wall_connections = list("0", "0", "0", "0")
+	var/list/blend_turfs = list(/turf/closed)
+	var/list/noblend_turfs = list(/turf/closed/mineral, /turf/closed/wall/mineral/titanium)
+	var/list/blend_objects = list(/obj/structure/window/reinforced/fulltile, /obj/structure/window/framed, /obj/structure/window_frame, /obj/machinery/door)
+	var/list/noblend_objects = list()
+	var/special_icon = TRUE
+	smoothing_flags = SMOOTH_CONNECTOR
+	smoothing_groups = null
+	canSmoothWith = null
+
+/obj/structure/grille/smooth_icon()
+	if(!special_icon)
+		return ..()
+	smoothing_flags &= ~SMOOTH_QUEUED
+	update_connections()
+	update_icon(~UPDATE_SMOOTHING)
+
+/obj/structure/grille/update_icon()
+	if(!special_icon)
+		return ..()
+
+	overlays.Cut()
+	icon_state = "blank"
+
+	for(var/i in 1 to 4)
+		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
+
+/obj/structure/grille/proc/update_connections()
+	var/list/wall_dirs = list()
+	for(var/direction in GLOB.alldirs)
+		var/turf/current = get_step(src, direction)
+		if(istype(current, /turf/closed))
+			var/turf/closed/current_wall = current
+			if(can_join_with(current_wall))
+				wall_dirs += direction
+			continue
+		if(!(direction in GLOB.cardinals))
+			continue
+		for(var/obj/thing in current)
+			if(can_join_with_object(thing))
+				wall_dirs += direction
+				break
+	wall_connections = dirs_to_corner_states(wall_dirs)
+
+/obj/structure/grille/proc/can_join_with(turf/closed/W)
+	if(W.type == type)
+		return TRUE
+	if(is_type_in_list(W, noblend_turfs))
+		return FALSE
+	if(is_type_in_list(W, blend_turfs))
+		return TRUE
+	return FALSE
+
+/obj/structure/grille/proc/can_join_with_object(obj/target)
+	if(is_type_in_list(target, noblend_objects))
+		return FALSE
+	if(is_type_in_list(target, blend_objects))
+		return TRUE
+	return FALSE
