@@ -47,7 +47,7 @@
 	overlays_file = '_horizon/icons/obj/doors/airlocks/station2/overlays.dmi'
 
 /obj/machinery/door/airlock/research
-	icon = '_horizon/icons/obj/doors/airlocks/station/research.dmi'
+	icon = '_horizon/icons/obj/doors/airlocks/station/science.dmi'
 
 /obj/machinery/door/airlock/sandstone
 	icon = '_horizon/icons/obj/doors/airlocks/station/sandstone.dmi'
