@@ -16,10 +16,9 @@
 	 * noblend_objects - Objects to avoid blending with (such as children of listed blend objects).
 	 */
 	var/list/blend_turfs = list(/turf/closed)
-	var/list/noblend_turfs = list(/turf/closed/mineral)
+	var/list/noblend_turfs = list(/turf/closed/mineral, /turf/closed/wall/mineral/titanium)
 	var/list/blend_objects = list(/obj/structure/window/reinforced/fulltile, /obj/structure/window/framed, /obj/structure/window_frame, /obj/machinery/door)
-	var/list/noblend_objects = list(/obj/machinery/door/airlock/public/glass)
-
+	var/list/noblend_objects = list()
 
 /turf/closed/wall/Initialize(mapload)
 	. = ..()

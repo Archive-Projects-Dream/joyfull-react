@@ -22,7 +22,7 @@
 	var/list/wall_connections = list("0", "0", "0", "0")
 	/// Objects the glass blends with cardinally - mirrors the wall's blend_objects.
 	var/list/blend_objects = list(/obj/structure/window/reinforced/fulltile, /obj/structure/window/framed, /obj/structure/window_frame, /obj/machinery/door)
-	var/list/noblend_objects = list(/obj/machinery/door/airlock/public/glass)
+	var/list/noblend_objects = list()
 
 /*
 	 * The glass twin of the wall's connector: one scan feeds the four
