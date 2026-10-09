@@ -22,9 +22,10 @@
 	update_connections()
 	update_icon()
 
-	shadow.shadow_connections = wall_connections // the wall's corners are the shadow's corners
-	shadow.update_diagonals() // the diagonals are the only math the shadow owns
-	shadow.update_icon()
+	if(shadow) // only walls own a mask - bare turfs render without one
+		shadow.shadow_connections = wall_connections // the wall's corners are the shadow's corners
+		shadow.update_diagonals() // the diagonals are the only math the shadow owns
+		shadow.update_icon()
 
 /turf/closed/update_icon()
 	. = ..()
@@ -35,12 +36,7 @@
 	icon_state = "blank"
 
 	for(var/i in 1 to 4)
-		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
-
-/turf/closed/proc/corner_icon_state(corner)
-	if(diagonal && (corner == "0" || corner == "5"))
-		return "wall[corner]-diagonal"
-	return "wall[corner]"
+		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i], diagonal), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
 /turf/closed/proc/update_connections()
 	var/list/wall_dirs = list()
@@ -67,7 +63,8 @@
 				break
 
 	wall_connections = dirs_to_corner_states(wall_dirs)
-	shadow.diag_connections = glass
+	if(shadow)
+		shadow.diag_connections = glass
 
 /turf/closed/proc/can_join_with(turf/closed/W)
 	if(W.type == type)
@@ -104,6 +101,15 @@
 #undef CORNER_COUNTERCLOCKWISE
 #undef CORNER_DIAGONAL
 #undef CORNER_CLOCKWISE
+
+/**
+ * The corner state name every frame family shares - walls add the
+ * two diagonal-only states, the glass renders the plain states.
+ */
+/proc/corner_icon_state(corner, diagonal = FALSE)
+	if(diagonal && (corner == "0" || corner == "5"))
+		return "wall[corner]-diagonal"
+	return "wall[corner]"
 
 // MARK: Shadow
 /atom/movable/atom_shadow/wall
