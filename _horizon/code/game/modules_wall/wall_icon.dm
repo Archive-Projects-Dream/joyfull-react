@@ -21,13 +21,16 @@
 	for(var/i in 1 to 4)
 		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i], diagonal), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
-/turf/closed/proc/update_connections()
+/turf/closed/update_connections()
 	var/list/glass = list()
 	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects, glass))
 	if(shadow)
 		shadow.diag_connections = glass
 
 // MARK: Helpers
+/atom/proc/update_connections()
+	return
+
 /mutable_appearance/frill
 	appearance_flags = TILE_BOUND | RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM
 
@@ -57,7 +60,7 @@
 		var/turf/current = get_step(source, direction)
 		if(istype(current, /turf/closed))
 			var/turf/closed/current_wall = current
-			if(current_wall.type == source.type || !is_type_in_list(current_wall, noblend_turfs) && is_type_in_list(current_wall, blend_turfs))
+			if(can_join_with(current_wall, source, blend_turfs, noblend_turfs))
 				wall_dirs += direction
 				if(!isnull(see_through) && !current_wall.opacity) // fakeglass & co: the wall merges with it, tag it for the shadow
 					see_through += direction
@@ -65,13 +68,29 @@
 		if(!(direction in GLOB.cardinals))
 			continue
 		for(var/obj/thing in current)
-			if(!is_type_in_list(thing, noblend_objects) && is_type_in_list(thing, blend_objects))
+			if(can_join_with_object(thing, blend_objects, noblend_objects))
 				wall_dirs += direction
 				var/obj/machinery/door/current_door = thing
 				if(!isnull(see_through) && (istype(current_door) ? current_door.glass : !thing.opacity)) // glass doors, see-through windows
 					see_through += direction
 				break
 	return wall_dirs
+
+/proc/can_join_with(turf/closed/W, atom/source, list/blend_turfs, list/noblend_turfs)
+	if(W.type == source.type)
+		return TRUE
+	if(is_type_in_list(W, noblend_turfs))
+		return FALSE
+	if(is_type_in_list(W, blend_turfs))
+		return TRUE
+	return FALSE
+
+/proc/can_join_with_object(obj/target, list/blend_objects, list/noblend_objects)
+	if(is_type_in_list(target, noblend_objects))
+		return FALSE
+	if(is_type_in_list(target, blend_objects))
+		return TRUE
+	return FALSE
 
 #define CORNER_NONE 0
 #define CORNER_COUNTERCLOCKWISE 1
@@ -165,7 +184,7 @@
 	for(var/i in 1 to 4)
 		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = ABOVE_WALL_PLANE, offset_spokesman = src)
 
-/obj/structure/window/proc/update_connections()
+/obj/structure/window/update_connections()
 	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects))
 
 // MARK: Window frame
@@ -186,7 +205,7 @@
 	for(var/i in 1 to 4)
 		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
-/obj/structure/window_frame/proc/update_connections()
+/obj/structure/window_frame/update_connections()
 	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects))
 
 // MARK: Grille
@@ -220,5 +239,5 @@
 	for(var/i in 1 to 4)
 		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
-/obj/structure/grille/proc/update_connections()
+/obj/structure/grille/update_connections()
 	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects))
