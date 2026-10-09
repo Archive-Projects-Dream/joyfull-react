@@ -1,36 +1,4 @@
-// MARK: Wall
-/turf/closed/smooth_icon()
-	if(!special_icon)
-		return ..() //standard bitmask walls keep their normal smoothing
-	smoothing_flags &= ~SMOOTH_QUEUED
-	update_connections()
-	update_icon()
-
-	if(shadow)
-		shadow.shadow_connections = wall_connections // the wall's corners are the shadow's corners
-		shadow.update_diagonals() // the diagonals are the only math the shadow owns
-		shadow.update_icon()
-
-/turf/closed/update_icon()
-	if(!special_icon)
-		return ..()
-
-	overlays.Cut()
-	icon_state = "blank"
-
-	for(var/i in 1 to 4)
-		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i], diagonal), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
-
-/turf/closed/update_connections()
-	var/list/glass = list()
-	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects, glass))
-	if(shadow)
-		shadow.diag_connections = glass
-
-// MARK: Helpers
-/atom/proc/update_connections()
-	return
-
+// MARK: Algorithm
 /mutable_appearance/frill
 	appearance_flags = TILE_BOUND | RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM
 
@@ -47,13 +15,12 @@
 		vis.plane = plane
 	return make_mutable_appearance_directional(vis, dir)
 
-/*
- * The single neighbour scan every corner-frame renderer shares: eight
- * directions around `source`; walls join by type or the blend lists,
- * objects blend cardinally only. Returns the joined directions.
- * `see_through`, when passed, also collects the see-through ones for
- * the shadow's diagonals.
- */
+/atom/proc/render_corner_frames(atom/A, list/wall_connections, plane, diagonal = FALSE)
+	A.overlays.Cut()
+	A.icon_state = "blank"
+	for(var/i in 1 to 4)
+		A.overlays += get_wall_object(A.icon, corner_icon_state(wall_connections[i], diagonal), 1<<(i-1), plane = plane, offset_spokesman = A)
+
 /proc/scan_blend_dirs(atom/source, list/blend_turfs, list/noblend_turfs, list/blend_objects, list/noblend_objects, list/see_through)
 	var/list/wall_dirs = list()
 	for(var/direction in GLOB.alldirs)
@@ -126,6 +93,35 @@
 		return "wall[corner]-diagonal"
 	return "wall[corner]"
 
+// MARK: Wall
+/turf/closed/smooth_icon()
+	if(!special_icon)
+		return ..() //standard bitmask walls keep their normal smoothing
+	smoothing_flags &= ~SMOOTH_QUEUED
+	update_connections()
+	update_icon()
+
+	if(shadow)
+		shadow.shadow_connections = wall_connections // the wall's corners are the shadow's corners
+		shadow.update_diagonals() // the diagonals are the only math the shadow owns
+		shadow.update_icon()
+
+/turf/closed/update_icon()
+	if(!special_icon)
+		return ..()
+
+	overlays.Cut()
+	icon_state = "blank"
+
+	for(var/i in 1 to 4)
+		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i], diagonal), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
+
+/turf/closed/proc/update_connections()
+	var/list/glass = list()
+	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects, glass))
+	if(shadow)
+		shadow.diag_connections = glass
+
 // MARK: Shadow
 /atom/movable/atom_shadow/wall
 	icon = '_horizon/icons/obj/modular_shadow.dmi'
@@ -177,14 +173,9 @@
 /obj/structure/window/update_icon()
 	if(!special_icon)
 		return ..()
+	render_corner_frames(src, wall_connections, ABOVE_WALL_PLANE)
 
-	overlays.Cut()
-	icon_state = "blank"
-
-	for(var/i in 1 to 4)
-		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = ABOVE_WALL_PLANE, offset_spokesman = src)
-
-/obj/structure/window/update_connections()
+/obj/structure/window/proc/update_connections()
 	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects))
 
 // MARK: Window frame
@@ -198,14 +189,9 @@
 /obj/structure/window_frame/update_icon()
 	if(!special_icon)
 		return ..()
+	render_corner_frames(src, wall_connections, WALL_PLANE)
 
-	overlays.Cut()
-	icon_state = "blank"
-
-	for(var/i in 1 to 4)
-		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
-
-/obj/structure/window_frame/update_connections()
+/obj/structure/window_frame/proc/update_connections()
 	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects))
 
 // MARK: Grille
@@ -232,12 +218,7 @@
 /obj/structure/grille/update_icon()
 	if(!special_icon)
 		return ..()
+	render_corner_frames(src, wall_connections, WALL_PLANE)
 
-	overlays.Cut()
-	icon_state = "blank"
-
-	for(var/i in 1 to 4)
-		overlays += get_wall_object(icon, corner_icon_state(wall_connections[i]), 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
-
-/obj/structure/grille/update_connections()
+/obj/structure/grille/proc/update_connections()
 	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects))
