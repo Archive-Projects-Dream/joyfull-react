@@ -2,9 +2,9 @@
 	var/atom/movable/atom_shadow/wall/shadow
 
 	var/list/wall_connections = list("0", "0", "0", "0")
-	var/list/blend_turfs = list(/turf/closed)
+	var/list/blend_turfs = list(/turf/closed, /turf/closed/wall/mineral/plastitanium)
 	var/list/noblend_turfs = list(/turf/closed/mineral, /turf/closed/wall/mineral/titanium)
-	var/list/blend_objects = list(/obj/structure/window/reinforced/fulltile, /obj/structure/window/framed, /obj/structure/window_frame, /obj/machinery/door)
+	var/list/blend_objects = list(/obj/structure/grille, /obj/structure/window/fulltile, /obj/structure/window/reinforced/fulltile, /obj/structure/window/reinforced/shuttle, /obj/structure/window/reinforced/plasma/plastitanium, /obj/structure/window/plasma/fulltile, /obj/structure/window/reinforced/plasma/fulltile, /obj/structure/window/framed, /obj/structure/window_frame, /obj/machinery/door)
 	var/list/noblend_objects = list()
 
 	var/special_icon = TRUE

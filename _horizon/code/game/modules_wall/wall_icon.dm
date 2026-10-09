@@ -35,7 +35,7 @@
 		if(!(direction in GLOB.cardinals))
 			continue
 		for(var/obj/thing in current)
-			if(can_join_with_object(thing, blend_objects, noblend_objects))
+			if(can_join_with_object(thing, source, blend_objects, noblend_objects))
 				wall_dirs += direction
 				var/obj/machinery/door/current_door = thing
 				if(!isnull(see_through) && (istype(current_door) ? current_door.glass : !thing.opacity)) // glass doors, see-through windows
@@ -52,7 +52,9 @@
 		return TRUE
 	return FALSE
 
-/proc/can_join_with_object(obj/target, list/blend_objects, list/noblend_objects)
+/proc/can_join_with_object(obj/target, atom/source, list/blend_objects, list/noblend_objects)
+	if(target.type == source.type)
+		return TRUE
 	if(is_type_in_list(target, noblend_objects))
 		return FALSE
 	if(is_type_in_list(target, blend_objects))
@@ -156,9 +158,10 @@
 /// Does the tile on that side of us hold a mask the shadow could link with?
 /atom/movable/atom_shadow/wall/proc/mask_at(dir)
 	var/turf/current_turf = get_step(src, dir)
-	var/turf/closed/wall/current_wall = current_turf
-	if(current_wall?.shadow)
-		return TRUE
+	if(istype(current_turf, /turf/closed))
+		var/turf/closed/current_wall = current_turf
+		if(current_wall.shadow) // walls own one, bare closed turfs don't
+			return TRUE
 	var/obj/machinery/door/current_door = locate(/obj/machinery/door) in current_turf
 	return current_door && current_door.shadow // solid doors own one, glass doors stay empty
 

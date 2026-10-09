@@ -26,7 +26,7 @@
 
 /obj/machinery/door/setDir(newdir)
 	. = ..()
-	shadow.dir = newdir
+	shadow?.dir = newdir
 
 /obj/machinery/door/airlock/update_icon(updates = ALL)
 	. = ..()
@@ -48,4 +48,4 @@
 
 /obj/machinery/door/poddoor/update_icon(updates = ALL)
 	. = ..()
-	shadow.icon_state = density ? "closed" : "open"
+	shadow?.icon_state = density ? "closed" : "open"

@@ -17,14 +17,18 @@
 
 /obj/structure/window/reinforced/shuttle
 	icon = '_horizon/icons/obj/smooth_structures/shuttle_window.dmi'
+	icon_state = "wall"
 	plane = ABOVE_WALL_PLANE
 	special_icon = TRUE
 	smoothing_flags = SMOOTH_CONNECTOR
 	smoothing_groups = null
 	canSmoothWith = null
+	blend_turfs = list(/turf/closed/wall/mineral/titanium)
+	noblend_turfs = list(/turf/closed/mineral)
 
 /obj/structure/window/reinforced/plasma/plastitanium
 	icon = '_horizon/icons/obj/smooth_structures/plastitanium_window.dmi'
+	icon_state = "wall"
 	plane = ABOVE_WALL_PLANE
 	special_icon = TRUE
 	smoothing_flags = SMOOTH_CONNECTOR
@@ -33,6 +37,7 @@
 
 /obj/structure/window/fulltile
 	icon = '_horizon/icons/obj/smooth_structures/window.dmi'
+	icon_state = "wall"
 	plane = ABOVE_WALL_PLANE
 	special_icon = TRUE
 	smoothing_flags = SMOOTH_CONNECTOR
@@ -41,6 +46,7 @@
 
 /obj/structure/window/plasma/fulltile
 	icon = '_horizon/icons/obj/smooth_structures/plasma_window.dmi'
+	icon_state = "wall"
 	plane = ABOVE_WALL_PLANE
 	special_icon = TRUE
 	smoothing_flags = SMOOTH_CONNECTOR
@@ -49,6 +55,7 @@
 
 /obj/structure/window/reinforced/plasma/fulltile
 	icon = '_horizon/icons/obj/smooth_structures/rplasma_window.dmi'
+	icon_state = "wall"
 	plane = ABOVE_WALL_PLANE
 	special_icon = TRUE
 	smoothing_flags = SMOOTH_CONNECTOR
@@ -57,6 +64,7 @@
 
 /turf/closed/indestructible/fakeglass
 	icon = '_horizon/icons/obj/smooth_structures/gold_shuttle_window.dmi'
+	icon_state = "wall"
 	special_icon = TRUE
 	smoothing_flags = SMOOTH_CONNECTOR
 	smoothing_groups = null
