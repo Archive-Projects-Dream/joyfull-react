@@ -394,6 +394,10 @@
 	plane = POINT_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 
+/atom/movable/screen/plane_master/point/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
+	. = ..()
+	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE))
+
 ///Contains all turf lighting
 /atom/movable/screen/plane_master/turf_lighting
 	name = "Turf Lighting"
@@ -632,7 +636,11 @@
 /atom/movable/screen/plane_master/above_floor
 	name = "Above Floor Plane"
 	plane = ABOVE_FLOOR_PLANE
-	render_relay_planes = list(RENDER_PLANE_MASKED_WORLD)
+	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+
+/atom/movable/screen/plane_master/above_floor/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
+	. = ..()
+	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE))
 
 /atom/movable/screen/plane_master/rendering_plate/masked_game_hub
 	name = "Masked Game Hub"
@@ -666,14 +674,14 @@
 	render_relay_planes = list()
 	color = list(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,2)
 
-
+/*
 // MARK: Под дебаг теней / For debug shadows
 /atom/movable/screen/plane_master/wall_fov/show_to(mob/mymob)
 	..()
 	if(!isobserver(mymob))
 		return
 	hide_from(mymob)
-
+*/
 
 /atom/movable/screen/plane_master/wall_fov/proc/set_displace_offset(dx, dy, duration)
 	var/filter = get_filter("wall_displace")
@@ -873,7 +881,7 @@
 	. = ..()
 	var/offset_target = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset)
 	filters += filter(type = "layer", render_source = offset_target, flags = FILTER_UNDERLAY)
-	filters += filter(type = "blur", size = 5)
+	filters += filter(type = "blur", size = 10)
 	filters += filter(type = "layer", render_source = offset_target)
 	filters += filter(type = "blur", size = 1)
 
