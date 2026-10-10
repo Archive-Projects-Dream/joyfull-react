@@ -12,7 +12,7 @@
 	add_screen_object(/atom/movable/screen/pai/software, HUD_PAI_SOFTWARE)
 	add_screen_object(/atom/movable/screen/pai/shell, HUD_PAI_SHELL)
 	add_screen_object(/atom/movable/screen/pai/chassis, HUD_PAI_CHASSIS)
-	add_screen_object(/atom/movable/screen/pai/rest, HUD_MOB_REST)
+	add_screen_object(/atom/movable/screen/pai/rest, HUD_PAI_REST)
 	add_screen_object(/atom/movable/screen/pai/light, HUD_CYBORG_LAMP)
 	add_screen_object(/atom/movable/screen/pai/newscaster, HUD_PAI_NEWSCASTER)
 	add_screen_object(/atom/movable/screen/pai/host_monitor, HUD_PAI_HOST_MONITOR)

@@ -94,24 +94,56 @@
 /datum/action_group/proc/check_against_view()
 	var/owner_view = owner?.mymob?.canon_client?.view
 	if(!owner_view)
+		world.log << "check_against_view: no owner_view, bailing"
 		return
 	// Unlikey as it is, we may have been changed. Want to start from our target position and fail down
 	column_max = initial(column_max)
+	north_offset = initial(north_offset)
 	// Convert our viewer's view var into a workable offset
 	var/list/view_size = view_to_pixels(owner_view)
 
+	// Chat rect collision bounds (if chat is onmap), already in viewport coordinates
+	var/list/cv = owner.chat_rect_viewport
+	var/chat_left = cv?[1]
+	var/chat_bottom = cv?[2]
+	var/chat_w = cv?[3]
+	var/chat_h = cv?[4]
+	world.log << "check_against_view: [type] cv=[cv ? "([chat_left],[chat_bottom],[chat_w],[chat_h])" : "null"] view=[owner_view] view_px=[view_size[1]]x[view_size[2]] initial north_offset=[north_offset] column_max=[column_max]"
+	// If chat overlaps the top-left (where action buttons live), shift north_offset down
+	if(cv)
+		var/chat_top = chat_bottom + chat_h
+		world.log << "check_against_view: chat_left=[chat_left] < half=[view_size[1]/2]? [chat_left < view_size[1]/2] chat_top=[chat_top] > half=[view_size[2]/2]? [chat_top > view_size[2]/2]"
+		// Action buttons start at WEST (x=32), NORTH (top). Check if chat covers that area.
+		if(chat_left < view_size[1] / 2 && chat_top > view_size[2] / 2)
+			var/chat_tiles_from_top = round((view_size[2] - chat_bottom) / ICON_SIZE_Y)
+			world.log << "check_against_view: shifting north_offset from [north_offset] to [max(north_offset, chat_tiles_from_top)] (chat_tiles_from_top=[chat_tiles_from_top])"
+			north_offset = max(north_offset, chat_tiles_from_top)
+
 	// We're primarially concerned about width here, if someone makes us 1x2000 I wish them a swift and watery death
 	var/furthest_screen_loc = ButtonNumberToScreenCoords(column_max - 1)
+	world.log << "check_against_view: furthest_screen_loc=[furthest_screen_loc]"
+	if(!furthest_screen_loc)
+		world.log << "check_against_view: no furthest_screen_loc, refreshing"
+		refresh_actions()
+		return
 	var/list/offsets = screen_loc_to_offset(furthest_screen_loc, owner_view)
-	if(offsets[1] > ICON_SIZE_X && offsets[1] < view_size[1] && offsets[2] > ICON_SIZE_Y && offsets[2] < view_size[2]) // We're all good
+	var/fits_view = offsets[1] > ICON_SIZE_X && offsets[1] < view_size[1] && offsets[2] > ICON_SIZE_Y && offsets[2] < view_size[2]
+	var/hits_chat = cv && rects_overlap(offsets[1], offsets[2], ICON_SIZE_X, ICON_SIZE_Y, chat_left, chat_bottom, chat_w, chat_h)
+	world.log << "check_against_view: offsets=([offsets[1]],[offsets[2]]) fits_view=[fits_view] hits_chat=[hits_chat]"
+	if(fits_view && !hits_chat)
+		world.log << "check_against_view: fits and no chat hit, refreshing with north_offset=[north_offset]"
+		refresh_actions()
 		return
 
 	for(column_max in column_max - 1 to 1 step -1) // Yes I could do this by unwrapping ButtonNumberToScreenCoords, but I don't feel like it
 		var/tested_screen_loc = ButtonNumberToScreenCoords(column_max)
 		offsets = screen_loc_to_offset(tested_screen_loc, owner_view)
+		fits_view = offsets[1] > ICON_SIZE_X && offsets[1] < view_size[1] && offsets[2] > ICON_SIZE_Y && offsets[2] < view_size[2]
+		hits_chat = cv && rects_overlap(offsets[1], offsets[2], ICON_SIZE_X, ICON_SIZE_Y, chat_left, chat_bottom, chat_w, chat_h)
 		// We've found a valid max length, pack it in
-		if(offsets[1] > ICON_SIZE_X && offsets[1] < view_size[1] && offsets[2] > ICON_SIZE_Y && offsets[2] < view_size[2])
+		if(fits_view && !hits_chat)
 			break
+	world.log << "check_against_view: final column_max=[column_max] north_offset=[north_offset]"
 	// Use our newly resized column max
 	refresh_actions()
 

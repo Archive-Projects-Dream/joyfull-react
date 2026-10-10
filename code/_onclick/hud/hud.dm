@@ -64,6 +64,14 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 
 	/// Subtypes can override this to force a specific UI style
 	var/ui_style = null
+	/// Cached chat browser rect as list(x, y, w, h) in mapwindow pixels, or null if not onmap
+	var/list/chat_rect
+	/// Chat rect converted to viewport pixel coordinates (bottom-up) as list(left, bottom, w, h)
+	var/list/chat_rect_viewport
+	/// Cached map view-size for scaling, as list(w, h)
+	var/list/cached_map_view_size
+	/// Assoc list of hud_key -> original screen_loc for displaced elements
+	var/list/displaced_elements = list()
 	/// Assoc list of all screen objects we hold by their key
 	var/list/atom/movable/screen/screen_objects = list()
 	/// List of screen objects by their screen group
@@ -166,6 +174,10 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 		LAZYADD(screen_groups[group_key], new_object)
 		new_object.hud_group_key = group_key
 
+	// Displace if it overlaps the chat browser
+	if(chat_rect && new_object.screen_loc)
+		displace_single_element(hud_key, new_object)
+
 	if (update_screen)
 		show_hud(hud_version)
 	return new_object
@@ -199,6 +211,8 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	SIGNAL_HANDLER
 
 	view_audit_buttons()
+	if(chat_rect)
+		displace_hud_for_chat(chat_rect)
 
 /datum/hud/proc/on_eye_change(datum/source, atom/old_eye, atom/new_eye)
 	SIGNAL_HANDLER
@@ -388,6 +402,10 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 		viewmob.hide_other_mob_action_buttons(mymob)
 		viewmob.hud_used.plane_masters_update()
 		viewmob.show_other_mob_action_buttons(mymob)
+
+	// Re-apply chat browser displacement after HUD rebuild
+	if(chat_rect)
+		displace_hud_for_chat(chat_rect)
 
 	SEND_SIGNAL(screenmob, COMSIG_MOB_HUD_REFRESHED, src)
 	return TRUE
@@ -623,6 +641,380 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 		var/list/current_offsets = screen_loc_to_offset(floating_button.screen_loc, our_view)
 		// We set the view arg here, so the output will be properly hemm'd in by our new view
 		floating_button.screen_loc = offset_to_screen_loc(current_offsets[1], current_offsets[2], view = our_view)
+
+/// Updates the cached chat browser rect and displaces overlapping HUD elements.
+/// Pass null to clear displacement (e.g. when switching to panel mode).
+/datum/hud/proc/displace_hud_for_chat(list/new_rect)
+	// Silently restore original screen_locs before recomputing
+	for(var/key in displaced_elements)
+		var/atom/movable/screen/obj = screen_objects[key]
+		if(obj)
+			obj.screen_loc = displaced_elements[key]
+	displaced_elements.Cut()
+	chat_rect = new_rect
+	chat_rect_viewport = null
+	if(!chat_rect || !length(chat_rect))
+		to_chat(mymob, span_notice("displace_hud: cleared"))
+		if(listed_actions)
+			listed_actions.check_against_view()
+		if(palette_actions)
+			palette_actions.check_against_view()
+		return
+	var/our_view = mymob?.canon_client?.view
+	if(!our_view)
+		return
+	var/chat_x = chat_rect[1]
+	var/chat_y = chat_rect[2]
+	var/chat_w = chat_rect[3]
+	var/chat_h = chat_rect[4]
+	// screen_loc_to_offset uses view_to_pixels (tile-based), but chat bounds are in mapwindow pixels
+	// We need to scale chat bounds from mapwindow coords to viewport coords
+	var/list/view_size = view_to_pixels(our_view)
+	if(!cached_map_view_size)
+		return
+	var/map_w = cached_map_view_size[1]
+	var/map_h = cached_map_view_size[2]
+	if(!map_w || !map_h)
+		return
+	var/scale_x = view_size[1] / map_w
+	var/scale_y = view_size[2] / map_h
+	// Scale chat bounds from mapwindow pixels to viewport pixels
+	var/scaled_x = chat_x * scale_x
+	var/scaled_y = chat_y * scale_y
+	var/scaled_w = chat_w * scale_x
+	var/scaled_h = chat_h * scale_y
+	// BYOND screen_loc Y is bottom-up but winset pos Y is top-down
+	var/chat_bottom = view_size[2] - (scaled_y + scaled_h)
+	var/chat_left = scaled_x
+	// Add half-tile padding to account for zoom scaling imprecision
+	var/hpad = ICON_SIZE_X / 2
+	chat_left -= hpad
+	chat_bottom -= hpad
+	scaled_w += hpad * 2
+	scaled_h += hpad * 2
+	chat_rect_viewport = list(chat_left, chat_bottom, scaled_w, scaled_h)
+	to_chat(mymob, span_notice("displace_hud: view=[our_view] view_px=[view_size[1]]x[view_size[2]] map_view=[map_w]x[map_h] scale=([scale_x],[scale_y]) chat_input=([chat_x],[chat_y],[chat_w],[chat_h]) chat_scaled=([scaled_x],[scaled_y],[scaled_w],[scaled_h]) chat_converted=(left=[chat_left],bottom=[chat_bottom])"))
+	// Determine shift direction based on which half of the screen the chat center is in
+	var/chat_center_x = chat_left + chat_w / 2
+	var/chat_center_y = chat_bottom + chat_h / 2
+	var/shift_x_dir = (chat_center_x > view_size[1] / 2) ? -1 : 1
+	var/shift_y_dir = (chat_center_y > view_size[2] / 2) ? -1 : 1
+	to_chat(mymob, span_notice("displace_hud: center=([chat_center_x],[chat_center_y]) shift_dir=([shift_x_dir],[shift_y_dir])"))
+	// Build list of all element rects for collision checking
+	var/list/element_rects = list()
+	for(var/key in screen_objects)
+		if(key == HUD_MOB_SCREENTIP)
+			continue
+		var/atom/movable/screen/obj = screen_objects[key]
+		if(!obj.screen_loc || obj.screen_loc == "")
+			continue
+		// Skip elements with spanning screen_locs (contain "to")
+		if(findtext(obj.screen_loc, " to "))
+			continue
+		// Skip elements with * in screen_loc (render targets)
+		if(findtext(obj.screen_loc, "*"))
+			continue
+		var/list/offsets = screen_loc_to_offset(obj.screen_loc, our_view)
+		if(!offsets)
+			continue
+		element_rects[key] = list(offsets[1], offsets[2], ICON_SIZE_X, ICON_SIZE_Y)
+		to_chat(mymob, span_notice("displace_hud: ELEMENT [key] '[obj.name]' screen_loc=[obj.screen_loc] px=([offsets[1]],[offsets[2]])"))
+	to_chat(mymob, span_notice("displace_hud: [length(element_rects)] elements to check"))
+	// Use explicitly defined displacement groups, plus individual elements not in any group
+	var/list/key_groups = HUD_DISPLACEMENT_KEY_GROUPS
+	var/list/type_groups = HUD_DISPLACEMENT_TYPE_GROUPS
+	var/list/in_a_group = list()
+	// Build groups from explicit key lists
+	var/list/groups = list()
+	for(var/list/group in key_groups)
+		var/list/valid_group = list()
+		for(var/key in group)
+			if(element_rects[key])
+				valid_group += key
+				in_a_group[key] = TRUE
+		if(length(valid_group))
+			groups += list(valid_group)
+	// Build groups from type matching
+	var/list/ghost_extras = HUD_DISPLACEMENT_GROUP_GHOST_EXTRAS
+	for(var/group_type in type_groups)
+		var/list/type_group = list()
+		for(var/key in element_rects)
+			if(in_a_group[key])
+				continue
+			var/atom/movable/screen/obj = screen_objects[key]
+			if(istype(obj, group_type))
+				type_group += key
+				in_a_group[key] = TRUE
+		// Merge extras into the ghost group
+		if(group_type == /atom/movable/screen/ghost)
+			for(var/extra_key in ghost_extras)
+				if(element_rects[extra_key] && !in_a_group[extra_key])
+					type_group += extra_key
+					in_a_group[extra_key] = TRUE
+		if(length(type_group))
+			groups += list(type_group)
+	// Add ungrouped elements as individual groups
+	for(var/key in element_rects)
+		if(!in_a_group[key])
+			groups += list(list(key))
+	to_chat(mymob, span_notice("displace_hud: [length(groups)] groups"))
+	// For each group, check if ANY element overlaps the chat. If so, compute the delta to clear the worst overlap and apply to ALL elements in the group.
+	var/displaced_count = 0
+	for(var/list/group in groups)
+		// Find all overlapping elements in this group
+		var/has_overlap = FALSE
+		var/worst_key
+		var/worst_overlap = 0
+		for(var/key in group)
+			var/list/rect = element_rects[key]
+			if(rects_overlap(rect[1], rect[2], rect[3], rect[4], chat_left, chat_bottom, scaled_w, scaled_h))
+				has_overlap = TRUE
+				var/overlap_x = min(rect[1] + rect[3], chat_left + scaled_w) - max(rect[1], chat_left)
+				var/overlap_y = min(rect[2] + rect[4], chat_bottom + scaled_h) - max(rect[2], chat_bottom)
+				var/overlap_area = max(overlap_x, 0) * max(overlap_y, 0)
+				if(overlap_area > worst_overlap || !worst_key)
+					worst_overlap = overlap_area
+					worst_key = key
+		if(!has_overlap)
+			continue
+		// Find the element closest to the chat center, it's deepest inside and needs the most shift
+		var/chat_cx = chat_left + scaled_w / 2
+		var/chat_cy = chat_bottom + scaled_h / 2
+		var/closest_key = group[1]
+		var/closest_dist = INFINITY
+		for(var/key in group)
+			var/list/rect = element_rects[key]
+			var/dx = rect[1] + ICON_SIZE_X / 2 - chat_cx
+			var/dy = rect[2] + ICON_SIZE_Y / 2 - chat_cy
+			var/dist = dx * dx + dy * dy
+			if(dist < closest_dist)
+				closest_dist = dist
+				closest_key = key
+		var/list/worst_rect = element_rects[closest_key]
+		var/el_x = worst_rect[1]
+		var/el_y = worst_rect[2]
+		var/dist_to_h_edge = min(abs(el_x - chat_left), abs(el_x - (chat_left + scaled_w)))
+		var/dist_to_v_edge = min(abs(el_y - chat_bottom), abs(el_y - (chat_bottom + scaled_h)))
+		var/horizontal_first = dist_to_h_edge < dist_to_v_edge
+		// Determine per-element shift direction: away from chat center
+		var/el_shift_x = (el_x > chat_left + scaled_w / 2) ? 1 : -1
+		var/el_shift_y = (el_y > chat_bottom + scaled_h / 2) ? 1 : -1
+		to_chat(mymob, span_notice("displace_hud: worst=[worst_key] px=([el_x],[el_y]) dist_h=[dist_to_h_edge] dist_v=[dist_to_v_edge] h_first=[horizontal_first] shift=([el_shift_x],[el_shift_y])"))
+		// Find minimum shift to clear the chat for the worst element
+		// Try all 4 directions, preferring the one closest to the chat edge
+		var/list/try_dirs = list()
+		if(horizontal_first)
+			try_dirs = list(list(el_shift_x, 0), list(0, el_shift_y), list(-el_shift_x, 0), list(0, -el_shift_y))
+		else
+			try_dirs = list(list(0, el_shift_y), list(el_shift_x, 0), list(0, -el_shift_y), list(-el_shift_x, 0))
+		var/delta_x = 0
+		var/delta_y = 0
+		var/found = FALSE
+		for(var/list/dir in try_dirs)
+			if(found)
+				break
+			var/dx = dir[1]
+			var/dy = dir[2]
+			var/new_x = el_x
+			var/new_y = el_y
+			for(var/attempt in 1 to 30)
+				new_x += dx * ICON_SIZE_X
+				new_y += dy * ICON_SIZE_Y
+				// Bail if we've gone off-screen
+				if(new_x < ICON_SIZE_X || new_x > view_size[1] || new_y < ICON_SIZE_Y || new_y > view_size[2])
+					to_chat(mymob, span_notice("displace_hud:   [dx],[dy] attempt [attempt] -> ([new_x],[new_y]) OUT OF BOUNDS"))
+					break
+				// Check if ALL group members would clear the chat with this delta
+				var/test_dx = new_x - el_x
+				var/test_dy = new_y - el_y
+				var/still_overlaps = FALSE
+				for(var/g_key in group)
+					var/list/g_rect = element_rects[g_key]
+					var/g_new_x = g_rect[1] + test_dx
+					var/g_new_y = g_rect[2] + test_dy
+					if(rects_overlap(g_new_x, g_new_y, g_rect[3], g_rect[4], chat_left, chat_bottom, scaled_w, scaled_h))
+						still_overlaps = TRUE
+						break
+				to_chat(mymob, span_notice("displace_hud:   [dx],[dy] attempt [attempt] -> ([new_x],[new_y]) overlaps=[still_overlaps]"))
+				if(!still_overlaps)
+					delta_x = new_x - el_x
+					delta_y = new_y - el_y
+					found = TRUE
+					break
+		if(!found)
+			to_chat(mymob, span_warning("displace_hud: FAILED to find shift for group of [length(group)]"))
+			continue
+		to_chat(mymob, span_boldnotice("displace_hud: GROUP of [length(group)] shifting delta=([delta_x],[delta_y])"))
+		// Apply the same delta to every element in the group
+		for(var/key in group)
+			var/atom/movable/screen/obj = screen_objects[key]
+			displaced_elements[key] = obj.screen_loc
+			var/new_loc = apply_screen_loc_delta(obj.screen_loc, delta_x, delta_y)
+			to_chat(mymob, span_boldnotice("displace_hud:   [key] '[obj.name]' [obj.screen_loc] -> [new_loc]"))
+			obj.screen_loc = new_loc
+			var/list/rect = element_rects[key]
+			element_rects[key] = list(rect[1] + delta_x, rect[2] + delta_y, rect[3], rect[4])
+			displaced_count++
+	// Cascade pass: check if any undisplaced group now overlaps a displaced element
+	for(var/pass in 1 to 5)
+		var/cascade_found = FALSE
+		for(var/list/group in groups)
+			if(displaced_elements[group[1]])
+				continue
+			// Check if any element in this group overlaps any displaced element
+			var/needs_move = FALSE
+			for(var/key in group)
+				var/list/rect = element_rects[key]
+				for(var/d_key in displaced_elements)
+					var/list/d_rect = element_rects[d_key]
+					if(rects_overlap(rect[1], rect[2], rect[3], rect[4], d_rect[1], d_rect[2], d_rect[3], d_rect[4]))
+						needs_move = TRUE
+						break
+				if(needs_move)
+					break
+			if(!needs_move)
+				continue
+			cascade_found = TRUE
+			// Find worst overlap and shift this group
+			var/worst_key = group[1]
+			var/list/worst_rect = element_rects[worst_key]
+			var/el_x = worst_rect[1]
+			var/el_y = worst_rect[2]
+			var/el_shift_x = (el_x > chat_left + scaled_w / 2) ? 1 : -1
+			var/el_shift_y = (el_y > chat_bottom + scaled_h / 2) ? 1 : -1
+			var/dist_to_h_edge = min(abs(el_x - chat_left), abs(el_x - (chat_left + scaled_w)))
+			var/dist_to_v_edge = min(abs(el_y - chat_bottom), abs(el_y - (chat_bottom + scaled_h)))
+			var/horizontal_first = dist_to_h_edge < dist_to_v_edge
+			var/list/try_dirs = list()
+			if(horizontal_first)
+				try_dirs = list(list(el_shift_x, 0), list(0, el_shift_y), list(-el_shift_x, 0), list(0, -el_shift_y))
+			else
+				try_dirs = list(list(0, el_shift_y), list(el_shift_x, 0), list(0, -el_shift_y), list(-el_shift_x, 0))
+			var/delta_x = 0
+			var/delta_y = 0
+			var/found = FALSE
+			for(var/list/dir in try_dirs)
+				if(found)
+					break
+				var/dx = dir[1]
+				var/dy = dir[2]
+				var/new_x = el_x
+				var/new_y = el_y
+				for(var/attempt in 1 to 30)
+					new_x += dx * ICON_SIZE_X
+					new_y += dy * ICON_SIZE_Y
+					if(new_x < ICON_SIZE_X || new_x > view_size[1] || new_y < ICON_SIZE_Y || new_y > view_size[2])
+						break
+					var/still_overlaps = rects_overlap(new_x, new_y, ICON_SIZE_X, ICON_SIZE_Y, chat_left, chat_bottom, scaled_w, scaled_h)
+					if(!still_overlaps)
+						for(var/other_key in element_rects)
+							if(other_key in group)
+								continue
+							var/list/other_rect = element_rects[other_key]
+							if(rects_overlap(new_x, new_y, ICON_SIZE_X, ICON_SIZE_Y, other_rect[1], other_rect[2], other_rect[3], other_rect[4]))
+								still_overlaps = TRUE
+								break
+					if(!still_overlaps)
+						delta_x = new_x - el_x
+						delta_y = new_y - el_y
+						found = TRUE
+						break
+			if(found)
+				to_chat(mymob, span_boldnotice("displace_hud: CASCADE group of [length(group)] delta=([delta_x],[delta_y])"))
+				for(var/key in group)
+					var/atom/movable/screen/obj = screen_objects[key]
+					displaced_elements[key] = obj.screen_loc
+					obj.screen_loc = apply_screen_loc_delta(obj.screen_loc, delta_x, delta_y)
+					var/list/rect = element_rects[key]
+					element_rects[key] = list(rect[1] + delta_x, rect[2] + delta_y, rect[3], rect[4])
+					displaced_count++
+		if(!cascade_found)
+			break
+	to_chat(mymob, span_notice("displace_hud: done. [displaced_count] displaced in [length(groups)] groups"))
+	// Re-check action groups against the new chat rect
+	if(listed_actions)
+		listed_actions.check_against_view()
+	if(palette_actions)
+		palette_actions.check_against_view()
+
+/// Restores all HUD elements to their original positions
+/datum/hud/proc/restore_hud_displacement()
+	for(var/key in displaced_elements)
+		var/atom/movable/screen/obj = screen_objects[key]
+		if(obj)
+			obj.screen_loc = displaced_elements[key]
+	displaced_elements.Cut()
+	chat_rect_viewport = null
+	// Restore action groups to their default sizing
+	if(listed_actions)
+		listed_actions.check_against_view()
+	if(palette_actions)
+		palette_actions.check_against_view()
+
+/// Displaces a single screen element if it overlaps the chat rect. Used for late-added elements.
+/datum/hud/proc/displace_single_element(hud_key, atom/movable/screen/obj)
+	if(!chat_rect_viewport || !obj.screen_loc || findtext(obj.screen_loc, " to ") || findtext(obj.screen_loc, "*"))
+		return
+	var/our_view = mymob?.canon_client?.view
+	if(!our_view)
+		return
+	var/list/offsets = screen_loc_to_offset(obj.screen_loc, our_view)
+	if(!offsets)
+		return
+	var/list/view_size = view_to_pixels(our_view)
+	var/cv_left = chat_rect_viewport[1]
+	var/cv_bottom = chat_rect_viewport[2]
+	var/cv_w = chat_rect_viewport[3]
+	var/cv_h = chat_rect_viewport[4]
+	if(!rects_overlap(offsets[1], offsets[2], ICON_SIZE_X, ICON_SIZE_Y, cv_left, cv_bottom, cv_w, cv_h))
+		return
+	var/shift_y_dir = ((cv_bottom + cv_h / 2) > view_size[2] / 2) ? -1 : 1
+	var/shift_x_dir = ((cv_left + cv_w / 2) > view_size[1] / 2) ? -1 : 1
+	var/list/element_rects = list()
+	for(var/key in screen_objects)
+		if(key == hud_key)
+			continue
+		var/atom/movable/screen/other = screen_objects[key]
+		if(!other.screen_loc || findtext(other.screen_loc, " to ") || findtext(other.screen_loc, "*"))
+			continue
+		var/list/other_offsets = screen_loc_to_offset(other.screen_loc, our_view)
+		if(other_offsets)
+			element_rects[key] = list(other_offsets[1], other_offsets[2], ICON_SIZE_X, ICON_SIZE_Y)
+	var/new_x = offsets[1]
+	var/new_y = offsets[2]
+	var/displaced = FALSE
+	for(var/attempt in 1 to 20)
+		new_y += shift_y_dir * ICON_SIZE_Y
+		if(!rects_overlap(new_x, new_y, ICON_SIZE_X, ICON_SIZE_Y, cv_left, cv_bottom, cv_w, cv_h) && !collides_with_any(new_x, new_y, ICON_SIZE_X, ICON_SIZE_Y, element_rects, hud_key))
+			displaced = TRUE
+			break
+	if(!displaced)
+		new_x = offsets[1]
+		new_y = offsets[2]
+		for(var/attempt in 1 to 20)
+			new_x += shift_x_dir * ICON_SIZE_X
+			if(!rects_overlap(new_x, new_y, ICON_SIZE_X, ICON_SIZE_Y, cv_left, cv_bottom, cv_w, cv_h) && !collides_with_any(new_x, new_y, ICON_SIZE_X, ICON_SIZE_Y, element_rects, hud_key))
+				displaced = TRUE
+				break
+	if(displaced)
+		displaced_elements[hud_key] = obj.screen_loc
+		var/delta_x = new_x - offsets[1]
+		var/delta_y = new_y - offsets[2]
+		obj.screen_loc = apply_screen_loc_delta(obj.screen_loc, delta_x, delta_y)
+
+/// Checks if two rectangles overlap
+/proc/rects_overlap(x1, y1, w1, h1, x2, y2, w2, h2)
+	return !(x1 + w1 <= x2 || x2 + w2 <= x1 || y1 + h1 <= y2 || y2 + h2 <= y1)
+
+/// Checks if a rect collides with any element rect in the list, excluding a specific key
+/proc/collides_with_any(x, y, w, h, list/element_rects, exclude_key)
+	for(var/key in element_rects)
+		if(key == exclude_key)
+			continue
+		var/list/other = element_rects[key]
+		if(rects_overlap(x, y, w, h, other[1], other[2], other[3], other[4]))
+			return TRUE
+	return FALSE
 
 /// Generates and fills new action groups with our mob's current actions
 /datum/hud/proc/build_action_groups()

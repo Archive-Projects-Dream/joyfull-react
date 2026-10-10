@@ -46,6 +46,7 @@ function setupApp() {
   });
 
   // Unhide the panel
+  /* TODO: harry
   Byond.winset('output_selector.legacy_output_selector', {
     left: 'output_browser',
   });
@@ -55,6 +56,7 @@ function setupApp() {
       size: output.size,
     });
   });
+  */
 
   // Enable hot module reloading
   if (import.meta.webpackHot) {

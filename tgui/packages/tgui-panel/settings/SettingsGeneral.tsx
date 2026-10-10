@@ -12,7 +12,7 @@ import {
 import { toFixed } from 'tgui-core/math';
 import { capitalize } from 'tgui-core/string';
 import { chatRenderer } from '../chat/renderer';
-import { FONTS, THEMES } from './constants';
+import { CHAT_CORNERS, FONTS, THEMES } from './constants';
 import { resetPaneSplitters, setEditPaneSplitters } from './scaling';
 import { exportChatSettings, importChatSettings } from './settingsImExport';
 import { useSettings } from './use-settings';
@@ -42,6 +42,42 @@ export function SettingsGeneral(props) {
             </Button>
           ))}
         </LabeledList.Item>
+        {document.body.classList.contains('onmap') && (
+          <>
+            <LabeledList.Item label="Chat position">
+              {CHAT_CORNERS.map((corner) => (
+                <Button
+                  key={corner}
+                  selected={settings.chatCorner === corner}
+                  color="transparent"
+                  onClick={() => updateSettings({ chatCorner: corner })}
+                >
+                  {corner.split('-').map(capitalize).join(' ')}
+                </Button>
+              ))}
+            </LabeledList.Item>
+            <LabeledList.Item label="Chat opacity">
+              <Slider
+                minValue={0.1}
+                maxValue={1}
+                step={0.05}
+                value={settings.chatOpacity}
+                format={(v) => `${Math.round(v * 100)}%`}
+                onChange={(e, value) => updateSettings({ chatOpacity: value })}
+              />
+            </LabeledList.Item>
+            <LabeledList.Item label="Chat padding">
+              <Slider
+                minValue={0}
+                maxValue={50}
+                step={1}
+                value={settings.chatPadding}
+                unit="px"
+                onChange={(e, value) => updateSettings({ chatPadding: value })}
+              />
+            </LabeledList.Item>
+          </>
+        )}
         <LabeledList.Item label="UI sizes">
           <Stack>
             <Stack.Item>

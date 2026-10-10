@@ -6,6 +6,91 @@
 @use 'sass:map';
 @use 'sass:color';
 
+body.onmap {
+  --chat-opacity: 0.45;
+  --color-base: hsla(225, 10%, 10%, var(--chat-opacity)) !important;
+  --section-background: hsla(225, 10%, 10%, var(--chat-opacity)) !important;
+  --color-base-start: hsl(
+    from var(--color-base) h s calc(l + var(--base-gradient-spread))
+  );
+  --color-base-end: hsl(
+    from var(--color-base) h s calc(l - var(--base-gradient-spread))
+  );
+
+  .Window {
+    inset: 4px;
+    border-radius: var(--border-radius-large);
+    border: var(--border-thickness-tiny) solid hsla(225, 20%, 40%, 0.2);
+    box-shadow: 0 0 4px hsla(225, 30%, 5%, 0.5);
+    overflow: hidden;
+  }
+}
+
+.ResizeHandle {
+  position: fixed;
+  z-index: 100;
+
+  &--left {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: ew-resize;
+  }
+
+  &--right {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: ew-resize;
+  }
+
+  &--top {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    cursor: ns-resize;
+  }
+
+  &--bottom {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 6px;
+    cursor: ns-resize;
+  }
+
+  &--bottom-left,
+  &--bottom-right,
+  &--top-left,
+  &--top-right {
+    width: 12px;
+    height: 12px;
+  }
+
+  &--bottom-left {
+    left: 0;
+    bottom: 0;
+  }
+
+  &--bottom-right {
+    right: 0;
+    bottom: 0;
+  }
+
+  &--top-left {
+    left: 0;
+    top: 0;
+  }
+
+  &--top-right {
+    right: 0;
+    top: 0;
+  }
+}
+
 em {
   font-style: normal;
   font-weight: bold;
