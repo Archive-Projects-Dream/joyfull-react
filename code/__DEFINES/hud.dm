@@ -537,8 +537,7 @@
 	HUD_DISPLACEMENT_GROUP_VOIDWALKER)
 
 #define HUD_DISPLACEMENT_TYPE_GROUPS list( \
-	/atom/movable/screen/ghost, \
-	/atom/movable/screen/lobby)
+	/atom/movable/screen/ghost)
 
 #define SCRN_OBJ_DEFAULT "default"
 /// Floating somewhere on the hud, not in any predefined place
