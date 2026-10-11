@@ -220,6 +220,8 @@
 		if(ispath(picked_mob, /mob/living/simple_animal/hostile/megafauna/bubblegum))
 			megafauna_types.Remove(picked_mob)
 
+			new picked_mob(target_turf)
+
 #undef CAVE_SPAWN_MOB
 #undef CAVE_SPAWN_FEATURE
 #undef CAVE_SPAWN_TENDRIL

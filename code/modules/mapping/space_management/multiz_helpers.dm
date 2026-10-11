@@ -13,16 +13,17 @@
 	them = get_turf(them)
 	if(!us || !them)
 		return NONE
+
 	if(us.z == them.z)
 		return get_dir(us, them)
 	else
 		var/turf/T = GET_TURF_ABOVE(us)
 		var/dir = NONE
-		if(T && (T.z == them.z))
+		if(T && (T.virtual_z == them.virtual_z))
 			dir = UP
 		else
 			T = GET_TURF_BELOW(us)
-			if(T && (T.z == them.z))
+			if(T && (T.virtual_z == them.virtual_z))
 				dir = DOWN
 			else
 				return get_dir(us, them)

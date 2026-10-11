@@ -10,6 +10,8 @@
 
 // BEGIN_INCLUDE
 #include "code\__DEFINES\_helpers.dm"
+#include "code\__DEFINES\maps.dm"
+#include "code\__DEFINES\orbit_defines.dm"
 #include "code\__DEFINES\_signals.dm"
 #include "code\__DEFINES\buildmode.dm"
 #include "code\__DEFINES\dir_slash.dm"

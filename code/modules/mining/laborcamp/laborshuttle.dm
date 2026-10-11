@@ -1,3 +1,5 @@
+// [HORIZON-DISABLED] - Заменено на /obj/machinery/computer/shuttle_flight
+/*
 /obj/machinery/computer/shuttle/labor
 	name = "labor shuttle console"
 	desc = "Used to call and send the labor camp shuttle."
@@ -26,6 +28,7 @@
 		to_chat(user, span_warning("Shuttle is already at the outpost!"))
 		return FALSE
 	return TRUE
+*/
 
 /obj/docking_port/stationary/laborcamp_home
 	name = "SS13: Labor Shuttle Dock"

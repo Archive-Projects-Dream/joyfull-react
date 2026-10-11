@@ -113,6 +113,9 @@ GLOBAL_LIST_EMPTY(station_turfs)
 	/// If TRUE, then this turf will be skipped entirely by minimap rendering.
 	var/skip_minimap_rendering = FALSE
 
+	/// The virtual z-level this turf belongs to (used for virtual z-level system)
+	var/virtual_z
+
 
 /// ChangeTurf passes the old signal tables here so initialization can update them directly.
 /// In particular, occupant initialization can move or delete existing contents before New() returns.
@@ -136,11 +139,15 @@ GLOBAL_LIST_EMPTY(station_turfs)
  * If you add something relevant here add it there too
  * [/turf/open/space/Initialize]
  */
-/turf/Initialize(mapload)
+/turf/Initialize(mapload, inherited_virtual_z)
 	SHOULD_CALL_PARENT(FALSE)
 	if(flags_1 & INITIALIZED_1)
 		stack_trace("Warning: [src]([type]) initialized multiple times!")
 	flags_1 |= INITIALIZED_1
+
+	// Set virtual_z from parameter if provided
+	if(inherited_virtual_z)
+		virtual_z = inherited_virtual_z
 
 	/// We do NOT use the shortcut here, because this is faster
 	if(SSmapping.max_plane_offset)
@@ -240,6 +247,20 @@ GLOBAL_LIST_EMPTY(station_turfs)
 /// Signals registered by the turf on itself are cleared so the new type can register its own
 /turf/_clear_signal_refs()
 	UnregisterSignal(src, _signal_procs?[src])
+
+/**
+ * Gets the turf above this one (multi-z aware)
+ * This is a wrapper for GET_TURF_ABOVE to satisfy static type checking
+ */
+/turf/proc/get_above_turf()
+	return GET_TURF_ABOVE(src)
+
+/**
+ * Gets the turf below this one (multi-z aware)
+ * This is a wrapper for GET_TURF_BELOW to satisfy static type checking
+ */
+/turf/proc/get_below_turf()
+	return GET_TURF_BELOW(src)
 
 /turf/attack_hand(mob/user, list/modifiers)
 	. = ..()

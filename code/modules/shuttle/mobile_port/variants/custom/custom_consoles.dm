@@ -1,3 +1,5 @@
+// [HORIZON-DISABLED] - Заменено на /obj/machinery/computer/shuttle_flight
+/*
 /obj/machinery/computer/shuttle/custom_shuttle
 	desc = "A shuttle control computer."
 	shuttleId = ""
@@ -38,6 +40,7 @@
 		possible_destinations = "whiteship_home;shuttle[new_id]_custom;"
 		return TRUE
 	return FALSE
+*/
 
 //docking cam
 /obj/machinery/computer/camera_advanced/shuttle_docker/custom

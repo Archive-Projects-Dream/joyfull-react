@@ -1,3 +1,5 @@
+// [HORIZON-DISABLED] - Заменено на /obj/machinery/computer/shuttle_flight
+/*
 /obj/machinery/computer/shuttle/white_ship
 	name = "White Ship Console"
 	desc = "Used to control the White Ship."
@@ -15,6 +17,7 @@
 /obj/machinery/computer/shuttle/white_ship/bridge/Initialize(mapload, obj/item/circuitboard/C)
 	. = ..()
 	AddComponent(/datum/component/gps, SPACE_SIGNAL_GPSTAG_WHITE_SHIP)
+*/
 
 /obj/machinery/computer/camera_advanced/shuttle_docker/whiteship
 	name = "White Ship Navigation Computer"

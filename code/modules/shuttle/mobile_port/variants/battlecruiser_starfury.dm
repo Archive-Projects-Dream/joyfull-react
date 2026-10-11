@@ -102,6 +102,8 @@
 	y_offset = 3
 	x_offset = 0
 
+// [HORIZON-DISABLED] - Заменено на /obj/machinery/computer/shuttle_flight
+/*
 /obj/machinery/computer/shuttle/starfury/fighter
 	name = "syndicate fighter control console"
 	desc = "A control computer which controls a shuttle which operates from the SBC Starfury.."
@@ -128,6 +130,7 @@
 	shuttleId = "SBC_corvette"
 	possible_destinations = "SBC_corvette_custom;SBC_corvette_bay;syndicate_ne;syndicate_nw;syndicate_n;syndicate_se;syndicate_sw;syndicate_s"
 	req_access = list(ACCESS_SYNDICATE)
+*/
 
 /*
  * Summons the SBC Starfury, a large syndicate battlecruiser, in Deep Space.

@@ -21,13 +21,15 @@
 /obj/item/circuitboard/computer/cyborg_mothership
 	name = "#101011"
 	greyscale_colors = CIRCUIT_COLOR_GENERIC
-	build_path = /obj/machinery/computer/shuttle/cyborg_mothership
+	build_path = /obj/machinery/computer/shuttle_flight
 
 /obj/item/circuitboard/computer/cyborg_mothership/bridge
 	name = "#101011 Bridge"
 	greyscale_colors = CIRCUIT_COLOR_GENERIC
-	build_path = /obj/machinery/computer/shuttle/cyborg_mothership/bridge
+	build_path = /obj/machinery/computer/shuttle_flight
 
+// [HORIZON-DISABLED] - Заменено на /obj/machinery/computer/shuttle_flight
+/*
 /obj/machinery/computer/shuttle/cyborg_mothership
 	name = "#101011 Console"
 	desc = "Used to control the Cyborg Mothership."
@@ -44,6 +46,7 @@
 /obj/machinery/computer/shuttle/cyborg_mothership/bridge/Initialize(mapload, obj/item/circuitboard/C)
 	. = ..()
 	AddComponent(/datum/component/gps, SPACE_SIGNAL_GPSTAG)
+*/
 
 /obj/machinery/computer/camera_advanced/shuttle_docker/cyborg_mothership
 	name = "#101011 Navigation Computer"
