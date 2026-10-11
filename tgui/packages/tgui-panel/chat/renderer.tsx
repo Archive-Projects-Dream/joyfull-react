@@ -156,6 +156,10 @@ function isSelfActionMessage(text: string): boolean {
   return /^\s*You\b/.test(text);
 }
 
+// How long a message stays lit in frameless mode before it fades back out
+const FRAMELESS_MESSAGE_LINGER = 8000;
+const FRAMELESS_FADE_DURATION = 600;
+
 class ChatRenderer {
   loaded: boolean;
   rootNode: HTMLElement | null;
@@ -171,6 +175,8 @@ class ChatRenderer {
   currentJob: string | null;
   currentCharacter: string | null;
   handleScroll: (type: any) => void;
+  frameless: boolean;
+  private framelessTimers: Map<HTMLElement, ReturnType<typeof setTimeout>>;
 
   constructor() {
     this.loaded = false;
@@ -180,6 +186,8 @@ class ChatRenderer {
     this.visibleMessages = [];
     this.page = null;
     this.events = new EventEmitter();
+    this.frameless = false;
+    this.framelessTimers = new Map();
     // Scroll handler
 
     this.scrollNode = null;
@@ -190,6 +198,14 @@ class ChatRenderer {
     this.handleScroll = (evt) => {
       const node = this.scrollNode;
       if (!node) {
+        return;
+      }
+      // Frameless chat isn't scrollable while hidden, so never drop scroll tracking
+      if (
+        this.frameless &&
+        !document.body.classList.contains('frameless-visible')
+      ) {
+        this.scrollToBottom();
         return;
       }
       const height = node.scrollHeight;
@@ -242,6 +258,42 @@ class ChatRenderer {
       });
       this.queue = [];
     }
+  }
+
+  setFrameless(value: boolean) {
+    this.frameless = value;
+    if (value) {
+      this.scrollTracking = true;
+      store.set(scrollTrackingAtom, true);
+      this.scrollToBottom();
+      return;
+    }
+    for (const [node, timer] of this.framelessTimers) {
+      clearTimeout(timer);
+      node.classList.remove('ChatMessage--recent', 'ChatMessage--fading');
+    }
+    this.framelessTimers.clear();
+  }
+
+  private scheduleMessageFade(node: HTMLElement) {
+    if (!this.frameless) {
+      return;
+    }
+    node.classList.add('ChatMessage--recent');
+    node.classList.remove('ChatMessage--fading');
+    const existing = this.framelessTimers.get(node);
+    if (existing) {
+      clearTimeout(existing);
+    }
+    const timer = setTimeout(() => {
+      node.classList.add('ChatMessage--fading');
+      const fadeTimer = setTimeout(() => {
+        node.classList.remove('ChatMessage--recent', 'ChatMessage--fading');
+        this.framelessTimers.delete(node);
+      }, FRAMELESS_FADE_DURATION);
+      this.framelessTimers.set(node, fadeTimer);
+    }, FRAMELESS_MESSAGE_LINGER);
+    this.framelessTimers.set(node, timer);
   }
 
   assignStyle(style = {}) {
@@ -479,6 +531,12 @@ class ChatRenderer {
       if (combinable) {
         combinable.times = (combinable.times || 1) + 1;
         updateMessageBadge(combinable);
+        if (combinable.node) {
+          this.scheduleMessageFade(combinable.node);
+        }
+        if (this.frameless) {
+          setTimeout(() => this.scrollToBottom());
+        }
         continue;
       }
       // Reuse message node
@@ -628,6 +686,7 @@ class ChatRenderer {
       if (canPageAcceptType(this.page, message.type)) {
         fragment.appendChild(node);
         this.visibleMessages.push(message);
+        this.scheduleMessageFade(node);
       }
     }
     if (node) {

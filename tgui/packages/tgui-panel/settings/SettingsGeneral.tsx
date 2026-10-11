@@ -76,6 +76,20 @@ export function SettingsGeneral(props) {
                 onChange={(e, value) => updateSettings({ chatPadding: value })}
               />
             </LabeledList.Item>
+            {settings.chatFrameless && (
+              <LabeledList.Item label="Message backdrop">
+                <Button
+                  selected={settings.chatMessageBg}
+                  color="transparent"
+                  icon={settings.chatMessageBg ? 'square' : 'square-xmark'}
+                  onClick={() =>
+                    updateSettings({ chatMessageBg: !settings.chatMessageBg })
+                  }
+                >
+                  {settings.chatMessageBg ? 'Enabled' : 'Disabled'}
+                </Button>
+              </LabeledList.Item>
+            )}
           </>
         )}
         <LabeledList.Item label="UI sizes">

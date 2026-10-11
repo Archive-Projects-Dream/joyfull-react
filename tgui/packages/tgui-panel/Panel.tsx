@@ -15,6 +15,7 @@ import { ChatPanel } from './chat/ChatPanel';
 import { ChatTabs } from './chat/ChatTabs';
 import { useChatPersistence } from './chat/use-chat-persistence';
 import { useChatPlacement } from './chat/use-chat-placement';
+import { chatRenderer } from './chat/renderer';
 import { gameAtom } from './game/atoms';
 import { useKeepAlive } from './game/use-keep-alive';
 import { Notifications } from './Notifications';
@@ -29,11 +30,64 @@ import { CommandBar } from './verbs/CommandBar';
 export function Panel(props) {
   const [audioVisible, setAudioVisible] = useAtom(visibleAtom);
   const game = useAtomValue(gameAtom);
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const [settingsVisible, setSettingsVisible] = useAtom(settingsVisibleAtom);
   useChatPersistence();
   const { isOnMap, isPopup, chatCorner } = useChatPlacement();
   useKeepAlive();
+
+  const frameless = isOnMap && settings.chatFrameless;
+  const chatTop = frameless && chatCorner.startsWith('top');
+  const messageBg = frameless && settings.chatMessageBg;
+
+  // Frameless chat is invisible until the mouse is over it, so the body carries the state
+  useEffect(() => {
+    const body = document.body;
+    const clearClasses = () =>
+      body.classList.remove(
+        'frameless',
+        'frameless-visible',
+        'chat-message-bg',
+        'chat-top',
+      );
+
+    if (!frameless) {
+      clearClasses();
+      chatRenderer.setFrameless(false);
+      return;
+    }
+
+    body.classList.add('frameless');
+    body.classList.toggle('chat-message-bg', !!messageBg);
+    body.classList.toggle('chat-top', chatTop);
+    // Closing a panel or turning frameless on with the mouse over the chat hid it,
+    // and no mouseenter comes to show it again
+    body.classList.toggle(
+      'frameless-visible',
+      body.matches(':hover') || settingsVisible,
+    );
+    chatRenderer.setFrameless(true);
+
+    const show = () => {
+      body.classList.add('frameless-visible');
+      chatRenderer.scrollToBottom();
+    };
+    const hide = () => {
+      if (!settingsVisible) {
+        body.classList.remove('frameless-visible');
+      }
+    };
+
+    body.addEventListener('mouseenter', show);
+    body.addEventListener('mouseleave', hide);
+
+    return () => {
+      body.removeEventListener('mouseenter', show);
+      body.removeEventListener('mouseleave', hide);
+      clearClasses();
+      chatRenderer.setFrameless(false);
+    };
+  }, [frameless, messageBg, chatTop, settingsVisible]);
 
   const onPopupDrag = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -78,7 +132,7 @@ export function Panel(props) {
       )}
       <Stack fill vertical className="Panel__stack">
         <Stack.Item>
-          <Section fitted>
+          <Section fitted className="Panel__header">
             <Stack mr={1} align="center">
               <Stack.Item grow>
                 <ChatTabs />
@@ -98,6 +152,25 @@ export function Panel(props) {
                   }}
                 />
               </Stack.Item>
+              {isOnMap && (
+                <Stack.Item>
+                  <Button
+                    color="transparent"
+                    icon={settings.chatFrameless ? 'eye-slash' : 'eye'}
+                    tooltip={
+                      settings.chatFrameless
+                        ? 'Show chat frame'
+                        : 'Hide chat frame'
+                    }
+                    tooltipPosition="bottom-start"
+                    onClick={() =>
+                      updateSettings({
+                        chatFrameless: !settings.chatFrameless,
+                      })
+                    }
+                  />
+                </Stack.Item>
+              )}
               <Stack.Item>
                 <Button
                   color="grey"
