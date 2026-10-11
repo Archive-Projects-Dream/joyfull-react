@@ -196,8 +196,11 @@ GLOBAL_LIST_INIT(blacklisted_automated_baseturfs, typecacheof(list(
 	// We will only run this logic if the tile is not on the prime z layer, since we use area overlays to cover that
 	if(SSmapping.z_level_to_plane_offset[z])
 		var/area/our_area = new_turf.loc
-		if(our_area.lighting_effects)
-			new_turf.add_overlay(our_area.lighting_effects[SSmapping.z_level_to_plane_offset[z] + 1])
+		var/effect_index = SSmapping.z_level_to_plane_offset[z] + 1
+		// Areas lit before this z stack deepened may carry a shorter
+		// lighting_effects list, so bounds check instead of indexing OOB.
+		if(our_area.lighting_effects && length(our_area.lighting_effects) >= effect_index)
+			new_turf.add_overlay(our_area.lighting_effects[effect_index])
 
 	// only queue for smoothing if SSatom initialized us, and we'd be changing smoothing state
 	if(flags_1 & INITIALIZED_1)

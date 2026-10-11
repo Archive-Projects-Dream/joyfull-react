@@ -20,15 +20,15 @@
 	var/datum/orbital_object/target_orbital_object
 	var/docking_initiated = FALSE
 
-// Мы полностью переопределяем Initialize базового shuttle_docker,
-// чтобы избежать вызова SSshuttle.get_containing_shuttle(src), который вызывает рантайм null.z,
-// так как камера создается в nullspace.
+// The parent shuttle_docker/Initialize already adds the rotate/place actions
+// and the nav_computer_icon element, so duplicating them here caused a double
+// COMSIG_SHUTTLE_NAV_COMPUTER_IMAGE_REQUESTED registration (override warning)
+// and doubled camera actions.
+// The parent's get_containing_shuttle(src) call is now null-safe because
+// is_in_shuttle_bounds guards against atoms without a turf (this computer is
+// created in nullspace and positioned by launch()).
 /obj/machinery/computer/camera_advanced/shuttle_docker/orbital/Initialize(mapload)
-	// Вызываем Initialize родителя camera_advanced, минуя shuttle_docker
 	. = ..()
-	actions += new /datum/action/innate/shuttledocker_rotate(src)
-	actions += new /datum/action/innate/shuttledocker_place(src)
-	AddElement(/datum/element/nav_computer_icon, 'icons/effects/nav_computer_indicators.dmi', "computer", FALSE)
 	whitelist_turfs = typecacheof(list(/turf/open, /turf/closed))
 
 /obj/machinery/computer/camera_advanced/shuttle_docker/orbital/Destroy()

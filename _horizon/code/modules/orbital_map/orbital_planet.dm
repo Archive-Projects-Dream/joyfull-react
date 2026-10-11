@@ -13,7 +13,8 @@
 	var/landable = TRUE
 	var/map_generator_type = /datum/map_generator/planet_generator/rocky
 	var/datum/virtual_level/planet_level
-	var/datum/virtual_level/cave_level
+	/// Every virtual level owned by this planet (dungeon, caves, surface, etc).
+	var/list/datum/virtual_level/planet_levels
 	var/list/obj/docking_port/stationary/reserve_docks
 	var/baseturf_type = /turf/open/space/basic
 	var/preserve_level = FALSE
@@ -66,7 +67,10 @@
 	reserve_docks = result[2]
 
 	if(length(result) >= 3)
-		cave_level = result[3]
+		// The generator hands back the full list of created levels here, not a
+		// single level, so normalize it into our planet_levels list.
+		var/extra_levels = result[3]
+		planet_levels = islist(extra_levels) ? extra_levels : list(extra_levels)
 
 	if(!planet_level)
 		log_world("ORBITAL ERROR: planet_level is null after generation for [name]!")
@@ -232,9 +236,11 @@
 	if(!planet_level)
 		return FALSE
 
-	var/list/mind_mobs = planet_level.get_mind_mobs()
-	if(length(mind_mobs))
-		return FALSE
+	// Check every level of the planet, not just the surface.
+	for(var/datum/virtual_level/vlevel as anything in get_planet_levels())
+		var/list/mind_mobs = vlevel.get_mind_mobs()
+		if(length(mind_mobs))
+			return FALSE
 
 	for(var/obj/docking_port/stationary/dock as anything in reserve_docks)
 		if(dock.get_docked())
@@ -250,21 +256,26 @@
 		qdel(dock, TRUE)
 	reserve_docks = null
 
-	// Очищаем поверхность
-	planet_level.clear_reservation()
-	SSmapping.destroy_planet_zlevel(planet_level)
-	qdel(planet_level)
+	// Clear every virtual level this planet owns (surface, caves, dungeon).
+	// generate_planet_level returns the whole level stack as its third element,
+	// so unloading only the surface would leak the other levels forever.
+	for(var/datum/virtual_level/vlevel as anything in get_planet_levels())
+		vlevel.clear_reservation()
+		SSmapping.destroy_planet_zlevel(vlevel)
+		qdel(vlevel)
+	planet_levels = null
 	planet_level = null
-
-	// Очищаем пещеры, если они есть
-	if(cave_level)
-		cave_level.clear_reservation()
-		SSmapping.destroy_planet_zlevel(cave_level)
-		qdel(cave_level)
-		cave_level = null
 
 	src.star_system.generate_planets(1)
 	qdel(src)
+
+/// Returns every virtual level owned by this planet, including the surface.
+/datum/orbital_object/planet/proc/get_planet_levels()
+	. = list()
+	if(length(planet_levels))
+		. += planet_levels
+	if(planet_level && !(planet_level in .))
+		. += planet_level
 
 /datum/orbital_object/planet/proc/emergency_dock(datum/orbital_object/shuttle/dock_requester)
 	if(!istype(dock_requester) || !landable)

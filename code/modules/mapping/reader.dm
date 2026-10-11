@@ -939,23 +939,33 @@ GLOBAL_LIST_EMPTY(map_model_default)
 		if(GLOB.use_preloader)
 			world.preloader_load(area_instance)
 
-	// Index right before /area is /turf
+	// Index right before /area is expected to hold the /turf
 	index--
 	var/atom/instance
+	// Some external map generators (e.g. the rust-g planet generator) emit
+	// cells with the turf written before the movables instead of last, which
+	// would otherwise feed a non-turf path into ChangeTurf and abort the turf
+	// swap halfway through. Locate the last /turf path in the cell so we stay
+	// compatible with both the standard DMM convention (movables, turf, area)
+	// and turf-first orderings.
+	var/turf_index = 0
+	for(var/member_index in 1 to index)
+		if(ispath(members[member_index], /turf))
+			turf_index = member_index
 	//then instance the /turf
 	//NOTE: this used to place any turfs before the last "underneath" it using .appearance and underlays
 	//We don't actually use this, and all it did was cost cpu, so we don't do this anymore
-	if(members[index] != /turf/template_noop)
-		if(members_attributes[index] != default_list)
-			world.preloader_setup(members_attributes[index], members[index])
+	if(turf_index && members[turf_index] != /turf/template_noop)
+		if(members_attributes[turf_index] != default_list)
+			world.preloader_setup(members_attributes[turf_index], members[turf_index])
 
 		// Note: we make the assertion that the last path WILL be a turf. if it isn't, this will fail.
 		if(placeOnTop)
-			instance = crds.load_on_top(members[index], CHANGETURF_DEFER_CHANGE | (no_changeturf ? CHANGETURF_SKIP : NONE))
+			instance = crds.load_on_top(members[turf_index], CHANGETURF_DEFER_CHANGE | (no_changeturf ? CHANGETURF_SKIP : NONE))
 		else if(no_changeturf)
-			instance = create_atom(members[index], crds)//first preloader pass
+			instance = create_atom(members[turf_index], crds)//first preloader pass
 		else
-			instance = crds.ChangeTurf(members[index], null, CHANGETURF_DEFER_CHANGE)
+			instance = crds.ChangeTurf(members[turf_index], null, CHANGETURF_DEFER_CHANGE)
 
 		if(GLOB.use_preloader && instance)//second preloader pass, for those atoms that don't ..() in New()
 			world.preloader_load(instance)
@@ -966,7 +976,9 @@ GLOBAL_LIST_EMPTY(map_model_default)
 	MAPLOADING_CHECK_TICK
 
 	//finally instance all remainings objects/mobs
-	for(var/atom_index in 1 to index-1)
+	for(var/atom_index in 1 to index)
+		if(atom_index == turf_index)
+			continue
 		if(members_attributes[atom_index] != default_list)
 			world.preloader_setup(members_attributes[atom_index], members[atom_index])
 

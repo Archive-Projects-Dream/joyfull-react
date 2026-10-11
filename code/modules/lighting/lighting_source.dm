@@ -228,6 +228,10 @@ GLOBAL_LIST_EMPTY(lighting_sheets)
 /datum/light_source/proc/get_sheet(multiz = FALSE)
 	var/range = max(1, light_range);
 	var/key = "[range]-[visual_offset]-[offset_x]-[offset_y]-[light_dir]-[light_angle]-[light_height]-[multiz]"
+	// Multiz sheets are sized against SSmapping.max_plane_offset, so a sheet
+	// generated before a deeper stack was loaded at runtime must not be reused.
+	if(multiz)
+		key = "[key]-[SSmapping.max_plane_offset]"
 	var/list/hand_back = GLOB.lighting_sheets[key]
 	if(!hand_back)
 		if(multiz)
