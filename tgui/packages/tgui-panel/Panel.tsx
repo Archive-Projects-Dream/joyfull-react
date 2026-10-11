@@ -55,13 +55,8 @@ export function Panel(props) {
   const frameless = isOnMap && settings.chatFrameless;
   const chatTop = frameless && chatCorner.startsWith('top');
   const messageBg = frameless && settings.chatMessageBg;
-  // Click-through mode: the collapsed chat is a bottom strip, the rest
-  // of its rect is free map
   const hoverStrip = frameless && settings.chatHoverStrip;
 
-  // Frameless chat is invisible until the mouse is over it, so the body carries the state.
-  // Top-corner chats additionally render the log reversed, so the strip
-  // and the expanded chat show the newest message at the corner either way.
   useEffect(() => {
     const body = document.body;
     const clearClasses = () =>
@@ -86,14 +81,8 @@ export function Panel(props) {
     body.classList.add('frameless');
     body.classList.toggle('chat-message-bg', !!messageBg);
     body.classList.toggle('chat-top', chatTop);
-    // The marker bar stays put in strip mode, in both the collapsed and
-    // the expanded state, so hovering the chat open moves nothing
     body.classList.toggle('chat-stripmode', hoverStrip);
     chatRenderer.setFrameless(true);
-    // Closing a panel or turning frameless on with the mouse over the chat hid it,
-    // and no mouseenter comes to show it again. The strip starts collapsed -
-    // unless the settings are open inside the chat, which needs to stay
-    // visible and clickable until they are closed.
     body.classList.toggle(
       'frameless-visible',
       hoverStrip
@@ -101,8 +90,6 @@ export function Panel(props) {
             (body.matches(':hover') && !isChatStripCollapsed())
         : body.matches(':hover') || settingsVisible,
     );
-    // Settings were just closed with the pointer elsewhere: the strip is
-    // expanded but nothing will collapse it - no mouseleave is coming
     if (hoverStrip && !settingsVisible && !body.matches(':hover')) {
       collapseChatToStrip();
     }
@@ -110,19 +97,13 @@ export function Panel(props) {
     const show = () => {
       const wasCollapsed = isChatStripCollapsed();
       if (hoverStrip) {
-        // Deferred while the pointer is on the strip's chrome, and gated
-        // while a TGUI window is squatting on the chat's rect
         requestChatStripExpand();
         if (wasCollapsed) {
-          // Chrome stays unpainted until the strip actually grows
           return;
         }
       } else {
         body.classList.add('frameless-visible');
       }
-      // Coming out of the strip means re-sticking to the newest message;
-      // a chat that was merely faded (strip mode off) keeps wherever the
-      // reader had scrolled to instead of yanking them back down
       if (wasCollapsed) {
         chatRenderer.scrollToBottom();
       }
@@ -150,9 +131,6 @@ export function Panel(props) {
     };
   }, [frameless, messageBg, chatTop, settingsVisible, hoverStrip]);
 
-  // The on-map chat has no titlebar, so its header doubles as one.
-  // tgui's Button and Tabs render as divs, so match their classes rather
-  // than <button> - anything interactive in the header stays clickable.
   const onHeaderDrag = useCallback((e: React.PointerEvent) => {
     if (
       (e.target as HTMLElement).closest(
@@ -170,8 +148,6 @@ export function Panel(props) {
         <div
           className={`ChatHoverStrip${chatTop ? ' ChatHoverStrip--top' : ''}`}
           onMouseEnter={() => {
-            // The marker's own chrome must stay grabbable: hovering it
-            // parks the expand instead of snapping the chat open
             setStripChromeHovered(true);
             requestChatStripExpand();
           }}
@@ -185,15 +161,10 @@ export function Panel(props) {
           onPointerDown={startChatMove}
         >
           <Icon name={chatTop ? 'chevron-down' : 'chevron-up'} />
-          <span className="ChatHoverStrip__label">Chat</span>
           <span className="ChatHoverStrip__ping" />
         </div>
       )}
-      {/* The border handle sits on the cut line of the collapsed strip
-          itself - the edge where the chat was cropped - so dragging it
-          moves that boundary with the pointer and releasing it leaves it
-          right there. It is chrome like the marker: hovering it parks the
-          expand instead of snapping the chat open. */}
+
       {isOnMap && hoverStrip && (
         <div
           className={`ChatPeekEdge${chatTop ? ' ChatPeekEdge--top' : ''}`}
@@ -221,8 +192,6 @@ export function Panel(props) {
         <Stack fill vertical className="Panel__stack">
           <Stack.Item>
             <Section fitted className="Panel__header">
-              {/* Plain div: Stack only forwards a fixed allowlist of
-                  handlers, and onPointerDown is not among them */}
               <div
                 onPointerDown={isOnMap ? onHeaderDrag : undefined}
                 style={isOnMap ? { cursor: 'grab' } : undefined}

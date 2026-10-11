@@ -16,34 +16,28 @@ body.onmap {
   --frameless-shadow-color-soft: rgba(0, 0, 0, 0.5);
   --frameless-backdrop: hsla(225, 10%, 10%, var(--chat-opacity));
 
-  --color-base: var(--onmap-base) !important;
-  --section-background: var(--onmap-base) !important;
-  // hsl(from ...) drops the source alpha unless it is asked for, so carry it through or
-  // these come out opaque and the gradient paints right over the translucent base
+  --color-base: var(--onmap-base);
+  --section-background: var(--onmap-base);
   --color-base-start: hsl(
-    from var(--color-base) h s calc(l + var(--base-gradient-spread)) / alpha
+    from var(--color-base) h s calc(l + var(--base-gradient-spread))
   );
   --color-base-end: hsl(
-    from var(--color-base) h s calc(l - var(--base-gradient-spread)) / alpha
+    from var(--color-base) h s calc(l - var(--base-gradient-spread))
   );
 
   overflow: hidden;
-
   .Window {
     inset: 4px;
-    // Window.scss lays a gradient over the background colour. Nothing to shade against the
-    // map, and it would hide whatever translucency the base colour has.
-    background-image: none;
     border-radius: var(--border-radius-large);
     border: var(--border-thickness-tiny) solid var(--onmap-window-border);
     box-shadow: 0 0 4px var(--onmap-window-shadow);
     overflow: hidden;
   }
 
-  // Float the messages down onto the input bar. Without this a short backlog sits at the top
-  // of the box and the empty remainder reads as a gap, since the box itself is invisible.
-  // margin-top:auto only takes effect while the content is shorter than the pane, so
-  // scrolling a full backlog still behaves normally. The scroll button is position:fixed.
+  .Panel__stack {
+    gap: 0;
+  }
+
   #chat-pane {
     display: flex;
     flex-direction: column;
@@ -53,7 +47,6 @@ body.onmap {
     margin-top: auto;
   }
 
-  // Frameless: nothing is drawn until you mouse over, messages fade in and out on their own
   &.frameless {
     .Window {
       background-color: transparent;
@@ -76,6 +69,29 @@ body.onmap {
       opacity: 0;
       pointer-events: none;
       transition: opacity 300ms ease;
+    }
+
+    .CommandBar {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 300ms ease;
+    }
+
+    &.chat-top .CommandBar {
+      display: none;
+    }
+
+    &.chat-top .CommandBar.CommandBar--focused {
+      display: flex;
+      opacity: 1;
+      pointer-events: auto;
+      border-radius: var(--border-radius-large);
+    }
+
+    &:not(.chat-top) .CommandBar:focus-within {
+      opacity: 1;
+      pointer-events: auto;
+      border-radius: var(--border-radius-large);
     }
 
     #chat-pane {
@@ -107,7 +123,10 @@ body.onmap {
       transition: opacity 600ms ease;
     }
 
-    // Anchored to a top corner, messages grow downwards from nothing
+    &.chat-top .Panel__header {
+      display: none;
+    }
+
     &.chat-top .Panel__header {
       display: none;
     }
@@ -117,10 +136,6 @@ body.onmap {
       display: none;
     }
 
-    // The log is rendered reversed for top corners: the newest message
-    // sits right under the corner and older history extends downward, so
-    // the collapsed strip and the expanded window show the same thing and
-    // expanding moves nothing
     &.chat-top .Chat {
       display: flex;
       flex-direction: column-reverse;
@@ -128,14 +143,10 @@ body.onmap {
       margin-bottom: auto;
     }
 
-    // The edge marker doubles as the top-corner chat's missing titlebar, so
-    // the log keeps its top inset in both the collapsed and the expanded
-    // state
     &.chat-top #chat-pane {
       padding-top: 14px;
     }
 
-    // Rounded ends of a backdrop run swap places once the log is reversed
     &.chat-top.chat-message-bg .ChatMessage--recent {
       &:not(.ChatMessage--recent + .ChatMessage--recent) {
         border-radius: 0 0 6px 6px;
@@ -166,7 +177,6 @@ body.onmap {
         opacity 600ms ease,
         border-radius 300ms ease;
 
-      // Round only the outer corners of a run of lit messages
       &:not(.ChatMessage--recent + .ChatMessage--recent) {
         border-radius: 6px 6px 0 0;
       }
@@ -207,6 +217,18 @@ body.onmap {
         transition: opacity 200ms ease;
       }
 
+      .Stack__item:has(> .CommandBar) {
+        order: initial;
+      }
+
+      .CommandBar {
+        display: flex;
+        opacity: 1;
+        pointer-events: auto;
+        border-radius: 0;
+        transition: opacity 200ms ease;
+      }
+
       #chat-pane {
         pointer-events: auto;
         overflow-y: auto;
@@ -231,13 +253,6 @@ body.onmap {
     }
   }
 
-  // Click-through: the browser control is only a peek strip tall, so
-  // everything that is not the log itself is dropped and every handle is
-  // unreachable. The window stays mounted - its scroll position is what
-  // the peek shows - and the messages fill the strip on their own.
-  // The command bar stays mounted under the log: the collapsed strip
-  // and the expanded window then end in the same log/command bar/marker
-  // stack, and expanding the chat moves nothing.
   &.chat-hover-collapsed {
     .Panel__header,
     .Notifications,
@@ -250,7 +265,6 @@ body.onmap {
       border-radius: 0;
     }
 
-    // The peek shows the live tail of the log, not the fade cycle
     .ChatMessage {
       opacity: 1;
       transition: opacity 0ms;
@@ -262,17 +276,11 @@ body.onmap {
     }
   }
 
-  // Strip mode keeps the marker bar in place between the collapsed and
-  // the expanded state, so nothing at the anchored edge ever shifts when
-  // the chat is hovered open
   &.chat-stripmode {
     .Window {
       border-radius: 0;
     }
 
-    // The marker overlays the bottom edge of the control; keep the
-    // command bar clear of it. Top-corner chats carry their marker on
-    // the top edge instead and need no such clearance
     &:not(.chat-top) .CommandBar {
       margin-bottom: 14px;
     }
@@ -283,10 +291,6 @@ html:has(body.onmap) {
   background: transparent !important;
 }
 
-// Slim marker on the anchored edge of the collapsed chat. The strip itself
-// is a live peek of the log, so this only hints where hovering expands it
-// and doubles as the drag handle of a chat that has no header of its own
-// (top corners, where it also stays once the chat is expanded).
 .ChatHoverStrip {
   display: none;
   position: fixed;
@@ -322,8 +326,6 @@ html:has(body.onmap) {
   }
 }
 
-// A chat anchored into a top corner hugs the map's top edge instead, and
-// its marker flips with it
 .ChatHoverStrip--top {
   top: 0;
   bottom: auto;
@@ -332,20 +334,12 @@ html:has(body.onmap) {
   border-radius: 0 0 var(--border-radius-large) var(--border-radius-large);
 }
 
-// The marker stays up in strip mode (any corner) and for top-corner
-// frameless chats (where it doubles as the titlebar), in both the
-// collapsed and the expanded state
 body.onmap.frameless.chat-stripmode .ChatHoverStrip,
 body.onmap.frameless.chat-top .ChatHoverStrip,
 body.chat-hover-collapsed .ChatHoverStrip {
   display: flex;
 }
 
-// Border handle of the peek strip: it sits on the cut line itself - the
-// top edge of the collapsed strip for bottom corners, its bottom edge for
-// top ones - so dragging it moves that boundary with the pointer and
-// releasing it leaves it exactly where the drag stopped. It only ever
-// changes the visible area; the chat's full rect is left alone
 .ChatPeekEdge {
   display: none;
   position: fixed;
@@ -358,7 +352,6 @@ body.chat-hover-collapsed .ChatHoverStrip {
   cursor: ns-resize;
   user-select: none;
   z-index: 201;
-  // A hairline along the strip's cut edge marks where the chat was cropped
   border-top: var(--border-thickness-tiny) solid rgba(255, 255, 255, 0.14);
 
   &:active {
@@ -366,8 +359,6 @@ body.chat-hover-collapsed .ChatHoverStrip {
   }
 }
 
-// A top-corner strip grows downward from the map's top edge, so its cut
-// line is the strip's bottom edge and the handle flips with it
 .ChatPeekEdge--top {
   top: auto;
   bottom: 0;
@@ -375,8 +366,6 @@ body.chat-hover-collapsed .ChatHoverStrip {
   border-bottom: var(--border-thickness-tiny) solid rgba(255, 255, 255, 0.14);
 }
 
-// The handle exists only while the chat is collapsed - expanded, there is
-// no cut edge to mark
 body.chat-hover-collapsed .ChatPeekEdge {
   display: flex;
 }
@@ -416,8 +405,6 @@ body.chat-hover-collapsed .ChatPeekEdge {
   }
 }
 
-// Reversed chats anchor the newest message to the top of the scroller, so
-// their "back to latest" button lives at the top too
 .Chat__scrollButton--reversed {
   bottom: auto;
   top: 1em;
