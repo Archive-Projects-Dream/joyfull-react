@@ -8,11 +8,17 @@ import { useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 import { useCallback } from 'react';
 import { Pane } from 'tgui/layouts';
-import { Button, Section, Stack } from 'tgui-core/components';
+import { Button, Icon, Section, Stack } from 'tgui-core/components';
 import { visibleAtom } from './audio/atoms';
 import { NowPlayingWidget } from './audio/NowPlayingWidget';
 import { ChatPanel } from './chat/ChatPanel';
 import { ChatTabs } from './chat/ChatTabs';
+import {
+  cancelChatStripCollapse,
+  expandChatFromStrip,
+  scheduleChatStripCollapse,
+  setChatStripMode,
+} from './chat/chat-hover-strip';
 import { useChatPersistence } from './chat/use-chat-persistence';
 import { useChatPlacement } from './chat/use-chat-placement';
 import { chatRenderer } from './chat/renderer';
@@ -39,6 +45,9 @@ export function Panel(props) {
   const frameless = isOnMap && settings.chatFrameless;
   const chatTop = frameless && chatCorner.startsWith('top');
   const messageBg = frameless && settings.chatMessageBg;
+  // Click-through mode: the collapsed chat is a bottom strip, the rest
+  // of its rect is free map
+  const hoverStrip = frameless && settings.chatHoverStrip;
 
   // Frameless chat is invisible until the mouse is over it, so the body carries the state
   useEffect(() => {
@@ -54,21 +63,26 @@ export function Panel(props) {
     if (!frameless) {
       clearClasses();
       chatRenderer.setFrameless(false);
+      setChatStripMode(false);
       return;
     }
 
     body.classList.add('frameless');
     body.classList.toggle('chat-message-bg', !!messageBg);
     body.classList.toggle('chat-top', chatTop);
+    chatRenderer.setFrameless(true);
     // Closing a panel or turning frameless on with the mouse over the chat hid it,
-    // and no mouseenter comes to show it again
+    // and no mouseenter comes to show it again. The strip starts collapsed.
     body.classList.toggle(
       'frameless-visible',
-      body.matches(':hover') || settingsVisible,
+      hoverStrip ? false : body.matches(':hover') || settingsVisible,
     );
-    chatRenderer.setFrameless(true);
 
     const show = () => {
+      if (hoverStrip) {
+        cancelChatStripCollapse();
+        expandChatFromStrip();
+      }
       body.classList.add('frameless-visible');
       chatRenderer.scrollToBottom();
     };
@@ -76,18 +90,23 @@ export function Panel(props) {
       if (!settingsVisible) {
         body.classList.remove('frameless-visible');
       }
+      if (hoverStrip) {
+        scheduleChatStripCollapse();
+      }
     };
 
     body.addEventListener('mouseenter', show);
     body.addEventListener('mouseleave', hide);
+    setChatStripMode(hoverStrip);
 
     return () => {
       body.removeEventListener('mouseenter', show);
       body.removeEventListener('mouseleave', hide);
+      setChatStripMode(false);
       clearClasses();
       chatRenderer.setFrameless(false);
     };
-  }, [frameless, messageBg, chatTop, settingsVisible]);
+  }, [frameless, messageBg, chatTop, settingsVisible, hoverStrip]);
 
   const onPopupDrag = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -119,117 +138,136 @@ export function Panel(props) {
   }, []);
 
   return (
-    <Pane theme={settings.theme} canSuspend={false}>
-      {isOnMap && <ResizeHandles corner={chatCorner} />}
-      {isPopup && (
-        <>
-          <ResizeHandles allEdges target="tgui_panel_popup" />
-          <div
-            className="PanelDragBar"
-            onMouseDown={onPopupDrag}
-          />
-        </>
+    <>
+      {isOnMap && (
+        <div
+          className="ChatHoverStrip"
+          onMouseEnter={() => {
+            cancelChatStripCollapse();
+            expandChatFromStrip();
+          }}
+          onClick={() => {
+            cancelChatStripCollapse();
+            expandChatFromStrip();
+          }}
+        >
+          <Icon name="chevron-up" />
+          <span className="ChatHoverStrip__label">Chat</span>
+          <span className="ChatHoverStrip__ping" />
+        </div>
       )}
-      <Stack fill vertical className="Panel__stack">
-        <Stack.Item>
-          <Section fitted className="Panel__header">
-            <Stack mr={1} align="center">
-              <Stack.Item grow>
-                <ChatTabs />
-              </Stack.Item>
-              <Stack.Item>
-                <PingIndicator />
-              </Stack.Item>
-              <Stack.Item>
-                <Button
-                  color="transparent"
-                  icon={isOnMap ? 'columns' : 'window-maximize'}
-                  tooltip={isOnMap ? 'Switch to panel' : 'Switch to overlay'}
-                  tooltipPosition="bottom-start"
-                  onClick={() => {
-                    console.log('panel/toggle_layout: sending, isOnMap =', isOnMap);
-                    Byond.sendMessage('panel/toggle_layout');
-                  }}
-                />
-              </Stack.Item>
-              {isOnMap && (
+      <Pane theme={settings.theme} canSuspend={false}>
+        {isOnMap && <ResizeHandles corner={chatCorner} />}
+        {isPopup && (
+          <>
+            <ResizeHandles allEdges target="tgui_panel_popup" />
+            <div className="PanelDragBar" onMouseDown={onPopupDrag} />
+          </>
+        )}
+        <Stack fill vertical className="Panel__stack">
+          <Stack.Item>
+            <Section fitted className="Panel__header">
+              <Stack mr={1} align="center">
+                <Stack.Item grow>
+                  <ChatTabs />
+                </Stack.Item>
+                <Stack.Item>
+                  <PingIndicator />
+                </Stack.Item>
                 <Stack.Item>
                   <Button
                     color="transparent"
-                    icon={settings.chatFrameless ? 'eye-slash' : 'eye'}
-                    tooltip={
-                      settings.chatFrameless
-                        ? 'Show chat frame'
-                        : 'Hide chat frame'
-                    }
+                    icon={isOnMap ? 'columns' : 'window-maximize'}
+                    tooltip={isOnMap ? 'Switch to panel' : 'Switch to overlay'}
                     tooltipPosition="bottom-start"
-                    onClick={() =>
-                      updateSettings({
-                        chatFrameless: !settings.chatFrameless,
-                      })
-                    }
+                    onClick={() => {
+                      console.log(
+                        'panel/toggle_layout: sending, isOnMap =',
+                        isOnMap,
+                      );
+                      Byond.sendMessage('panel/toggle_layout');
+                    }}
                   />
                 </Stack.Item>
-              )}
-              <Stack.Item>
-                <Button
-                  color="grey"
-                  selected={audioVisible}
-                  icon="music"
-                  tooltip="Music player"
-                  tooltipPosition="bottom-start"
-                  onClick={() => setAudioVisible((v) => !v)}
-                />
-              </Stack.Item>
-              <Stack.Item>
-                <Button
-                  icon={settingsVisible ? 'times' : 'cog'}
-                  selected={settingsVisible}
-                  tooltip={settingsVisible ? 'Close settings' : 'Open settings'}
-                  tooltipPosition="bottom-start"
-                  onClick={() => setSettingsVisible((v) => !v)}
-                />
-              </Stack.Item>
-            </Stack>
-          </Section>
-        </Stack.Item>
-        {audioVisible && (
-          <Stack.Item>
-            <Section>
-              <NowPlayingWidget />
+                {isOnMap && (
+                  <Stack.Item>
+                    <Button
+                      color="transparent"
+                      icon={settings.chatFrameless ? 'eye-slash' : 'eye'}
+                      tooltip={
+                        settings.chatFrameless
+                          ? 'Show chat frame'
+                          : 'Hide chat frame'
+                      }
+                      tooltipPosition="bottom-start"
+                      onClick={() =>
+                        updateSettings({
+                          chatFrameless: !settings.chatFrameless,
+                        })
+                      }
+                    />
+                  </Stack.Item>
+                )}
+                <Stack.Item>
+                  <Button
+                    color="grey"
+                    selected={audioVisible}
+                    icon="music"
+                    tooltip="Music player"
+                    tooltipPosition="bottom-start"
+                    onClick={() => setAudioVisible((v) => !v)}
+                  />
+                </Stack.Item>
+                <Stack.Item>
+                  <Button
+                    icon={settingsVisible ? 'times' : 'cog'}
+                    selected={settingsVisible}
+                    tooltip={settingsVisible ? 'Close settings' : 'Open settings'}
+                    tooltipPosition="bottom-start"
+                    onClick={() => setSettingsVisible((v) => !v)}
+                  />
+                </Stack.Item>
+              </Stack>
             </Section>
           </Stack.Item>
-        )}
-        {settingsVisible && (
-          <Stack.Item>
-            <SettingsPanel />
+          {audioVisible && (
+            <Stack.Item>
+              <Section>
+                <NowPlayingWidget />
+              </Section>
+            </Stack.Item>
+          )}
+          {settingsVisible && (
+            <Stack.Item>
+              <SettingsPanel />
+            </Stack.Item>
+          )}
+          <Stack.Item grow>
+            <Section fill fitted position="relative">
+              <Pane.Content scrollable id="chat-pane">
+                <ChatPanel lineHeight={settings.lineHeight} />
+              </Pane.Content>
+              <Notifications>
+                {game.connectionLostAt && (
+                  <Notifications.Item rightSlot={<ReconnectButton />}>
+                    You are either AFK, experiencing lag or the connection has
+                    closed.
+                  </Notifications.Item>
+                )}
+                {game.roundRestartedAt && (
+                  <Notifications.Item>
+                    The connection has been closed because the server is
+                    restarting. Please wait while you automatically reconnect.
+                  </Notifications.Item>
+                )}
+              </Notifications>
+            </Section>
           </Stack.Item>
-        )}
-        <Stack.Item grow>
-          <Section fill fitted position="relative">
-            <Pane.Content scrollable id="chat-pane">
-              <ChatPanel lineHeight={settings.lineHeight} />
-            </Pane.Content>
-            <Notifications>
-              {game.connectionLostAt && (
-                <Notifications.Item rightSlot={<ReconnectButton />}>
-                  You are either AFK, experiencing lag or the connection has
-                  closed.
-                </Notifications.Item>
-              )}
-              {game.roundRestartedAt && (
-                <Notifications.Item>
-                  The connection has been closed because the server is
-                  restarting. Please wait while you automatically reconnect.
-                </Notifications.Item>
-              )}
-            </Notifications>
-          </Section>
-        </Stack.Item>
-        <Stack.Item>
-          <CommandBar />
-        </Stack.Item>
-      </Stack>
-    </Pane>
+          <Stack.Item>
+            <CommandBar />
+          </Stack.Item>
+        </Stack>
+      </Pane>
+    </>
   );
 }

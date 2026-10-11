@@ -6,6 +6,7 @@ export const defaultSettings: SettingsState = {
   adminMusicVolume: 0.5,
   chatCorner: 'top-right',
   chatFrameless: true,
+  chatHoverStrip: true,
   chatMessageBg: false,
   chatOpacity: 0.45,
   chatPadding: 10,

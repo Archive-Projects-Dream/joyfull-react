@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import type { ChatCorner } from '../settings/constants';
+import { setChatStripDragging } from './chat-hover-strip';
 import { saveChatRatio } from './chat-ratio';
 
 const pixelRatio = window.devicePixelRatio ?? 1;
@@ -62,6 +63,8 @@ function startDrag(
   onMove: (dx: number, dy: number, startPos: Point, startSize: Point) => void,
 ) {
   e.preventDefault();
+  // Hover-strip collapse must not fire mid-drag
+  setChatStripDragging(true);
   const startMouseX = e.screenX * pixelRatio;
   const startMouseY = e.screenY * pixelRatio;
 
@@ -92,6 +95,7 @@ function startDrag(
         updateAnchors();
         saveChatRatio();
         sendBounds();
+        setChatStripDragging(false);
       };
 
       document.addEventListener('mousemove', handleMove);

@@ -195,10 +195,81 @@ body.onmap {
       }
     }
   }
+
+  // Click-through: the browser control is only a strip tall, so nothing
+  // else may be drawn and every handle is unreachable
+  &.chat-hover-collapsed {
+    .Window {
+      display: none;
+    }
+
+    .ResizeHandle {
+      display: none;
+    }
+  }
 }
 
 html:has(body.onmap) {
   background: transparent !important;
+}
+
+// The strip the collapsed on-map chat leaves behind. While collapsed the
+// browser control is exactly this tall, so the strip fills its viewport and
+// hovering anywhere on it grows the chat back.
+.ChatHoverStrip {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  max-height: 22px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--onmap-base);
+  border: var(--border-thickness-tiny) solid var(--onmap-window-border);
+  border-bottom: none;
+  border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+  transition: color 150ms ease;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+body.chat-hover-collapsed .ChatHoverStrip {
+  display: flex;
+}
+
+.ChatHoverStrip__ping {
+  position: absolute;
+  inset: 0;
+  background: #7fbaff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ChatHoverStrip--ping .ChatHoverStrip__ping {
+  animation: ChatHoverStripPing 1.2s ease-out;
+}
+
+@keyframes ChatHoverStripPing {
+  0% {
+    opacity: 0.45;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 .ResizeHandle {

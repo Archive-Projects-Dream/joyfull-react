@@ -10,6 +10,7 @@ export const settingsSchema = z.object({
   adminMusicVolume: z.number(),
   chatCorner: z.string(),
   chatFrameless: z.boolean(),
+  chatHoverStrip: z.boolean(),
   chatMessageBg: z.boolean(),
   chatOpacity: z.number(),
   chatPadding: z.number(),

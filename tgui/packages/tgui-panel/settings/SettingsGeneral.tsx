@@ -90,6 +90,22 @@ export function SettingsGeneral(props) {
                 </Button>
               </LabeledList.Item>
             )}
+            {settings.chatFrameless && (
+              <LabeledList.Item label="Open from bottom strip">
+                <Button
+                  selected={settings.chatHoverStrip}
+                  color="transparent"
+                  icon={
+                    settings.chatHoverStrip ? 'toggle-on' : 'toggle-off'
+                  }
+                  onClick={() =>
+                    updateSettings({ chatHoverStrip: !settings.chatHoverStrip })
+                  }
+                >
+                  {settings.chatHoverStrip ? 'Enabled' : 'Disabled'}
+                </Button>
+              </LabeledList.Item>
+            )}
           </>
         )}
         <LabeledList.Item label="UI sizes">
