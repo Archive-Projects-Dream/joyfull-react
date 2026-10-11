@@ -1,3 +1,11 @@
+/datum/hud/blob_overmind/get_displacement_groups()
+	return list(
+		list(HUD_MOB_HEALTH, HUD_BLOB_POWER_DISPLAY),
+		list(HUD_BLOB_BLOBBERNAUT, HUD_BLOB_RESOURCES, HUD_BLOB_NODE,
+			HUD_BLOB_FACTORY, HUD_BLOB_READAPT, HUD_BLOB_RELOCATE,
+			HUD_BLOB_JUMP_TO_CORE, HUD_BLOB_JUMP_TO_NODE),
+	)
+
 /datum/hud/blob_overmind/initialize_screen_objects()
 	. = ..()
 	add_screen_object(/atom/movable/screen/healths/blob, HUD_MOB_HEALTH, HUD_GROUP_INFO)

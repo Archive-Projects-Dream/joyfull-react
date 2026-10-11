@@ -4,6 +4,15 @@
 	///Boolean on whether to give a health doll.
 	var/give_health_doll = TRUE
 
+/datum/hud/dextrous/get_displacement_groups()
+	return list(
+		list(HUD_MOB_HEALTHDOLL),
+		list(HUD_MOB_DROP, HUD_MOB_SWAPHAND_2, HUD_MOB_PULL,
+			HUD_MOB_INTENTS, HUD_MOB_FLOOR_CHANGER, HUD_MOB_ZONE_SELECTOR,
+			HUD_MOB_AREA_CREATOR, HUD_MOB_MEMORIES, HUD_MOB_THROW,
+			HUD_KEY_HAND_SLOT(1), HUD_KEY_HAND_SLOT(2)),
+	)
+
 //Used for normal mobs that have hands.
 /datum/hud/dextrous/initialize_screen_objects()
 	. = ..()

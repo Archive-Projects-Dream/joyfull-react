@@ -1,6 +1,14 @@
 /datum/hud/larva
 	ui_style = 'icons/hud/screen_alien.dmi'
 
+/datum/hud/larva/get_displacement_groups()
+	return list(
+		list(HUD_MOB_HEALTH, HUD_ALIEN_QUEEN_FINDER),
+		list(HUD_MOB_INTENTS, HUD_MOB_ZONE_SELECTOR, HUD_MOB_PULL,
+			HUD_MOB_REST, HUD_MOB_SLEEP, HUD_MOB_NAVIGATE_MENU, HUD_MOB_MEMORIES,
+			HUD_MOB_FLOOR_CHANGER, HUD_MOB_LANGUAGE_MENU),
+	)
+
 /datum/hud/larva/initialize_screen_objects()
 	. = ..()
 	add_screen_object(/atom/movable/screen/combattoggle/flashy, HUD_MOB_INTENTS, HUD_GROUP_INFO, ui_style)

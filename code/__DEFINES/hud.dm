@@ -17,7 +17,8 @@
 
 //used to set the default viewport to the user's preference.
 #define VIEWPORT_USE_PREF "use_pref"
-#define WIDESCREEN_VIEWPORT_SIZE "19x15"
+#define WIDESCREEN_VIEWPORT_SIZE "26x15"
+#define WIDESCREEN_DOCKED_VIEWPORT_SIZE "19x15"
 #define SQUARE_VIEWPORT_SIZE "15x15"
 /// Largest viewport possible, required for checking if someone can see an object
 #define LARGEST_VIEWPORT_SIZE WIDESCREEN_VIEWPORT_SIZE
@@ -396,6 +397,8 @@
 // Defines relating to action button positions
 
 /// Whatever the base action datum thinks is best
+
+
 #define SCRN_OBJ_DEFAULT "default"
 /// Floating somewhere on the hud, not in any predefined place
 #define SCRN_OBJ_FLOATING "floating"

@@ -31,3 +31,14 @@
   // Chat styles
   @include meta.load-css('../tgchat/chat-light.scss');
 }
+
+.theme-light body.onmap {
+  background: transparent !important;
+  --onmap-base: hsla(0, 0%, 95%, var(--chat-opacity));
+  --onmap-window-border: hsla(0, 0%, 60%, 0.3);
+  --onmap-window-shadow: hsla(0, 0%, 80%, 0.5);
+  --frameless-stroke-color: white;
+  --frameless-shadow-color: rgba(255, 255, 255, 0.8);
+  --frameless-shadow-color-soft: rgba(255, 255, 255, 0.5);
+  --frameless-backdrop: hsla(0, 0%, 95%, var(--chat-opacity));
+}

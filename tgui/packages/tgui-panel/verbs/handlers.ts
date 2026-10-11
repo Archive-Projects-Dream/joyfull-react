@@ -1,5 +1,6 @@
 import { fetchRetry } from 'tgui-core/http';
 import { resolveAsset } from '../events/handlers/assets';
+import { chatRenderer } from '../chat/renderer';
 import { store } from '../events/store';
 import {
   adminTargetsAtom,
@@ -58,6 +59,13 @@ export function handleTargets(payload: { targets: Target[] }) {
 }
 
 export function handleFocusCommandBar() {
+  if (chatRenderer.frameless) {
+    const bar = document.querySelector('.CommandBar');
+    if (bar) {
+      bar.classList.add('CommandBar--focused');
+    }
+    chatRenderer.scrollToBottom();
+  }
   store.set(focusCommandBarAtom, (n) => n + 1);
 }
 

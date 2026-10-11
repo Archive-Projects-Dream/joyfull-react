@@ -1,6 +1,17 @@
 /datum/hud/ai
 	ui_style = 'icons/hud/screen_ai.dmi'
 
+/datum/hud/ai/get_displacement_groups()
+	return list(
+		list(HUD_AI_SENSORS, HUD_AI_CAMERA_LIGHT, HUD_AI_CAMERA_TRACK,
+			HUD_AI_CAMERA_LIST, HUD_AI_IMAGE_VIEW, HUD_AI_CREW_MONITOR,
+			HUD_AI_CREW_MANIFEST, HUD_SILICON_ALERTS, HUD_AI_AICORE,
+			HUD_AI_CALL_SHUTTLE, HUD_AI_ANNOUNCEMENT, HUD_AI_STATE_LAWS,
+			HUD_SILICON_TABLET, HUD_AI_MULTICAM, HUD_AI_ADD_MULTICAM,
+			HUD_AI_TAKE_IMAGE, HUD_MOB_LANGUAGE_MENU, HUD_MOB_MEMORIES),
+		list(HUD_AI_FLOOR_INDICATOR, HUD_AI_GO_UP, HUD_AI_GO_DOWN),
+	)
+
 /datum/hud/ai/initialize_screen_objects()
 	. = ..()
 	add_screen_object(/atom/movable/screen/language_menu, HUD_MOB_LANGUAGE_MENU, HUD_GROUP_STATIC, ui_style, ui_ai_language_menu)

@@ -2,6 +2,11 @@
 	ui_style = 'icons/hud/screen_voidwalker.dmi'
 	give_generic_combat = FALSE //we give our own version below, here.
 
+/datum/hud/dextrous/voidwalker/get_displacement_groups()
+	var/list/groups = ..()
+	groups += list(list(HUD_VOIDWALKER_SPACE_CAMO, HUD_VOIDWALKER_VOID_JUMP))
+	return groups
+
 /datum/hud/dextrous/voidwalker/initialize_screen_objects()
 	. = ..()
 	var/atom/movable/screen/floor_change = screen_objects[HUD_MOB_FLOOR_CHANGER]

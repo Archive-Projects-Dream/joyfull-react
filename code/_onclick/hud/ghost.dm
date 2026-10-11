@@ -2,6 +2,18 @@
 /datum/hud/ghost
 	ui_style = 'icons/hud/screen_ghost.dmi'
 
+/datum/hud/ghost/get_displacement_groups()
+	// Ghost buttons + language/floor changer
+	var/list/ghost_buttons = list(
+		HUD_GHOST_SPAWNERS, HUD_GHOST_ORBIT, HUD_GHOST_REENTER_CORPSE,
+		HUD_GHOST_DNR, HUD_GHOST_TELEPORT, HUD_GHOST_SETTINGS,
+		HUD_GHOST_MINIGAMES, HUD_MOB_LANGUAGE_MENU, HUD_MOB_FLOOR_CHANGER)
+	// Hudboxes (scanners, tray view, etc.)
+	var/list/hudboxes = list()
+	for(var/i in 1 to 10) // more than enough to cover all hudbox subtypes
+		hudboxes += HUD_KEY_GHOST_HUDBOX(i)
+	return list(ghost_buttons, hudboxes)
+
 /datum/hud/ghost/initialize_screen_objects()
 	. = ..()
 	add_screen_object(/atom/movable/screen/ghost/spawners_menu, HUD_GHOST_SPAWNERS)

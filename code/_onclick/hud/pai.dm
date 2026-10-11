@@ -2,6 +2,16 @@
 /datum/hud/pai
 	ui_style = 'icons/hud/screen_pai.dmi'
 
+/datum/hud/pai/get_displacement_groups()
+	return list(
+		list(HUD_PAI_SOFTWARE, HUD_PAI_SHELL, HUD_PAI_CHASSIS,
+			HUD_AI_STATE_LAWS, HUD_CYBORG_LAMP, HUD_MOB_REST),
+		list(HUD_PAI_HOST_MONITOR, HUD_PAI_GPS, HUD_PAI_NEWSCASTER,
+			HUD_AI_CREW_MANIFEST, HUD_SILICON_TABLET),
+		list(HUD_AI_TAKE_IMAGE, HUD_AI_IMAGE_VIEW, HUD_CYBORG_RADIO),
+		list(HUD_MOB_HEALTHDOLL, HUD_MOB_LANGUAGE_MENU, HUD_MOB_NAVIGATE_MENU, HUD_MOB_MEMORIES),
+	)
+
 /datum/hud/pai/initialize_screen_objects()
 	. = ..()
 	add_screen_object(/atom/movable/screen/healthdoll/living, HUD_MOB_HEALTHDOLL, HUD_GROUP_INFO)

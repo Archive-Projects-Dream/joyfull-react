@@ -1,6 +1,17 @@
 /datum/hud/alien
 	ui_style = 'icons/hud/screen_alien.dmi'
 
+/datum/hud/alien/get_displacement_groups()
+	return list(
+		list(HUD_MOB_HEALTH, HUD_ALIEN_PLASMA_DISPLAY, HUD_ALIEN_QUEEN_FINDER),
+		list(HUD_MOB_INTENTS, HUD_MOB_ZONE_SELECTOR, HUD_MOB_DROP,
+			HUD_MOB_THROW, HUD_MOB_PULL, HUD_MOB_REST, HUD_MOB_SLEEP, HUD_MOB_RESIST,
+			HUD_MOB_NAVIGATE_MENU, HUD_MOB_MEMORIES, HUD_ALIEN_HUNTER_LEAP,
+			HUD_MOB_FLOOR_CHANGER, HUD_MOB_LANGUAGE_MENU,
+			HUD_KEY_HAND_SLOT(1), HUD_KEY_HAND_SLOT(2),
+			HUD_MOB_SWAPHAND_1, HUD_MOB_SWAPHAND_2),
+	)
+
 /datum/hud/alien/initialize_screen_objects()
 	. = ..()
 	build_hand_slots()

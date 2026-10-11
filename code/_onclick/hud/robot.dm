@@ -1,6 +1,16 @@
 /datum/hud/robot
 	ui_style = 'icons/hud/screen_cyborg.dmi'
 
+/datum/hud/robot/get_displacement_groups()
+	return list(
+		list(HUD_MOB_HEALTH),
+		list(HUD_CYBORG_HANDS, HUD_CYBORG_LAMP, HUD_SILICON_ALERTS,
+			HUD_MOB_INTENTS, HUD_MOB_ZONE_SELECTOR, HUD_MOB_PULL,
+			HUD_KEY_HAND_SLOT(1), HUD_KEY_HAND_SLOT(2), HUD_KEY_HAND_SLOT(3),
+			HUD_MOB_FLOOR_CHANGER, HUD_MOB_LANGUAGE_MENU, HUD_MOB_NAVIGATE_MENU, HUD_MOB_MEMORIES),
+		list(HUD_SILICON_TAKE_IMAGE, HUD_CYBORG_RADIO, HUD_SILICON_TABLET),
+	)
+
 /datum/hud/robot/initialize_screen_objects()
 	. = ..()
 	// i, Robit

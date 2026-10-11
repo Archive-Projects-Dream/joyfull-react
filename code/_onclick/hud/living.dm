@@ -1,3 +1,10 @@
+/datum/hud/living/get_displacement_groups()
+	return list(
+		list(HUD_MOB_HEALTHDOLL, HUD_MOB_STAMINA),
+		list(HUD_MOB_PULL, HUD_MOB_INTENTS, HUD_MOB_FLOOR_CHANGER,
+			HUD_MOB_LANGUAGE_MENU, HUD_MOB_MEMORIES),
+	)
+
 /datum/hud/living/initialize_screen_objects()
 	. = ..()
 	add_screen_object(/atom/movable/screen/pull, HUD_MOB_PULL, HUD_GROUP_STATIC, ui_style, ui_living_pull)

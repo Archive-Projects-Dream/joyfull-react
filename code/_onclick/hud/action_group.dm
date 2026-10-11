@@ -97,20 +97,40 @@
 		return
 	// Unlikey as it is, we may have been changed. Want to start from our target position and fail down
 	column_max = initial(column_max)
+	north_offset = initial(north_offset)
 	// Convert our viewer's view var into a workable offset
 	var/list/view_size = view_to_pixels(owner_view)
 
+	var/list/cv = owner.chat_rect_viewport
+	var/chat_left = cv?[1]
+	var/chat_bottom = cv?[2]
+	var/chat_w = cv?[3]
+	var/chat_h = cv?[4]
+	if(cv)
+		var/chat_top = chat_bottom + chat_h
+		if(chat_left < view_size[1] / 2 && chat_top > view_size[2] / 2)
+			var/chat_tiles_from_top = round((view_size[2] - chat_bottom) / ICON_SIZE_Y)
+			north_offset = max(north_offset, chat_tiles_from_top)
+
 	// We're primarially concerned about width here, if someone makes us 1x2000 I wish them a swift and watery death
 	var/furthest_screen_loc = ButtonNumberToScreenCoords(column_max - 1)
+	if(!furthest_screen_loc)
+		refresh_actions()
+		return
 	var/list/offsets = screen_loc_to_offset(furthest_screen_loc, owner_view)
-	if(offsets[1] > ICON_SIZE_X && offsets[1] < view_size[1] && offsets[2] > ICON_SIZE_Y && offsets[2] < view_size[2]) // We're all good
+	var/fits_view = offsets[1] > ICON_SIZE_X && offsets[1] < view_size[1] && offsets[2] > ICON_SIZE_Y && offsets[2] < view_size[2]
+	var/hits_chat = cv && rects_overlap(offsets[1], offsets[2], ICON_SIZE_X, ICON_SIZE_Y, chat_left, chat_bottom, chat_w, chat_h)
+	if(fits_view && !hits_chat)
+		refresh_actions()
 		return
 
 	for(column_max in column_max - 1 to 1 step -1) // Yes I could do this by unwrapping ButtonNumberToScreenCoords, but I don't feel like it
 		var/tested_screen_loc = ButtonNumberToScreenCoords(column_max)
 		offsets = screen_loc_to_offset(tested_screen_loc, owner_view)
+		fits_view = offsets[1] > ICON_SIZE_X && offsets[1] < view_size[1] && offsets[2] > ICON_SIZE_Y && offsets[2] < view_size[2]
+		hits_chat = cv && rects_overlap(offsets[1], offsets[2], ICON_SIZE_X, ICON_SIZE_Y, chat_left, chat_bottom, chat_w, chat_h)
 		// We've found a valid max length, pack it in
-		if(offsets[1] > ICON_SIZE_X && offsets[1] < view_size[1] && offsets[2] > ICON_SIZE_Y && offsets[2] < view_size[2])
+		if(fits_view && !hits_chat)
 			break
 	// Use our newly resized column max
 	refresh_actions()
