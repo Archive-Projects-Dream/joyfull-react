@@ -91,7 +91,7 @@ export function SettingsGeneral(props) {
               </LabeledList.Item>
             )}
             {settings.chatFrameless && (
-              <LabeledList.Item label="Open from bottom strip">
+              <LabeledList.Item label="Collapse to peek strip">
                 <Button
                   selected={settings.chatHoverStrip}
                   color="transparent"

@@ -11,7 +11,7 @@ import { Tooltip } from 'tgui-core/components';
 import { EventEmitter } from 'tgui-core/events';
 import { classes } from 'tgui-core/react';
 import { store } from '../events/store';
-import { scrollTrackingAtom } from './atom';
+import { chatReversedAtom, scrollTrackingAtom } from './atom';
 import {
   COMBINE_MAX_MESSAGES,
   COMBINE_MAX_TIME_WINDOW,
@@ -176,6 +176,9 @@ class ChatRenderer {
   currentCharacter: string | null;
   handleScroll: (type: any) => void;
   frameless: boolean;
+  // Top-corner chats display the log reversed (newest at the corner) and
+  // stick to the top of the scroller instead of the bottom
+  reversed: boolean;
   private framelessTimers: Map<HTMLElement, ReturnType<typeof setTimeout>>;
 
   constructor() {
@@ -187,6 +190,7 @@ class ChatRenderer {
     this.page = null;
     this.events = new EventEmitter();
     this.frameless = false;
+    this.reversed = false;
     this.framelessTimers = new Map();
     // Scroll handler
 
@@ -210,9 +214,13 @@ class ChatRenderer {
       }
       const height = node.scrollHeight;
       const bottom = node.scrollTop + node.offsetHeight;
-      const scrollTracking =
-        Math.abs(height - bottom) < SCROLL_TRACKING_TOLERANCE ||
-        this.lastScrollHeight === 0;
+      // Reversed chats anchor to the top of the scroller: tracking is lost
+      // only by scrolling down, away from the newest message
+      const scrollTracking = this.reversed
+        ? node.scrollTop <= SCROLL_TRACKING_TOLERANCE ||
+          this.lastScrollHeight === 0
+        : Math.abs(height - bottom) < SCROLL_TRACKING_TOLERANCE ||
+          this.lastScrollHeight === 0;
       if (scrollTracking !== this.scrollTracking) {
         this.scrollTracking = scrollTracking;
         store.set(scrollTrackingAtom, scrollTracking);
@@ -273,6 +281,22 @@ class ChatRenderer {
       node.classList.remove('ChatMessage--recent', 'ChatMessage--fading');
     }
     this.framelessTimers.clear();
+  }
+
+  /**
+   * Top-corner chats are rendered with the log reversed, so the newest
+   * message sits right under the corner. While reversed, "stick to the
+   * latest" means scrollTop 0 instead of the bottom of the scroller.
+   */
+  setReversed(value: boolean) {
+    if (this.reversed === value) {
+      return;
+    }
+    this.reversed = value;
+    store.set(chatReversedAtom, value);
+    this.scrollTracking = true;
+    store.set(scrollTrackingAtom, true);
+    this.scrollToBottom();
   }
 
   private scheduleMessageFade(node: HTMLElement) {
@@ -440,9 +464,18 @@ class ChatRenderer {
   }
 
   scrollToBottom() {
+    if (!this.scrollNode) {
+      return;
+    }
+    // Reversed chats keep the newest message at the top of the scroller,
+    // which is scrollTop 0 rather than the end of the scroll range
+    if (this.reversed) {
+      this.scrollNode.scrollTop = 0;
+      return;
+    }
     // scrollHeight is always bigger than scrollTop and is
     // automatically clamped to the valid range.
-    this.scrollNode!.scrollTop = this.scrollNode!.scrollHeight;
+    this.scrollNode.scrollTop = this.scrollNode.scrollHeight;
   }
 
   changePage(page) {
@@ -467,7 +500,12 @@ class ChatRenderer {
     }
     if (node) {
       this.rootNode!.appendChild(fragment);
-      node.scrollIntoView();
+      if (this.reversed) {
+        // The newest message is at the top of a reversed chat
+        this.scrollToBottom();
+      } else {
+        node.scrollIntoView();
+      }
     }
   }
 

@@ -1,27 +1,41 @@
 /**
- * Click-through hover strip for the on-map frameless chat.
+ * Click-through peek strip for the on-map frameless chat.
  *
  * A browser control swallows every click inside its rect, so a chat that
  * floats over the map blocks input on the turfs and screen objects behind
  * it. While this mode is on, the collapsed chat shrinks the browseroutput
- * control down to a thin strip along the chat's bottom edge: everything
- * above the strip is bare map again and clicks fall straight through.
- * Hovering the strip grows the control back to the full chat rect.
+ * control down to a small strip that keeps showing the live tail of the
+ * log: everything beyond the strip is bare map again and clicks fall
+ * straight through. Hovering the strip grows the control back to the full
+ * chat rect.
+ *
+ * The strip hugs the edge the chat is anchored to - the map's bottom edge
+ * for bottom corners, its top edge for top corners - so the newest
+ * messages always sit right at the corner and expanding the chat never
+ * moves them. Top-corner chats render the log reversed (see
+ * chatRenderer.setReversed), which is what keeps the collapsed and the
+ * expanded display identical for them.
  *
  * Panel.tsx drives this module: it turns the mode on and off as the
  * relevant settings change, and routes the body hover events through here.
- * ResizeHandles reports drags so a resize never races the collapse.
+ * ResizeHandles reports drags so a resize or a move never races the
+ * collapse.
  */
 import { store } from '../events/store';
 import { settingsVisibleAtom } from '../settings/atoms';
+import { saveChatRatioRect } from './chat-ratio';
 import { chatRenderer } from './renderer';
 
 const COLLAPSE_DELAY = 300;
 const SELECT_RETRY_DELAY = 500;
 const SELECT_MAX_RETRIES = 8;
 
-/** Height of the strip the collapsed chat collapses to, in control pixels. */
-export const CHAT_STRIP_HEIGHT = 22;
+/**
+ * Height of the strip the collapsed chat collapses to, in control pixels.
+ * Tall enough for a few lines of the log to stay readable, small enough
+ * that nearly all of the chat's rect is returned to the map.
+ */
+export const CHAT_STRIP_HEIGHT = 96;
 
 type RectRatio = {
   x: number;
@@ -32,11 +46,16 @@ type RectRatio = {
 
 let mode = false;
 let collapsed = false;
+let stripAtTop = false;
 let fullRect: RectRatio | null = null;
 let collapseTimer: ReturnType<typeof setTimeout> | undefined;
 let selectRetries = 0;
 let dragging = false;
+let pendingExpand = false;
+let settling = false;
 let focusedBeforeCollapse: HTMLElement | null = null;
+let paneObserver: ResizeObserver | null = null;
+let paneObserverNode: HTMLElement | null = null;
 
 export function isChatStripCollapsed(): boolean {
   return collapsed;
@@ -103,9 +122,37 @@ function setAnchorsForRect(
 }
 
 /**
- * Shrinks the chat browser down to a strip along its own bottom edge.
- * The full rect is remembered as map ratios so it survives map resizes
- * that happen while the chat is collapsed.
+ * Keeps the newest message pinned to the strip's anchored edge whenever
+ * the chat pane changes size while collapsed. The winset that shrinks
+ * the control only resizes the viewport once BYOND has applied it, so the
+ * scroll position has to be re-applied after the fact; this also covers
+ * map window resizes that happen while the chat is collapsed.
+ */
+function observePaneForRestick(): void {
+  const pane = document.getElementById('chat-pane');
+  if (!pane || typeof ResizeObserver === 'undefined') {
+    return;
+  }
+  // The pane node does not survive every remount; re-attach when it changes
+  if (paneObserver && paneObserverNode === pane) {
+    return;
+  }
+  paneObserver?.disconnect();
+  paneObserverNode = pane;
+  paneObserver = new ResizeObserver(() => {
+    if (collapsed) {
+      chatRenderer.scrollToBottom();
+    }
+  });
+  paneObserver.observe(pane);
+}
+
+/**
+ * Shrinks the chat browser down to a peek strip along its anchored edge -
+ * the bottom edge for bottom corners, the top edge for top corners, where
+ * the reversed log keeps the newest message right under the corner. The
+ * full rect is remembered as map ratios so it survives map resizes that
+ * happen while the chat is collapsed.
  */
 export function collapseChatToStrip(): void {
   if (!mode || collapsed || dragging) {
@@ -135,9 +182,10 @@ export function collapseChatToStrip(): void {
         return;
       }
       fullRect = { x: x / mapW, y: y / mapH, w: w / mapW, h: h / mapH };
-      const stripY = y + h - CHAT_STRIP_HEIGHT;
+      const stripY = stripAtTop ? y : y + h - CHAT_STRIP_HEIGHT;
       collapsed = true;
-      // display:none blurs whatever was focused, remember it for the expand
+      // The command bar is display:none in the collapsed state, so
+      // whatever was focused loses focus; remember it for the expand
       focusedBeforeCollapse =
         document.activeElement instanceof HTMLElement
           ? document.activeElement
@@ -148,6 +196,10 @@ export function collapseChatToStrip(): void {
         size: `${w}x${CHAT_STRIP_HEIGHT}`,
       });
       setAnchorsForRect(x, stripY, w, CHAT_STRIP_HEIGHT, mapW, mapH);
+      observePaneForRestick();
+      // Re-stick to the newest message now; the observer above re-applies
+      // it once the shrunk viewport has actually settled
+      chatRenderer.scrollToBottom();
     });
   });
 }
@@ -157,15 +209,24 @@ export function expandChatFromStrip(): void {
   if (!collapsed) {
     return;
   }
+  if (dragging || settling) {
+    // A move-drag (or its bookkeeping) is in progress; expanding now
+    // would race the drag's own winsets or restore a stale rect, so it
+    // waits for the drag to settle instead
+    pendingExpand = true;
+    return;
+  }
   Byond.winget('browseroutput', 'parent').then((parent) => {
     if (parent !== 'mapwindow') {
       // The chat already left the map for another layout; just clean up
       collapsed = false;
+      pendingExpand = false;
       document.body.classList.remove('chat-hover-collapsed');
       return;
     }
     Byond.winget('mapwindow', ['size']).then((map) => {
       collapsed = false;
+      pendingExpand = false;
       if (!fullRect) {
         document.body.classList.remove('chat-hover-collapsed');
         return;
@@ -185,8 +246,8 @@ export function expandChatFromStrip(): void {
         size: `${w}x${h}`,
       });
       setAnchorsForRect(x, y, w, h, mapW, mapH);
-      // Let the control grow before the strip stops drawing, so the chat
-      // does not flash by squeezed into a strip-sized viewport
+      // Let the control grow before the strip chrome stops drawing, so the
+      // chat does not flash by squeezed into a strip-sized viewport
       setTimeout(() => {
         if (!collapsed) {
           document.body.classList.remove('chat-hover-collapsed');
@@ -246,24 +307,108 @@ export function setChatStripMode(active: boolean): void {
   if (!active) {
     cancelChatStripCollapse();
     if (collapsed) {
+      pendingExpand = false;
       expandChatFromStrip();
     } else {
       document.body.classList.remove('chat-hover-collapsed');
     }
+    paneObserver?.disconnect();
+    paneObserver = null;
+    paneObserverNode = null;
     return;
   }
   collapseChatToStrip();
 }
 
 /**
+ * Tells the strip which edge of the chat rect to hug: the top edge for
+ * chats anchored into a top corner (the log is reversed there, newest
+ * message right under the corner), the bottom edge for everyone else.
+ */
+export function setChatStripEdge(atTop: boolean): void {
+  stripAtTop = atTop;
+}
+
+/**
+ * Called by ResizeHandles when a drag ends on the collapsed strip. The
+ * control is only strip-sized while collapsed, so the remembered full
+ * rect is rebased to wherever the strip was dropped (its anchored edge
+ * stays put), persisted, and reported to DM so the HUD displacement
+ * keeps pointing at the real chat rect instead of flickering with the
+ * strip on every hover.
+ */
+export function settleChatStripAfterDrag(): void {
+  if (!collapsed || !fullRect) {
+    return;
+  }
+  settling = true;
+  Promise.all([
+    Byond.winget('browseroutput', ['pos', 'size']),
+    Byond.winget('mapwindow', ['size']),
+  ]).then(([browser, map]) => {
+    settling = false;
+    if (!collapsed || !fullRect) {
+      return;
+    }
+    const mapW = map.size.x;
+    const mapH = map.size.y;
+    if (!mapW || !mapH) {
+      return;
+    }
+    const fullW = fullRect.w;
+    const fullH = fullRect.h;
+    // The move kept the width; the anchored edge of the strip is where the
+    // full rect attaches: its top for a top-edge strip, its bottom
+    // otherwise
+    const stripBottom = browser.pos.y + browser.size.y;
+    const pxY = stripAtTop
+      ? browser.pos.y
+      : stripBottom - Math.round(fullH * mapH);
+    let x = browser.pos.x / mapW;
+    let y = pxY / mapH;
+    // Keep the expanded rect on the map even if the strip was dropped at
+    // the very edge
+    x = Math.min(Math.max(x, 0), Math.max(1 - fullW, 0));
+    y = Math.min(Math.max(y, 0), Math.max(1 - fullH, 0));
+    fullRect = { x, y, w: fullW, h: fullH };
+    saveChatRatioRect(fullRect);
+    Byond.sendMessage('panel/bounds', {
+      x: Math.round(fullRect.x * mapW),
+      y: Math.round(fullRect.y * mapH),
+      w: Math.round(fullRect.w * mapW),
+      h: Math.round(fullRect.h * mapH),
+    });
+    // A hover-expand that arrived mid-drag was postponed until now
+    if (pendingExpand) {
+      pendingExpand = false;
+      if (document.body.matches(':hover')) {
+        expandChatFromStrip();
+      }
+    }
+  });
+}
+
+/**
  * ResizeHandles reports drags so a collapse is never scheduled or fired
- * mid-drag; a drag that ends with the pointer outside the chat re-checks.
+ * mid-drag; a drag that ends with the pointer still over the chat either
+ * expands it (a hover-expand was postponed by the drag) or re-checks the
+ * collapse.
  */
 export function setChatStripDragging(value: boolean): void {
   dragging = value;
-  if (!value && mode && !collapsed) {
-    scheduleChatStripCollapse();
+  if (value || !mode) {
+    return;
   }
+  if (collapsed) {
+    if (pendingExpand) {
+      pendingExpand = false;
+      if (document.body.matches(':hover')) {
+        expandChatFromStrip();
+      }
+    }
+    return;
+  }
+  scheduleChatStripCollapse();
 }
 
 // Flash the strip when new messages land while the chat is collapsed

@@ -16,7 +16,9 @@ import { ChatTabs } from './chat/ChatTabs';
 import {
   cancelChatStripCollapse,
   expandChatFromStrip,
+  isChatStripCollapsed,
   scheduleChatStripCollapse,
+  setChatStripEdge,
   setChatStripMode,
 } from './chat/chat-hover-strip';
 import { useChatPersistence } from './chat/use-chat-persistence';
@@ -30,7 +32,11 @@ import { ReconnectButton } from './reconnect';
 import { settingsVisibleAtom } from './settings/atoms';
 import { SettingsPanel } from './settings/SettingsPanel';
 import { useSettings } from './settings/use-settings';
-import { ResizeHandles } from './chat/ResizeHandles';
+import {
+  ResizeHandles,
+  startChatMove,
+  startPopupMove,
+} from './chat/ResizeHandles';
 import { CommandBar } from './verbs/CommandBar';
 
 export function Panel(props) {
@@ -49,7 +55,9 @@ export function Panel(props) {
   // of its rect is free map
   const hoverStrip = frameless && settings.chatHoverStrip;
 
-  // Frameless chat is invisible until the mouse is over it, so the body carries the state
+  // Frameless chat is invisible until the mouse is over it, so the body carries the state.
+  // Top-corner chats additionally render the log reversed, so the strip
+  // and the expanded chat show the newest message at the corner either way.
   useEffect(() => {
     const body = document.body;
     const clearClasses = () =>
@@ -59,6 +67,9 @@ export function Panel(props) {
         'chat-message-bg',
         'chat-top',
       );
+
+    setChatStripEdge(chatTop);
+    chatRenderer.setReversed(frameless && chatTop);
 
     if (!frameless) {
       clearClasses();
@@ -72,19 +83,27 @@ export function Panel(props) {
     body.classList.toggle('chat-top', chatTop);
     chatRenderer.setFrameless(true);
     // Closing a panel or turning frameless on with the mouse over the chat hid it,
-    // and no mouseenter comes to show it again. The strip starts collapsed.
+    // and no mouseenter comes to show it again. The strip starts collapsed -
+    // unless the settings are open inside the chat, which needs to stay
+    // visible and clickable until they are closed.
     body.classList.toggle(
       'frameless-visible',
-      hoverStrip ? false : body.matches(':hover') || settingsVisible,
+      hoverStrip ? settingsVisible : body.matches(':hover') || settingsVisible,
     );
 
     const show = () => {
+      const wasCollapsed = isChatStripCollapsed();
       if (hoverStrip) {
         cancelChatStripCollapse();
         expandChatFromStrip();
       }
       body.classList.add('frameless-visible');
-      chatRenderer.scrollToBottom();
+      // Coming out of the strip means re-sticking to the newest message;
+      // a chat that was merely faded (strip mode off) keeps wherever the
+      // reader had scrolled to instead of yanking them back down
+      if (wasCollapsed) {
+        chatRenderer.scrollToBottom();
+      }
     };
     const hide = () => {
       if (!settingsVisible) {
@@ -105,43 +124,29 @@ export function Panel(props) {
       setChatStripMode(false);
       clearClasses();
       chatRenderer.setFrameless(false);
+      chatRenderer.setReversed(false);
     };
   }, [frameless, messageBg, chatTop, settingsVisible, hoverStrip]);
 
-  const onPopupDrag = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    const pixelRatio = window.devicePixelRatio ?? 1;
-    const startMouseX = e.screenX * pixelRatio;
-    const startMouseY = e.screenY * pixelRatio;
-
-    Byond.winget('tgui_panel_popup', ['pos']).then((props) => {
-      const startX = props.pos.x;
-      const startY = props.pos.y;
-
-      const onMove = (ev: MouseEvent) => {
-        ev.preventDefault();
-        const dx = ev.screenX * pixelRatio - startMouseX;
-        const dy = ev.screenY * pixelRatio - startMouseY;
-        Byond.winset('tgui_panel_popup', {
-          pos: `${startX + dx},${startY + dy}`,
-        });
-      };
-
-      const onUp = () => {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-      };
-
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
-    });
+  // The on-map chat has no titlebar, so its header doubles as one.
+  // tgui's Button and Tabs render as divs, so match their classes rather
+  // than <button> - anything interactive in the header stays clickable.
+  const onHeaderDrag = useCallback((e: React.PointerEvent) => {
+    if (
+      (e.target as HTMLElement).closest(
+        'button, a, input, [role="button"], .Button, .Tab, .Dropdown',
+      )
+    ) {
+      return;
+    }
+    startChatMove(e);
   }, []);
 
   return (
     <>
-      {isOnMap && (
+      {isOnMap && (hoverStrip || chatTop) && (
         <div
-          className="ChatHoverStrip"
+          className={`ChatHoverStrip${chatTop ? ' ChatHoverStrip--top' : ''}`}
           onMouseEnter={() => {
             cancelChatStripCollapse();
             expandChatFromStrip();
@@ -150,9 +155,22 @@ export function Panel(props) {
             cancelChatStripCollapse();
             expandChatFromStrip();
           }}
+          onPointerDown={startChatMove}
         >
-          <Icon name="chevron-up" />
+          <Icon name={chatTop ? 'chevron-down' : 'chevron-up'} />
           <span className="ChatHoverStrip__label">Chat</span>
+          <span
+            className="ChatHoverStrip__cog"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              cancelChatStripCollapse();
+              expandChatFromStrip();
+              setSettingsVisible((v) => !v);
+            }}
+          >
+            <Icon name="cog" />
+          </span>
           <span className="ChatHoverStrip__ping" />
         </div>
       )}
@@ -161,19 +179,25 @@ export function Panel(props) {
         {isPopup && (
           <>
             <ResizeHandles allEdges target="tgui_panel_popup" />
-            <div className="PanelDragBar" onMouseDown={onPopupDrag} />
+            <div className="PanelDragBar" onPointerDown={startPopupMove} />
           </>
         )}
         <Stack fill vertical className="Panel__stack">
           <Stack.Item>
             <Section fitted className="Panel__header">
-              <Stack mr={1} align="center">
-                <Stack.Item grow>
-                  <ChatTabs />
-                </Stack.Item>
-                <Stack.Item>
-                  <PingIndicator />
-                </Stack.Item>
+              {/* Plain div: Stack only forwards a fixed allowlist of
+                  handlers, and onPointerDown is not among them */}
+              <div
+                onPointerDown={isOnMap ? onHeaderDrag : undefined}
+                style={isOnMap ? { cursor: 'grab' } : undefined}
+              >
+                <Stack mr={1} align="center">
+                  <Stack.Item grow>
+                    <ChatTabs />
+                  </Stack.Item>
+                  <Stack.Item>
+                    <PingIndicator />
+                  </Stack.Item>
                 <Stack.Item>
                   <Button
                     color="transparent"
@@ -228,6 +252,7 @@ export function Panel(props) {
                   />
                 </Stack.Item>
               </Stack>
+              </div>
             </Section>
           </Stack.Item>
           {audioVisible && (

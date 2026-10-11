@@ -33,3 +33,12 @@ export function saveChatRatio(): void {
     });
   });
 }
+
+/**
+ * Persists an explicit rect as the chat placement. Used after the
+ * collapsed strip is dragged: the control itself is only strip-sized
+ * then, so the remembered full rect is the one worth saving.
+ */
+export function saveChatRatioRect(ratio: ChatRatio): void {
+  storage.set(STORAGE_KEY, ratio);
+}

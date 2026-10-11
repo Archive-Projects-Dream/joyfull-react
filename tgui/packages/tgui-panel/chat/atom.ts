@@ -5,6 +5,8 @@ export const mainPage = createMainPage();
 
 export const versionAtom = atom(5);
 export const scrollTrackingAtom = atom(true);
+/** Top-corner chats render the log reversed (newest at the corner). */
+export const chatReversedAtom = atom(false);
 export const chatPagesAtom = atom([mainPage.id]);
 export const currentPageIdAtom = atom(mainPage.id);
 export const chatPagesRecordAtom = atom({
