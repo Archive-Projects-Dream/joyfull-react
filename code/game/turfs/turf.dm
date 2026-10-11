@@ -122,6 +122,11 @@ GLOBAL_LIST_EMPTY(station_turfs)
 /turf/New(loc, list/inherited_listen_lookup, list/inherited_signal_procs)
 	_listen_lookup = inherited_listen_lookup
 	_signal_procs = inherited_signal_procs
+	// Default virtual_z to our physical z, so virtual level comparisons
+	// (== virtual_z) behave exactly like classic z-level comparisons for
+	// turfs that are not part of a reserved virtual level.
+	if(!virtual_z)
+		virtual_z = z
 	. = ..(loc)
 
 /turf/vv_edit_var(var_name, new_value)

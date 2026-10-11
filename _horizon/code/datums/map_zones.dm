@@ -89,7 +89,11 @@
 	var/name = "Sub Map Zone"
 	var/relative_id
 	var/id
-	var/static/next_id = 0
+	/// Virtual level ids start above the physical z-range (BYOND max z is 255,
+	/// we leave a wide margin) so that virtual_z values of regular turfs
+	/// (which default to their physical z) can never collide with vlevel ids
+	/// in SSmapping.virtual_z_translation lookups.
+	var/static/next_id = 10000
 	/// Map zone that contains this virtual level
 	var/datum/map_zone/parent_map_zone
 	/// Z level which contains this virtual level
@@ -454,7 +458,9 @@
 		var/area/old_area = get_area(turf)
 		space_area.contents += turf
 		turf.change_area(old_area, space_area)
-		turf.virtual_z = 0
+		// Reset virtual_z to the physical z default ("not in a virtual level"),
+		// consistent with the /turf/New default.
+		turf.virtual_z = turf.z
 		CHECK_TICK
 
 	for(var/turf/turf as anything in block_turfs)

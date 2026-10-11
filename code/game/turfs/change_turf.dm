@@ -138,7 +138,7 @@ GLOBAL_LIST_INIT(blacklisted_automated_baseturfs, typecacheof(list(
 	new_turf.rcd_memory = old_rcd_memory
 	new_turf.explosion_throw_details = old_explosion_throw_details
 	new_turf.explosive_resistance += old_explosive_resistance
-	new_turf.virtual_z = old_virtual_z
+	new_turf.virtual_z = old_virtual_z || new_turf.virtual_z
 
 	lighting_corner_NE = old_lighting_corner_NE
 	lighting_corner_SE = old_lighting_corner_SE

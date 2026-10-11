@@ -79,6 +79,9 @@ GLOBAL_LIST_EMPTY(starlight)
 /turf/open/space/basic/New() //Do not convert to Initialize
 	SHOULD_CALL_PARENT(FALSE)
 	//This is used to optimize the map loader
+	// Keep the virtual_z default consistent with /turf/New (see turf.dm)
+	if(!virtual_z)
+		virtual_z = z
 	return
 
 /turf/open/space/Destroy()
