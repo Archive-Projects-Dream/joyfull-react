@@ -235,9 +235,11 @@ body.onmap {
   // everything that is not the log itself is dropped and every handle is
   // unreachable. The window stays mounted - its scroll position is what
   // the peek shows - and the messages fill the strip on their own.
+  // The command bar stays mounted under the log: the collapsed strip
+  // and the expanded window then end in the same log/command bar/marker
+  // stack, and expanding the chat moves nothing.
   &.chat-hover-collapsed {
     .Panel__header,
-    .CommandBar,
     .Notifications,
     .Chat__scrollButton,
     .ResizeHandle {
@@ -246,17 +248,6 @@ body.onmap {
 
     .Window {
       border-radius: 0;
-    }
-
-    // The edge marker overlays the strip's anchored edge; keep the log
-    // clear of it (top-corner chats get their inset from the chat-top
-    // rule above, in both states)
-    #chat-pane {
-      padding-bottom: 14px;
-    }
-
-    &.chat-top #chat-pane {
-      padding-bottom: 0;
     }
 
     // The peek shows the live tail of the log, not the fade cycle
@@ -268,6 +259,22 @@ body.onmap {
     &.chat-message-bg .ChatMessage {
       background: var(--frameless-backdrop);
       border-radius: 0;
+    }
+  }
+
+  // Strip mode keeps the marker bar in place between the collapsed and
+  // the expanded state, so nothing at the anchored edge ever shifts when
+  // the chat is hovered open
+  &.chat-stripmode {
+    .Window {
+      border-radius: 0;
+    }
+
+    // The marker overlays the bottom edge of the control; keep the
+    // command bar clear of it. Top-corner chats carry their marker on
+    // the top edge instead and need no such clearance
+    &:not(.chat-top) .CommandBar {
+      margin-bottom: 14px;
     }
   }
 }
@@ -325,23 +332,32 @@ html:has(body.onmap) {
   border-radius: 0 0 var(--border-radius-large) var(--border-radius-large);
 }
 
-// Settings entry point for a chat that has no header to put one in - a
-// top-corner frameless chat, or any chat while it is collapsed to the strip
-.ChatHoverStrip__cog {
-  margin-left: 4px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
+// The marker stays up in strip mode (any corner) and for top-corner
+// frameless chats (where it doubles as the titlebar), in both the
+// collapsed and the expanded state
+body.onmap.frameless.chat-stripmode .ChatHoverStrip,
+body.onmap.frameless.chat-top .ChatHoverStrip,
 body.chat-hover-collapsed .ChatHoverStrip {
   display: flex;
 }
 
-// Top-corner chats have no header once frameless - no tabs, no settings,
-// nothing to drag - so their marker keeps working as the handle even
-// while the chat is expanded
-body.onmap.frameless.chat-top .ChatHoverStrip {
-  display: flex;
+// Peek grip: drag it along the anchored edge to resize the strip the
+// chat collapses to. It only changes the visible area - the chat's full
+// rect is left alone
+.ChatHoverStrip__grip {
+  width: 28px;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.18);
+  cursor: ns-resize;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.38);
+  }
+
+  &:active {
+    cursor: ns-resize;
+  }
 }
 
 .ChatHoverStrip__ping {

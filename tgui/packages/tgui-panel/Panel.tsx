@@ -15,11 +15,15 @@ import { ChatPanel } from './chat/ChatPanel';
 import { ChatTabs } from './chat/ChatTabs';
 import {
   cancelChatStripCollapse,
+  collapseChatToStrip,
   expandChatFromStrip,
   isChatStripCollapsed,
+  requestChatStripExpand,
   scheduleChatStripCollapse,
   setChatStripEdge,
   setChatStripMode,
+  setStripChromeHovered,
+  startChatStripPeekResize,
 } from './chat/chat-hover-strip';
 import { useChatPersistence } from './chat/use-chat-persistence';
 import { useChatPlacement } from './chat/use-chat-placement';
@@ -66,6 +70,7 @@ export function Panel(props) {
         'frameless-visible',
         'chat-message-bg',
         'chat-top',
+        'chat-stripmode',
       );
 
     setChatStripEdge(chatTop);
@@ -81,6 +86,9 @@ export function Panel(props) {
     body.classList.add('frameless');
     body.classList.toggle('chat-message-bg', !!messageBg);
     body.classList.toggle('chat-top', chatTop);
+    // The marker bar stays put in strip mode, in both the collapsed and
+    // the expanded state, so hovering the chat open moves nothing
+    body.classList.toggle('chat-stripmode', hoverStrip);
     chatRenderer.setFrameless(true);
     // Closing a panel or turning frameless on with the mouse over the chat hid it,
     // and no mouseenter comes to show it again. The strip starts collapsed -
@@ -88,16 +96,30 @@ export function Panel(props) {
     // visible and clickable until they are closed.
     body.classList.toggle(
       'frameless-visible',
-      hoverStrip ? settingsVisible : body.matches(':hover') || settingsVisible,
+      hoverStrip
+        ? settingsVisible ||
+            (body.matches(':hover') && !isChatStripCollapsed())
+        : body.matches(':hover') || settingsVisible,
     );
+    // Settings were just closed with the pointer elsewhere: the strip is
+    // expanded but nothing will collapse it - no mouseleave is coming
+    if (hoverStrip && !settingsVisible && !body.matches(':hover')) {
+      collapseChatToStrip();
+    }
 
     const show = () => {
       const wasCollapsed = isChatStripCollapsed();
       if (hoverStrip) {
-        cancelChatStripCollapse();
-        expandChatFromStrip();
+        // Deferred while the pointer is on the strip's chrome, and gated
+        // while a TGUI window is squatting on the chat's rect
+        requestChatStripExpand();
+        if (wasCollapsed) {
+          // Chrome stays unpainted until the strip actually grows
+          return;
+        }
+      } else {
+        body.classList.add('frameless-visible');
       }
-      body.classList.add('frameless-visible');
       // Coming out of the strip means re-sticking to the newest message;
       // a chat that was merely faded (strip mode off) keeps wherever the
       // reader had scrolled to instead of yanking them back down
@@ -148,8 +170,13 @@ export function Panel(props) {
         <div
           className={`ChatHoverStrip${chatTop ? ' ChatHoverStrip--top' : ''}`}
           onMouseEnter={() => {
-            cancelChatStripCollapse();
-            expandChatFromStrip();
+            // The marker's own chrome must stay grabbable: hovering it
+            // parks the expand instead of snapping the chat open
+            setStripChromeHovered(true);
+            requestChatStripExpand();
+          }}
+          onMouseLeave={() => {
+            setStripChromeHovered(false);
           }}
           onClick={() => {
             cancelChatStripCollapse();
@@ -159,18 +186,14 @@ export function Panel(props) {
         >
           <Icon name={chatTop ? 'chevron-down' : 'chevron-up'} />
           <span className="ChatHoverStrip__label">Chat</span>
-          <span
-            className="ChatHoverStrip__cog"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
-              e.stopPropagation();
-              cancelChatStripCollapse();
-              expandChatFromStrip();
-              setSettingsVisible((v) => !v);
-            }}
-          >
-            <Icon name="cog" />
-          </span>
+          {hoverStrip && (
+            <span
+              className="ChatHoverStrip__grip"
+              title="Drag to resize the peek strip"
+              onPointerDown={startChatStripPeekResize}
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
           <span className="ChatHoverStrip__ping" />
         </div>
       )}
