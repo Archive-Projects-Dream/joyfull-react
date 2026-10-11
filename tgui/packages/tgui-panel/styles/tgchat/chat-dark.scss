@@ -341,23 +341,57 @@ body.chat-hover-collapsed .ChatHoverStrip {
   display: flex;
 }
 
-// Peek grip: drag it along the anchored edge to resize the strip the
-// chat collapses to. It only changes the visible area - the chat's full
-// rect is left alone
-.ChatHoverStrip__grip {
-  width: 28px;
-  height: 10px;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.18);
+// Border handle of the peek strip: it sits on the cut line itself - the
+// top edge of the collapsed strip for bottom corners, its bottom edge for
+// top ones - so dragging it moves that boundary with the pointer and
+// releasing it leaves it exactly where the drag stopped. It only ever
+// changes the visible area; the chat's full rect is left alone
+.ChatPeekEdge {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 14px;
+  align-items: center;
+  justify-content: center;
   cursor: ns-resize;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.38);
-  }
+  user-select: none;
+  z-index: 201;
+  // A hairline along the strip's cut edge marks where the chat was cropped
+  border-top: var(--border-thickness-tiny) solid rgba(255, 255, 255, 0.14);
 
   &:active {
     cursor: ns-resize;
   }
+}
+
+// A top-corner strip grows downward from the map's top edge, so its cut
+// line is the strip's bottom edge and the handle flips with it
+.ChatPeekEdge--top {
+  top: auto;
+  bottom: 0;
+  border-top: none;
+  border-bottom: var(--border-thickness-tiny) solid rgba(255, 255, 255, 0.14);
+}
+
+// The handle exists only while the chat is collapsed - expanded, there is
+// no cut edge to mark
+body.chat-hover-collapsed .ChatPeekEdge {
+  display: flex;
+}
+
+.ChatPeekEdge__pill {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+  transition: background 150ms ease;
+}
+
+.ChatPeekEdge:hover .ChatPeekEdge__pill {
+  background: rgba(255, 255, 255, 0.45);
 }
 
 .ChatHoverStrip__ping {

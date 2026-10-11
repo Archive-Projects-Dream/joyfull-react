@@ -35,14 +35,15 @@ const COLLAPSE_DELAY = 300;
 const SELECT_RETRY_DELAY = 500;
 const SELECT_MAX_RETRIES = 8;
 /** Hovering the strip chrome waits this long before expanding, so the
- * marker and the peek grip can be grabbed without the chat snapping
- * open under the pointer. */
+ * marker bar and the peek border handle can be grabbed without the chat
+ * snapping open under the pointer. */
 const EXPAND_DEFER = 140;
 
 const PEEK_HEIGHT_KEY = 'chat-peek-height';
 /** Height of the collapsed strip, in control pixels: marker + command
- * bar + a handful of log lines. The user resizes it with the grip on the
- * marker; until then this default is used. */
+ * bar + a handful of log lines. The user sets it by dragging the border
+ * handle that sits on the strip's cut edge itself; until then this
+ * default is used. */
 const DEFAULT_PEEK_HEIGHT = 140;
 const MIN_PEEK_HEIGHT = 100;
 
@@ -74,8 +75,8 @@ let paneObserver: ResizeObserver | null = null;
 let paneObserverNode: HTMLElement | null = null;
 
 // Deferred expand bookkeeping: while the pointer sits on the strip's own
-// chrome (marker bar, peek grip) the chat must stay collapsed so those
-// stay draggable
+// chrome (marker bar, peek border handle) the chat must stay collapsed so
+// those stay draggable
 let chromeHovered = false;
 let expandTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -363,8 +364,9 @@ export function scheduleChatStripCollapse(): void {
 /**
  * Expands the chat out of the strip on hover. The actual expansion is
  * deferred for a moment so the strip's own chrome (the marker bar, the
- * peek grip) can be grabbed without the chat snapping open under the
- * pointer - while that chrome is hovered the request is simply parked.
+ * peek border handle) can be grabbed without the chat snapping open
+ * under the pointer - while that chrome is hovered the request is simply
+ * parked.
  */
 export function requestChatStripExpand(): void {
   if (!mode) {
@@ -531,9 +533,13 @@ export function setChatStripDragging(value: boolean): void {
 }
 
 /**
- * Drags the peek strip's height with the grip on its marker bar. Only
- * the visible area changes - the chat's full rect is left exactly as it
- * was, so expanding afterwards still restores the same window.
+ * Drags the peek strip's border handle. The handle lives on the cut line
+ * itself - the top edge of the strip for bottom corners, its bottom edge
+ * for top ones - so the border simply follows the pointer for the whole
+ * drag and stays exactly where the pointer lets go of it; that level
+ * becomes the boundary the chat collapses to from then on. Only the
+ * visible area changes - the chat's full rect is left exactly as it was,
+ * so expanding afterwards still restores the same window.
  */
 export function startChatStripPeekResize(e: React.PointerEvent): void {
   if (!collapsed) {
@@ -545,7 +551,11 @@ export function startChatStripPeekResize(e: React.PointerEvent): void {
   setChatStripDragging(true);
   const target = e.currentTarget as HTMLElement;
   const { pointerId } = e;
-  const startMouseY = e.screenY * (window.devicePixelRatio ?? 1);
+  // Screen coordinates are stable for the whole drag (the control only
+  // ever moves its far edge while resizing), so every height is measured
+  // against this fixed origin - the border lands pixel-for-pixel where
+  // the pointer is, with no drift accumulating over the drag
+  const startScreenY = e.screenY;
   let startPosX = 0;
   let startPosY = 0;
   let startSizeH = 0;
@@ -553,10 +563,20 @@ export function startChatStripPeekResize(e: React.PointerEvent): void {
   let mapW = 0;
   let mapH = 0;
   let maxHeight = Infinity;
+  // Skin pixels per CSS pixel, calibrated from the control itself (its
+  // skin size against its CSS viewport) so the border tracks the pointer
+  // exactly no matter how the host scales the skin
+  let skinPerCss = window.devicePixelRatio ?? 1;
   let ready = false;
   let latest: PointerEvent | null = null;
   let finished = false;
   let appliedH = peekHeight;
+
+  const heightAt = (screenY: number): number => {
+    const dy = (screenY - startScreenY) * skinPerCss;
+    // Dragging away from the anchored edge grows the peek
+    return startSizeH + (stripAtTop ? dy : -dy);
+  };
 
   const applyHeight = (newH: number) => {
     if (!ready) {
@@ -564,6 +584,9 @@ export function startChatStripPeekResize(e: React.PointerEvent): void {
     }
     const h = Math.max(MIN_PEEK_HEIGHT, Math.min(newH, maxHeight));
     appliedH = h;
+    // The anchored edge never moves during the drag - the strip's top
+    // for top corners, its bottom for everyone else - so the border is
+    // the only thing that travels
     const stripBottom = startPosY + startSizeH;
     const y = stripAtTop ? startPosY : stripBottom - h;
     Byond.winset('browseroutput', {
@@ -581,9 +604,7 @@ export function startChatStripPeekResize(e: React.PointerEvent): void {
     }
     ev.preventDefault();
     latest = ev;
-    const dy = ev.screenY * (window.devicePixelRatio ?? 1) - startMouseY;
-    // Dragging away from the anchored edge grows the peek
-    applyHeight(startSizeH + (stripAtTop ? dy : -dy));
+    applyHeight(heightAt(ev.screenY));
   };
 
   const finish = (ev: PointerEvent) => {
@@ -592,9 +613,7 @@ export function startChatStripPeekResize(e: React.PointerEvent): void {
     }
     finished = true;
     if (latest) {
-      const dy =
-        latest.screenY * (window.devicePixelRatio ?? 1) - startMouseY;
-      applyHeight(startSizeH + (stripAtTop ? dy : -dy));
+      applyHeight(heightAt(latest.screenY));
     }
     target.removeEventListener('pointermove', handleMove);
     target.removeEventListener('pointerup', finish);
@@ -634,12 +653,17 @@ export function startChatStripPeekResize(e: React.PointerEvent): void {
     startWidth = browser.size.x;
     mapW = map.size.x;
     mapH = map.size.y;
+    // The control's own skin size against its CSS viewport is the exact
+    // CSS-to-skin scale; screen deltas arrive in CSS pixels
+    const cssH = window.innerHeight;
+    if (cssH > 0 && startSizeH > 0) {
+      skinPerCss = startSizeH / cssH;
+    }
     ready = true;
     // The peek never grows past the chat's own full rect
     maxHeight = fullRect ? Math.round(fullRect.h * mapH) : Infinity;
     if (latest) {
-      const dy = latest.screenY * (window.devicePixelRatio ?? 1) - startMouseY;
-      applyHeight(startSizeH + (stripAtTop ? dy : -dy));
+      applyHeight(heightAt(latest.screenY));
     }
   });
 }

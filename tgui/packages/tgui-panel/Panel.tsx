@@ -186,15 +186,28 @@ export function Panel(props) {
         >
           <Icon name={chatTop ? 'chevron-down' : 'chevron-up'} />
           <span className="ChatHoverStrip__label">Chat</span>
-          {hoverStrip && (
-            <span
-              className="ChatHoverStrip__grip"
-              title="Drag to resize the peek strip"
-              onPointerDown={startChatStripPeekResize}
-              onClick={(e) => e.stopPropagation()}
-            />
-          )}
           <span className="ChatHoverStrip__ping" />
+        </div>
+      )}
+      {/* The border handle sits on the cut line of the collapsed strip
+          itself - the edge where the chat was cropped - so dragging it
+          moves that boundary with the pointer and releasing it leaves it
+          right there. It is chrome like the marker: hovering it parks the
+          expand instead of snapping the chat open. */}
+      {isOnMap && hoverStrip && (
+        <div
+          className={`ChatPeekEdge${chatTop ? ' ChatPeekEdge--top' : ''}`}
+          title="Drag to set how much of the chat stays visible"
+          onMouseEnter={() => {
+            setStripChromeHovered(true);
+            requestChatStripExpand();
+          }}
+          onMouseLeave={() => {
+            setStripChromeHovered(false);
+          }}
+          onPointerDown={startChatStripPeekResize}
+        >
+          <span className="ChatPeekEdge__pill" />
         </div>
       )}
       <Pane theme={settings.theme} canSuspend={false}>
