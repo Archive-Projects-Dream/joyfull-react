@@ -1126,39 +1126,44 @@ ADMIN_VERB(load_away_mission, R_FUN, "Load Away Mission", "Load a specific away 
 	return vlevel
 
 /// Destroys a planet's Z-level tracking data.
-/// The Z-level itself remains in the world as an empty space level.
-/// This prevents the mapping system from trying to use stale references.
+/// The Z-level itself remains in the world as an empty space level (BYOND
+/// cannot shrink world.maxz), so the z stays registered in z_list but is
+/// reset to a neutral reserved state with no multiz linkage.
 /// Returns TRUE on success, FALSE if the Z-level doesn't exist.
 /datum/controller/subsystem/mapping/proc/destroy_planet_zlevel(datum/virtual_level/vlevel)
 	if(!vlevel)
 		return FALSE
 
 	var/z_value = vlevel.z_value
-	var/datum/space_level/planet_z = z_list[z_value]
+	if(!ISINRANGE(z_value, 1, length(z_list)))
+		log_world("MAPPING: No Z-level found for planet at z=[z_value]")
+		return FALSE
 
+	var/datum/space_level/planet_z = z_list[z_value]
 	if(!planet_z)
 		log_world("MAPPING: No Z-level found for planet at z=[z_value]")
 		return FALSE
 
-	// Remove from z_list and all tracking lists
-	z_list -= z_value
-	z_level_to_plane_offset -= z_value
-	z_level_to_lowest_plane_offset -= z_value
-	z_level_to_stack -= z_value
-	gravity_by_z_level -= z_value
+	// Strip the multiz linkage traits so plane tracking and multiz stepping
+	// stop treating this level as part of a stack, then rebuild the linkages.
+	planet_z.traits = list(ZTRAIT_RESERVED = TRUE)
+	generate_linkages_for_z_level(z_value)
+	calculate_z_level_gravity(z_value)
 
-	// Clean up plane tracking for levels below the removed z
-	for(var/i in 1 to world.maxz)
-		if(i < z_value)
-			continue
-		var/level = z_list[i]
-		if(!level)
+	// These lookup lists are positional (index == z), so entries must never be
+	// removed: cutting them shifts every z above and corrupts the whole
+	// mapping. Reset the values in place instead.
+	z_level_to_plane_offset[z_value] = 0
+	z_level_to_lowest_plane_offset[z_value] = 0
+	z_level_to_stack[z_value] = list(z_value)
+	gravity_by_z_level[z_value] = 0
+
+	// Drop this z from every other level's stack membership.
+	for(var/i in 1 to length(z_level_to_stack))
+		if(i == z_value)
 			continue
 		var/list/stack = z_level_to_stack[i]
-		if(stack)
-			for(var/j in 1 to stack.len)
-				if(stack[j] >= z_value)
-					stack[j] -= 1
+		stack -= z_value
 
-	log_world("MAPPING: Planet Z-level [planet_z.name] (z=[z_value]) tracking removed")
+	log_world("MAPPING: Planet Z-level [planet_z.name] (z=[z_value]) tracking reset")
 	return TRUE

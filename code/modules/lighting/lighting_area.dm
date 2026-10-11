@@ -49,12 +49,18 @@
 
 /area/proc/remove_base_lighting()
 	UnregisterSignal(SSdcs, COMSIG_STARLIGHT_COLOR_CHANGED)
+	UnregisterSignal(SSmapping, COMSIG_PLANE_OFFSET_INCREASE)
 	var/list/z_offsets = SSmapping.z_level_to_plane_offset
 	if(length(lighting_effects) > 1)
 		for(var/area_zlevel in 1 to get_highest_zlevel())
 			if(z_offsets[area_zlevel])
+				var/effect_index = z_offsets[area_zlevel] + 1
+				// The effects list may be shorter than the current plane offsets
+				// if this area was lit before a deeper z stack got loaded.
+				if(length(lighting_effects) < effect_index)
+					continue
 				for(var/turf/T as anything in get_turfs_by_zlevel(area_zlevel))
-					T.cut_overlay(lighting_effects[z_offsets[T.z] + 1])
+					T.cut_overlay(lighting_effects[effect_index])
 	cut_overlay(lighting_effects[1])
 	lighting_effects = null
 	area_has_base_lighting = FALSE
@@ -106,6 +112,28 @@
 				area_turf.luminosity = 1
 
 	area_has_base_lighting = TRUE
+	RegisterSignal(SSmapping, COMSIG_PLANE_OFFSET_INCREASE, PROC_REF(on_plane_offset_increase))
+
+/// Extends our lighting effects when the max plane offset grows (e.g. a
+/// multi-z planet stack loaded at runtime). The cached list was sized against
+/// the old depth and would otherwise index out of bounds on the deeper levels.
+/area/proc/on_plane_offset_increase(datum/source, old_max, new_max)
+	SIGNAL_HANDLER
+	if(!area_has_base_lighting)
+		return
+	for(var/offset in length(lighting_effects) to new_max)
+		var/mutable_appearance/light
+		if(base_lighting_color == COLOR_STARLIGHT)
+			light = new(GLOB.starlight_overlays[offset + 1])
+		else
+			light = mutable_appearance('icons/effects/alphacolors.dmi', "white")
+			light.color = base_lighting_color
+		light.layer = LIGHTING_PRIMARY_LAYER
+		light.blend_mode = BLEND_ADD
+		light.appearance_flags = RESET_TRANSFORM | RESET_ALPHA | RESET_COLOR
+		light.alpha = base_lighting_alpha
+		SET_PLANE_W_SCALAR(light, LIGHTING_PLANE, offset)
+		lighting_effects += light
 
 /area/proc/starlight_changed(datum/source, old_star, new_star)
 	var/mutable_appearance/old_star_effect = mutable_appearance('icons/effects/alphacolors.dmi', "white")

@@ -173,9 +173,11 @@
 	if(SSmapping.z_level_to_plane_offset[z])
 		var/index = SSmapping.z_level_to_plane_offset[z] + 1
 		//Inherit overlay of new area
-		if(old_area.lighting_effects)
+		// Areas lit before this z stack deepened may carry shorter effect
+		// lists, indexing those would run out of bounds.
+		if(old_area.lighting_effects && length(old_area.lighting_effects) >= index)
 			cut_overlay(old_area.lighting_effects[index])
-		if(new_area.lighting_effects)
+		if(new_area.lighting_effects && length(new_area.lighting_effects) >= index)
 			add_overlay(new_area.lighting_effects[index])
 
 	// Manage removing/adding starlight overlays, we'll inherit from the area so we can drop it if the area has it already

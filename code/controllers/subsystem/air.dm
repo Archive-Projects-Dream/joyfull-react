@@ -257,6 +257,10 @@ SUBSYSTEM_DEF(air)
 		var/goal = queue[currT]
 		queue.Cut(1,2)
 
+		// Hard-deleted turfs linger as null keys in the rebuild queue.
+		if(!currT)
+			continue
+
 		currT.immediate_calculate_adjacent_turfs()
 		if(goal == MAKE_ACTIVE)
 			add_to_active(currT)

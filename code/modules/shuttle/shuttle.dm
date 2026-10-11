@@ -174,7 +174,9 @@
 // Say that A in the absolute (rectangular) bounds of this shuttle or no.
 /obj/docking_port/proc/is_in_shuttle_bounds(atom/A)
 	var/turf/T = get_turf(A)
-	if(T.z != z)
+	// Atoms in nullspace (e.g. the orbital docker camera before it is moved
+	// into place) have no turf, bail out instead of reading null.z.
+	if(!T || T.z != z)
 		return FALSE
 	var/list/bounds = return_coords()
 	var/x0 = bounds[1]

@@ -203,11 +203,15 @@
 	var/last_share = our_air.last_share;\
 	max_share = max(last_share, max_share);\
 	if(last_share > MINIMUM_AIR_TO_SUSPEND){\
-		our_excited_group.reset_cooldowns();\
+		if(our_excited_group){\
+			our_excited_group.reset_cooldowns();\
+		}\
 		cached_ticker = 0;\
 		enemy_tile.significant_share_ticker = 0;\
 	} else if(last_share > MINIMUM_MOLES_DELTA_TO_MOVE) {\
-		our_excited_group.dismantle_cooldown = 0;\
+		if(our_excited_group){\
+			our_excited_group.dismantle_cooldown = 0;\
+		}\
 		cached_ticker = 0;\
 		enemy_tile.significant_share_ticker = 0;\
 	}
@@ -215,11 +219,15 @@
 #define LAST_SHARE_CHECK \
 	var/last_share = our_air.last_share;\
 	if(last_share > MINIMUM_AIR_TO_SUSPEND){\
-		our_excited_group.reset_cooldowns();\
+		if(our_excited_group){\
+			our_excited_group.reset_cooldowns();\
+		}\
 		cached_ticker = 0;\
 		enemy_tile.significant_share_ticker = 0;\
 	} else if(last_share > MINIMUM_MOLES_DELTA_TO_MOVE) {\
-		our_excited_group.dismantle_cooldown = 0;\
+		if(our_excited_group){\
+			our_excited_group.dismantle_cooldown = 0;\
+		}\
 		cached_ticker = 0;\
 		enemy_tile.significant_share_ticker = 0;\
 	}
@@ -229,20 +237,28 @@
 	var/last_share = our_air.last_share;\
 	max_share = max(last_share, max_share);\
 	if(last_share > MINIMUM_AIR_TO_SUSPEND){\
-		our_excited_group.reset_cooldowns();\
+		if(our_excited_group){\
+			our_excited_group.reset_cooldowns();\
+		}\
 		cached_ticker = 0;\
 	} else if(last_share > MINIMUM_MOLES_DELTA_TO_MOVE) {\
-		our_excited_group.dismantle_cooldown = 0;\
+		if(our_excited_group){\
+			our_excited_group.dismantle_cooldown = 0;\
+		}\
 		cached_ticker = 0;\
 	}
 #else
 #define PLANET_SHARE_CHECK \
 	var/last_share = our_air.last_share;\
 	if(last_share > MINIMUM_AIR_TO_SUSPEND){\
-		our_excited_group.reset_cooldowns();\
+		if(our_excited_group){\
+			our_excited_group.reset_cooldowns();\
+		}\
 		cached_ticker = 0;\
 	} else if(last_share > MINIMUM_MOLES_DELTA_TO_MOVE) {\
-		our_excited_group.dismantle_cooldown = 0;\
+		if(our_excited_group){\
+			our_excited_group.dismantle_cooldown = 0;\
+		}\
 		cached_ticker = 0;\
 	}
 #endif
@@ -272,6 +288,10 @@
 	#endif
 
 	for(var/turf/open/enemy_tile as anything in adjacent_turfs)
+		// Turfs swapped out mid-cycle by deferred map loads/unloads leave dead
+		// null keys behind until adjacency gets rebuilt, so skip them.
+		if(!enemy_tile)
+			continue
 		#ifdef UNIT_TESTS
 		if(!istype(enemy_tile))
 			stack_trace("closed turf inside of adjacent turfs")
@@ -346,6 +366,8 @@
 			PLANET_SHARE_CHECK
 
 	for(var/turf/open/enemy_tile as anything in share_end)
+		if(!enemy_tile)
+			continue
 		var/datum/gas_mixture/enemy_mix = enemy_tile.air
 		archive()
 		// We share 100% of our mix in this step. Let's jive
