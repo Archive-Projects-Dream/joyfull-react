@@ -64,7 +64,7 @@
 	if(progress == last_progress)
 		return
 	last_progress = progress
-	bar.icon_state = "[round(((progress / goal) * 100), 6.25)]"
+	bar.icon_state = "[round((progress / goal) * 16)]"
 
 /datum/world_progressbar/proc/end_progress()
 	if(last_progress != goal)
@@ -81,11 +81,10 @@
 
 /obj/effect/abstract/progbar
 	icon = '_horizon/icons/progessbar.dmi'
-	icon_state = "progress_bar"
+	icon_state = "16"
 	plane = GAME_PLANE
 	layer = FLY_LAYER
 	appearance_flags = APPEARANCE_UI | KEEP_APART
-	pixel_y = 32
 	alpha = 0
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	vis_flags = NONE //We don't want VIS_INHERIT_PLANE

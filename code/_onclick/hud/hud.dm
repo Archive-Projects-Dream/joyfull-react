@@ -435,11 +435,14 @@ GLOBAL_LIST_INIT(available_wide_icons, list(
 
 	for(var/hud_key in screen_objects)
 		var/atom/item = screen_objects[hud_key]
-		if (item?.icon == ui_style)
-		item.icon = new_ui_style
-
-		if(hud_key == HUD_KEY_ITEM_SLOT(ITEM_SLOT_BACK) || hud_key == HUD_KEY_ITEM_SLOT(ITEM_SLOT_BELT) || hud_key == HUD_KEY_ITEM_SLOT(ITEM_SLOT_SUITSTORE))
+		var/datum/inventory_slot/inv_slot = null
+		var/atom/movable/screen/inventory/inv_item = item
+		if (istype(inv_item) && inv_item.slot_id)
+			inv_slot = inventory_slots[inv_item.slot_id]
+		if (inv_slot?.uses_wide_icon)
 			item.icon = wide_icon
+		else if (item?.icon == ui_style)
+			item.icon = new_ui_style
 
 	ui_style = new_ui_style
 	build_hand_slots(update_hud = TRUE)

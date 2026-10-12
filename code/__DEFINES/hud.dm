@@ -217,12 +217,12 @@
 #define ui_xenobiodisplay "WEST:6,CENTER:-4"
 
 //Lower center, persistent menu
-#define ui_sstore1 "CENTER-5.5:10,SOUTH:5"
-#define ui_id "CENTER-4.5:12,SOUTH:5"
-#define ui_belt "CENTER-3.5:14,SOUTH:5"
-#define ui_back "CENTER-2.5:14,SOUTH:5"
-#define ui_storage1 "CENTER+1.5:18,SOUTH:5"
-#define ui_storage2 "CENTER+2.5:20,SOUTH:5"
+#define ui_sstore1 "CENTER-6:12,SOUTH:5"
+#define ui_id "CENTER+4:2,SOUTH:5"
+#define ui_belt "CENTER-4.5:14,SOUTH:5"
+#define ui_back "CENTER-3:14,SOUTH:5"
+#define ui_storage1 "CENTER+2:2,SOUTH:5"
+#define ui_storage2 "CENTER+3:2,SOUTH:5"
 #define ui_combo "CENTER+4:24,SOUTH+1:7" //combo meter for martial arts
 
 //Lower right, persistent menu
@@ -257,7 +257,7 @@
 
 //Middle right (status indicators)
 #define ui_healthdoll "EAST-1:28,CENTER-1:17" // [HORIZON-EDIT]
-#define ui_health "EAST-1:28,CENTER-2:19" // [HORIZON-EDIT]
+#define ui_health "EAST-1:28,CENTER-2:17" // [HORIZON-EDIT]
 #define ui_internal "EAST-1:28,CENTER+1:21"
 #define ui_mood "EAST-1:28,CENTER:21"
 #define ui_hunger "EAST-1:2,CENTER:21"
@@ -280,12 +280,12 @@
 #define ui_living_healthdoll "EAST-1:28,CENTER-1:15"
 
 //Humans
-#define ui_human_floor_changer "EAST-4:22,SOUTH:5"
-#define ui_human_crafting "EAST-3:24,SOUTH+1:7"
+#define ui_human_floor_changer "EAST-3:8,SOUTH:5"
+#define ui_human_crafting "EAST-3:25,SOUTH:5"
 #define ui_human_navigate "EAST-3:7,SOUTH+1:7"
-#define ui_human_language "EAST-3:7,SOUTH+1:24"
+#define ui_human_language "EAST-3:25,SOUTH:21"
 #define ui_human_area "EAST-3:24,SOUTH+1:24"
-#define ui_human_memories_menu "EAST-4:22,SOUTH+1:7"
+#define ui_human_memories_menu "EAST-3:25,SOUTH+1:7"
 
 //Drones
 #define ui_drone_drop "CENTER+1:18,SOUTH:5"
