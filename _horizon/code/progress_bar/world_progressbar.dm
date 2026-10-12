@@ -5,7 +5,11 @@
 /atom/movable/screen/progbar_container/Initialize(mapload, datum/hud/hud_owner)
 	if(hud_owner)
 		RegisterSignal(hud_owner.mymob, COMSIG_LIVING_CHANGENEXT_MOVE, PROC_REF(on_changenext))
+		if(hud_owner.progbar_icon)
+			icon = hud_owner.progbar_icon
 	. = ..()
+	if(hud_owner?.progbar_icon && progbar?.bar)
+		progbar.bar.icon = hud_owner.progbar_icon
 
 /datum/world_progressbar
 	///The progress bar visual element.
@@ -80,7 +84,8 @@
 #undef PROGRESSBAR_HEIGHT
 
 /obj/effect/abstract/progbar
-	icon = '_horizon/icons/progessbar.dmi'
+	// icon is set dynamically by /atom/movable/screen/progbar_container/Initialize
+	// based on the player's UI style (Atomic / Expanse / ...).
 	icon_state = "16"
 	plane = GAME_PLANE
 	layer = FLY_LAYER

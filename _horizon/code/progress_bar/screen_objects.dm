@@ -1,6 +1,5 @@
 /atom/movable/screen/progbar_container
 	name = "swing cooldown"
-	icon = '_horizon/icons/progessbar.dmi'
 	icon_state = "progress_bar"
 	screen_loc = "CENTER-1:0,SOUTH+1:5"
 	var/datum/world_progressbar/progbar

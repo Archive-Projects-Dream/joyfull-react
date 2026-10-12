@@ -16,11 +16,19 @@ GLOBAL_LIST_INIT(available_wide_icons, list(
 	"Expanse" = '_horizon/icons/screen_expanse_wide.dmi',
 ))
 
+GLOBAL_LIST_INIT(available_progbar_icons, list(
+	"Atomic" = '_horizon/icons/progessbar_atomic.dmi',
+	"Expanse" = '_horizon/icons/progessbar_expanse.dmi',
+))
+
 /proc/ui_style2icon(ui_style)
 	return GLOB.available_ui_styles[ui_style] || GLOB.available_ui_styles[GLOB.available_ui_styles[1]]
 
 /proc/ui_style2wide_icon(ui_style)
 	return GLOB.available_wide_icons[ui_style] || GLOB.available_wide_icons[GLOB.available_wide_icons[1]]
+
+/proc/ui_style2progbar_icon(ui_style)
+	return GLOB.available_progbar_icons[ui_style] || GLOB.available_progbar_icons[GLOB.available_progbar_icons[1]]
 
 /datum/hud
 	var/mob/mymob
@@ -68,6 +76,8 @@ GLOBAL_LIST_INIT(available_wide_icons, list(
 	var/ui_style = null
 	/// Current wide HUD icon file (48x32 format), shared by hands and wide inventory slots
 	var/wide_icon = null
+	/// Current swing-cooldown progress bar icon file (96x16), matched to ui_style
+	var/progbar_icon = null
 	/// Assoc list of all screen objects we hold by their key
 	var/list/atom/movable/screen/screen_objects = list()
 	/// List of screen objects by their screen group
@@ -94,6 +104,8 @@ GLOBAL_LIST_INIT(available_wide_icons, list(
 		ui_style = ui_style2icon(owner.client?.prefs?.read_preference(/datum/preference/choiced/ui_style))
 		// Set wide HUD icon based on UI style
 		wide_icon = ui_style2wide_icon(owner.client?.prefs?.read_preference(/datum/preference/choiced/ui_style))
+		// Set swing-cooldown progress bar icon based on UI style
+		progbar_icon = ui_style2progbar_icon(owner.client?.prefs?.read_preference(/datum/preference/choiced/ui_style))
 
 	add_screen_object(/atom/movable/screen/button_palette, HUD_MOB_TOGGLE_PALETTE)
 	add_screen_object(/atom/movable/screen/palette_scroll/down, HUD_MOB_PALETTE_DOWN)
@@ -434,6 +446,7 @@ GLOBAL_LIST_INIT(available_wide_icons, list(
 		return
 
 	wide_icon = ui_style2wide_icon(new_ui_style)
+	progbar_icon = ui_style2progbar_icon(new_ui_style)
 
 	for(var/hud_key in screen_objects)
 		var/atom/item = screen_objects[hud_key]
@@ -445,6 +458,11 @@ GLOBAL_LIST_INIT(available_wide_icons, list(
 			item.icon = wide_icon
 		else if (item?.icon == ui_style)
 			item.icon = new_ui_style
+
+	var/atom/movable/screen/progbar_container/progbar_obj = screen_objects[HUDKEY_MOB_USE_TIMER]
+	if(progbar_obj?.progbar?.bar)
+		progbar_obj.icon = progbar_icon
+		progbar_obj.progbar.bar.icon = progbar_icon
 
 	ui_style = new_ui_style
 	build_hand_slots(update_hud = TRUE)
