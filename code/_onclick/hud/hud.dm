@@ -7,11 +7,13 @@
 // The default UI style is the first one in the list
 GLOBAL_LIST_INIT(available_ui_styles, list(
 	"Atomic" = '_horizon/icons/screen_atomic.dmi',
+	"Expanse" = '_horizon/icons/screen_expanse.dmi',
 ))
 
 // Mapping of UI styles to their corresponding 48x32 wide HUD icons (hands, back, belt, suit storage)
 GLOBAL_LIST_INIT(available_wide_icons, list(
 	"Atomic" = '_horizon/icons/screen_atomic_wide.dmi',
+	"Expanse" = '_horizon/icons/screen_expanse_wide.dmi',
 ))
 
 /proc/ui_style2icon(ui_style)
