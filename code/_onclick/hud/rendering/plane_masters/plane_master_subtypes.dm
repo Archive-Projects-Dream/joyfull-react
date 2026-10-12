@@ -396,7 +396,7 @@
 
 /atom/movable/screen/plane_master/point/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
-	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE))
+	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_15_RENDER_TARGET, offset), flags = MASK_INVERSE))
 
 ///Contains all turf lighting
 /atom/movable/screen/plane_master/turf_lighting
@@ -468,7 +468,7 @@
 	// Blue channel is dedicated to specular, i.e. our bootleg implementation of shiny objects
 	// We map it onto alpha so we can use the mask plate in an alpha mask filter to cut out only the shiny bits
 	add_relay_to(GET_NEW_PLANE(RENDER_PLANE_SPECULAR_MASK, offset), relay_color = list(0,0,0,0, 0,0,0,0, 0,0,0,1, 0,0,0,0, 1,1,1,0))
-	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE))
+	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_15_RENDER_TARGET, offset), flags = MASK_INVERSE))
 
 /atom/movable/screen/plane_master/pipecrawl
 	name = "Pipecrawl"
@@ -640,7 +640,7 @@
 
 /atom/movable/screen/plane_master/above_floor/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
-	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE))
+	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_15_RENDER_TARGET, offset), flags = MASK_INVERSE))
 
 /atom/movable/screen/plane_master/rendering_plate/masked_game_hub
 	name = "Masked Game Hub"
@@ -662,7 +662,7 @@
 
 /atom/movable/screen/plane_master/rendering_plate/masked_game_hub/proc/update_wall_fov(mob/source)
 	SIGNAL_HANDLER
-	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE))
+	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_15_RENDER_TARGET, offset), flags = MASK_INVERSE))
 
 // MARK: Shadow-Planes
 /atom/movable/screen/plane_master/wall_fov
