@@ -6,32 +6,19 @@
 
 // The default UI style is the first one in the list
 GLOBAL_LIST_INIT(available_ui_styles, list(
-	"Midnight" = '_horizon/icons/ui/screen_midnight.dmi',
-	//"Retro" = 'icons/hud/screen_retro.dmi',
-	"Plasmafire" = 'icons/hud/screen_plasmafire.dmi',
-	"Slimecore" = 'icons/hud/screen_slimecore.dmi',
-	"Operative" = 'icons/hud/screen_operative.dmi',
-	//"Clockwork" = 'icons/hud/screen_clockwork.dmi',
-	"Glass" = 'icons/hud/screen_glass.dmi',
-	//"Trasen-Knox" = 'icons/hud/screen_trasenknox.dmi',
-	"Detective" = 'icons/hud/screen_detective.dmi',
+	"Atomic" = '_horizon/icons/screen_atomic.dmi',
 ))
 
-// Mapping of UI styles to their corresponding 48x32 hands icons
-GLOBAL_LIST_INIT(available_hands_icons, list(
-	"Midnight" = '_horizon/icons/hands_midnight.dmi',
-	"Plasmafire" = '_horizon/icons/hands_plasmafire.dmi',
-	"Slimecore" = '_horizon/icons/hands_slimecore.dmi',
-	"Operative" = '_horizon/icons/hands_operative.dmi',
-	"Glass" = '_horizon/icons/hands_glass.dmi',
-	"Detective" = '_horizon/icons/hands_detective.dmi',
+// Mapping of UI styles to their corresponding 48x32 wide HUD icons (hands, back, belt, suit storage)
+GLOBAL_LIST_INIT(available_wide_icons, list(
+	"Atomic" = '_horizon/icons/screen_atomic_wide.dmi',
 ))
 
 /proc/ui_style2icon(ui_style)
 	return GLOB.available_ui_styles[ui_style] || GLOB.available_ui_styles[GLOB.available_ui_styles[1]]
 
-/proc/ui_style2hands_icon(ui_style)
-	return GLOB.available_hands_icons[ui_style] || GLOB.available_hands_icons[GLOB.available_hands_icons[1]]
+/proc/ui_style2wide_icon(ui_style)
+	return GLOB.available_wide_icons[ui_style] || GLOB.available_wide_icons[GLOB.available_wide_icons[1]]
 
 /datum/hud
 	var/mob/mymob
@@ -77,8 +64,8 @@ GLOBAL_LIST_INIT(available_hands_icons, list(
 
 	/// Subtypes can override this to force a specific UI style
 	var/ui_style = null
-	/// Current hands icon file (48x32 format), matched to ui_style
-	var/hands_icon = null
+	/// Current wide HUD icon file (48x32 format), shared by hands and wide inventory slots
+	var/wide_icon = null
 	/// Assoc list of all screen objects we hold by their key
 	var/list/atom/movable/screen/screen_objects = list()
 	/// List of screen objects by their screen group
@@ -103,8 +90,8 @@ GLOBAL_LIST_INIT(available_hands_icons, list(
 	if (!ui_style)
 		// will fall back to the default if any of these are null
 		ui_style = ui_style2icon(owner.client?.prefs?.read_preference(/datum/preference/choiced/ui_style))
-		// Set hands icon based on UI style (TODO: Переделать в верх)
-		hands_icon = ui_style2hands_icon(owner.client?.prefs?.read_preference(/datum/preference/choiced/ui_style))
+		// Set wide HUD icon based on UI style
+		wide_icon = ui_style2wide_icon(owner.client?.prefs?.read_preference(/datum/preference/choiced/ui_style))
 
 	add_screen_object(/atom/movable/screen/button_palette, HUD_MOB_TOGGLE_PALETTE)
 	add_screen_object(/atom/movable/screen/palette_scroll/down, HUD_MOB_PALETTE_DOWN)
@@ -444,13 +431,15 @@ GLOBAL_LIST_INIT(available_hands_icons, list(
 	if (initial(ui_style) || ui_style == new_ui_style)
 		return
 
-	// Update hands icon to match new UI style
-	hands_icon = ui_style2hands_icon(new_ui_style)
+	wide_icon = ui_style2wide_icon(new_ui_style)
 
 	for(var/hud_key in screen_objects)
 		var/atom/item = screen_objects[hud_key]
 		if (item?.icon == ui_style)
-			item.icon = new_ui_style
+		item.icon = new_ui_style
+
+		if(hud_key == HUD_KEY_ITEM_SLOT(ITEM_SLOT_BACK) || hud_key == HUD_KEY_ITEM_SLOT(ITEM_SLOT_BELT) || hud_key == HUD_KEY_ITEM_SLOT(ITEM_SLOT_SUITSTORE))
+			item.icon = wide_icon
 
 	ui_style = new_ui_style
 	build_hand_slots(update_hud = TRUE)
@@ -478,7 +467,7 @@ GLOBAL_LIST_INIT(available_hands_icons, list(
 		remove_screen_object(hand, FALSE)
 
 	for(var/i in 1 to length(mymob.held_items))
-		var/atom/movable/screen/inventory/hand/hand_box = add_screen_object(/atom/movable/screen/inventory/hand, HUD_KEY_HAND_SLOT(i), HUD_GROUP_STATIC, hands_icon, ui_hand_position(i))
+		var/atom/movable/screen/inventory/hand/hand_box = add_screen_object(/atom/movable/screen/inventory/hand, HUD_KEY_HAND_SLOT(i), HUD_GROUP_STATIC, wide_icon, ui_hand_position(i))
 		hand_box.name = mymob.get_held_index_name(i)
 		hand_box.icon_state = "hand_[mymob.held_index_to_dir(i)]"
 		hand_box.held_index = i

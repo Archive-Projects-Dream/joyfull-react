@@ -64,7 +64,7 @@
 	if(progress == last_progress)
 		return
 	last_progress = progress
-	bar.icon_state = "prog_bar_[round(((progress / goal) * 100), 2)]"
+	bar.icon_state = "[round(((progress / goal) * 100), 6.25)]"
 
 /datum/world_progressbar/proc/end_progress()
 	if(last_progress != goal)
@@ -74,14 +74,14 @@
 		animate(bar, alpha = 0, time = PROGRESSBAR_ANIMATION_TIME)
 		QDEL_IN(src, PROGRESSBAR_ANIMATION_TIME)
 	else
-		bar.icon_state = "prog_bar_ready"
+		bar.icon_state = "16"
 
 #undef PROGRESSBAR_ANIMATION_TIME
 #undef PROGRESSBAR_HEIGHT
 
 /obj/effect/abstract/progbar
 	icon = '_horizon/icons/progessbar.dmi'
-	icon_state = "prog_bar_ready"
+	icon_state = "progress_bar"
 	plane = GAME_PLANE
 	layer = FLY_LAYER
 	appearance_flags = APPEARANCE_UI | KEEP_APART
