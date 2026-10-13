@@ -82,6 +82,9 @@
 	icon = '_horizon/icons/obj/doors/airlocks/blastdoor.dmi'
 	smoothing_groups = SMOOTH_GROUP_AIRLOCK
 
+/obj/machinery/door/poddoor/shutters
+	icon = '_horizon/icons/obj/doors/airlocks/shutters.dmi'
+
 /obj/machinery/door/airlock/public
 	icon = '_horizon/icons/obj/doors/airlocks/station2/glass.dmi'
 	overlays_file = '_horizon/icons/obj/doors/airlocks/station2/overlays.dmi'
