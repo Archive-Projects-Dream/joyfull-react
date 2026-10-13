@@ -31,7 +31,6 @@ export type ServerState = {
   transparent: boolean;
   characterName: string | null;
   preferenceIssues: string[];
-  serverName: string | null;
   backgroundUrl: string | null;
   videoUrl: string | null;
   previewUrls: Record<string, string> | null;
@@ -456,7 +455,6 @@ function StatsPanel({ ss, pregame }: { ss: ServerState; pregame: boolean }) {
     <div className="lobby__stats-holder">
       <div className="lobby__stats">
         <div className="lobby__panel-title">Server</div>
-        <StatsRow label="Server" value={ss.serverName} />
         <StatsRow label="Map" value={ss.mapName} />
         <StatsRow label="Status" value={GAME_PHASE_TEXT[ss.gamePhase]} />
         {pregame ? (

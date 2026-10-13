@@ -312,7 +312,6 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		// [HORIZON-ADD] html lobby extras
 		"characterName" = get_character_name(),
 		"preferenceIssues" = get_preference_issues(),
-		"serverName" = CONFIG_GET(string/servername),
 		"backgroundUrl" = get_lobby_background_url(),
 		"videoUrl" = get_lobby_video_url(),
 		"previewUrls" = preview_urls,
