@@ -40,7 +40,7 @@
 		"Grand9K_Pixel.ttf" = file("interface/fonts/Grand9K_Pixel.ttf"),
 	)
 	parents = list(
-		"fonts.css" = file("tgui/packages/tgui-escape-menu/styles/fonts.css"),
+		"escape-fonts.css" = file("tgui/packages/tgui-escape-menu/styles/fonts.css"),
 	)
 
 /datum/asset/simple/namespaced/escape_menu_sounds
@@ -69,7 +69,7 @@
 		"chakrapetch-bold.ttf" = file("tgui/packages/chakrapetch/chakrapetch-bold.ttf"),
 	)
 	parents = list(
-		"fonts.css" = file("tgui/packages/tgui-lobby/styles/fonts.css"),
+		"lobby-fonts.css" = file("tgui/packages/tgui-lobby/styles/fonts.css"),
 	)
 
 

@@ -314,7 +314,6 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"canPoll" = !is_guest_key(client?.key) && SSdbcore.Connect(),
 		"transparent" = GLOB.lobby_background_transparent,
 		// [HORIZON-ADD] html-lobby-v2 additions
-		"language" = get_language(),
 		"characterName" = get_character_name(),
 		"preferenceIssues" = get_preference_issues(),
 		"serverName" = CONFIG_GET(string/server),
@@ -463,35 +462,10 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 			if(SSticker.current_state == GAME_STATE_STARTUP)
 				to_chat(player, span_admin("The server is still setting up, but the round will be started as soon as possible."))
 		// [HORIZON-ADD] html-lobby-v2 actions
-		if("set_language")
-			var/language = payload["language"]
-			if(!(language in list(LOBBY_LANGUAGE_ENGLISH, LOBBY_LANGUAGE_RUSSIAN)))
-				return TRUE
-			var/datum/preference/language_preference = GLOB.preference_entries_by_key[/datum/preference/choiced/lobby_language]
-			var/datum/preferences/current_prefs = client?.prefs
-			if(!language_preference || !current_prefs)
-				return TRUE
-			// update_preference() is gated by is_accessible(), which depends on the
-			// preferences window being open on the game tab, so write the value
-			// directly instead - the lobby has to work from any state.
-			if(current_prefs.write_preference(language_preference, language))
-				current_prefs.save_preferences()
-				language_preference.apply_to_client(client, language)
 		if("refresh_preview")
 			INVOKE_ASYNC(src, PROC_REF(update_character_preview), TRUE)
 
 	return TRUE
-
-/// [HORIZON-ADD] Returns the lobby language preference for this client
-/datum/lobby_menu/proc/get_language()
-	var/language = client?.prefs?.read_preference(/datum/preference/choiced/lobby_language)
-	return language || LOBBY_LANGUAGE_ENGLISH
-
-/// [HORIZON-ADD] Called when the lobby language preference is written; refreshes the lobby text
-/datum/lobby_menu/proc/on_language_changed(value)
-	if(!client || !window)
-		return
-	send_init()
 
 /// [HORIZON-ADD] Returns the current character's name for the welcome line
 /datum/lobby_menu/proc/get_character_name()
@@ -502,7 +476,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	var/mob/dead/new_player/player = client?.mob
 	if(!istype(player))
 		return list()
-	return player.get_preference_issues(get_language())
+	return player.get_preference_issues()
 
 /**
  * [HORIZON-ADD] Renders the current character into four directional preview

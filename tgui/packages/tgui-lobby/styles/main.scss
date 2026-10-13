@@ -60,8 +60,8 @@ img {
   --button-color-transparent: hsla(220, 50%, 40%, 0.75);
   --progress-bar-background: hsla(0, 0%, 0%, 0.5);
   --tooltip-background-lightness: 25;
-  --lobby-accent: hsl(120, 55%, 45%);
-  --lobby-accent-dim: hsla(120, 55%, 45%, 0.45);
+  --lobby-accent: hsl(0, 35%, 60%);
+  --lobby-accent-dim: hsla(355, 35%, 60%, 0.45);
 }
 
 // Neutral fallback theme (original weyland_yutani)
@@ -72,8 +72,8 @@ img {
   --button-color-transparent: hsla(213, 30%, 40%, 0.75);
   --progress-bar-background: hsla(0, 0%, 0%, 0.5);
   --tooltip-background-lightness: 25;
-  --lobby-accent: hsl(213, 35%, 60%);
-  --lobby-accent-dim: hsla(213, 35%, 60%, 0.45);
+  --lobby-accent: hsl(355, 35%, 60%);
+  --lobby-accent-dim: hsla(347, 35%, 60%, 0.45);
 }
 
 // Entry animations, only while the CRT theme is active
@@ -335,11 +335,6 @@ img {
   justify-content: space-between;
   gap: 0.5em;
   line-height: 1.6;
-}
-
-.lobby__stats-label {
-  color: var(--lobby-accent, hsl(120, 55%, 45%));
-  white-space: nowrap;
 }
 
 .LobbyScreen--plain .lobby__stats-label {

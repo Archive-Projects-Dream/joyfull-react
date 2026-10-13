@@ -8,7 +8,6 @@ import {
   Section,
   Stack,
 } from 'tgui-core/components';
-import { type LobbyLanguage, makeT, playerCountLabel } from './i18n';
 import {
   loadSoundsEnabled,
   playLoadSound,
@@ -36,7 +35,6 @@ export type ServerState = {
   canPoll: boolean;
   transparent: boolean;
   // html-lobby-v2 additions
-  language: LobbyLanguage;
   characterName: string | null;
   preferenceIssues: string[];
   previewUrls: Record<string, string> | null;
@@ -72,25 +70,7 @@ const PREVIEW_IMG_RETRIES = 12;
 /** Delay between preview image retries */
 const PREVIEW_IMG_RETRY_MS = 400;
 
-const GAME_PHASE_STATUS = {
-  startup: 'statusStartup',
-  pregame: 'statusPregame',
-  setting_up: 'statusSettingUp',
-  playing: 'statusPlaying',
-  postgame: 'statusPostgame',
-} as const;
-
 const PREVIEW_DIRS = ['south', 'east', 'north', 'west'] as const;
-
-function countdownLabel(countdown: string, t: ReturnType<typeof makeT>) {
-  if (countdown === 'DELAYED') {
-    return t('delayed');
-  }
-  if (countdown === 'SOON') {
-    return t('soon');
-  }
-  return countdown;
-}
 
 export function LobbyMenu() {
   const [ss, setSs] = useState<ServerState | null>(null);
@@ -219,8 +199,6 @@ export function LobbyMenu() {
     return null;
   }
 
-  const language = ss.language || 'english';
-  const t = makeT(language);
   const crtTheme = !themeDisabled;
   const crtFilter = crtTheme && !filterDisabled;
   const pregame = ss.gamePhase === 'pregame' || ss.gamePhase === 'startup';
@@ -278,16 +256,14 @@ export function LobbyMenu() {
               <Stack.Item>
                 <Stack vertical align="center" className="welcomeHolder">
                   <Stack.Item>
-                    <Box className="typeEffect styledText">
-                      {t('welcome')}
-                    </Box>
+                    <Box className="typeEffect styledText">Welcome,</Box>
                   </Stack.Item>
                   <Stack.Item>
                     <Box
                       className="typeEffect styledText"
                       style={{ animationDelay: '1.4s' }}
                     >
-                      {ss.characterName || t('guest')}
+                      {ss.characterName || 'Guest'}
                     </Box>
                   </Stack.Item>
                 </Stack>
@@ -303,7 +279,7 @@ export function LobbyMenu() {
                 disabled={!ss.assetsReady}
                 onClick={() => sendAction('character_setup')}
               >
-                {t('setupCharacter')}
+                Setup Character
               </LobbyButton>
 
               <LobbyButton
@@ -312,7 +288,7 @@ export function LobbyMenu() {
                 disabled={!ss.assetsReady}
                 onClick={() => sendAction('settings')}
               >
-                {t('gamePreferences')}
+                Game Preferences
               </LobbyButton>
 
               <LobbyButton
@@ -320,7 +296,7 @@ export function LobbyMenu() {
                 icon="check-to-slot"
                 onClick={() => sendAction('crew_manifest')}
               >
-                {t('crewManifest')}
+                Crew Manifest
               </LobbyButton>
 
               <LobbyButton
@@ -328,7 +304,7 @@ export function LobbyMenu() {
                 icon="list-ul"
                 onClick={() => sendAction('changelog')}
               >
-                {t('changelog')}
+                Changelog
               </LobbyButton>
 
               <Stack.Item>
@@ -341,7 +317,7 @@ export function LobbyMenu() {
                 disabled={!ss.canObserve}
                 onClick={() => sendAction('observe')}
               >
-                {t('observe')}
+                Observe
               </LobbyButton>
 
               {ss.canReady && (
@@ -351,7 +327,7 @@ export function LobbyMenu() {
                   selected={ss.isReady}
                   onClick={() => sendAction('ready_toggle')}
                 >
-                  {ss.isReady ? t('unready') : t('ready')}
+                  {ss.isReady ? 'Unready' : 'Ready'}
                 </LobbyButton>
               )}
 
@@ -361,7 +337,7 @@ export function LobbyMenu() {
                   icon="users"
                   onClick={() => sendAction('join')}
                 >
-                  {t('joinGame')}
+                  Join Game
                 </LobbyButton>
               )}
 
@@ -369,10 +345,10 @@ export function LobbyMenu() {
                 <LobbyButton
                   delay={typingDelay(7)}
                   icon="clipboard-list"
-                  badge={ss.hasNewPoll ? t('newPoll') : null}
+                  badge={ss.hasNewPoll ? 'New poll!' : null}
                   onClick={() => sendAction('poll')}
                 >
-                  {t('polls')}
+                  Polls
                 </LobbyButton>
               )}
 
@@ -382,7 +358,7 @@ export function LobbyMenu() {
                   icon="forward"
                   onClick={() => sendAction('start_now')}
                 >
-                  {t('startNow')}
+                  Start Now
                 </LobbyButton>
               )}
 
@@ -393,7 +369,7 @@ export function LobbyMenu() {
                   icon="eye-slash"
                   onClick={() => setHidden(true)}
                 >
-                  <span className="styledText">{t('hideMenu')}</span>
+                  <span className="styledText">Hide Menu</span>
                 </Button>
               </Stack.Item>
             </Stack>
@@ -401,16 +377,14 @@ export function LobbyMenu() {
         </Stack.Item>
       </Stack>
 
-      <CharacterPreview ss={ss} t={t} />
+      <CharacterPreview ss={ss} />
 
-      <StatsPanel ss={ss} t={t} language={language} pregame={pregame} />
+      <StatsPanel ss={ss} pregame={pregame} />
 
       <PreferenceIssues issues={ss.preferenceIssues} />
 
       <LobbySettings
         ss={ss}
-        t={t}
-        language={language}
         filterDisabled={filterDisabled}
         setFilterDisabled={setFilterDisabled}
         themeDisabled={themeDisabled}
@@ -423,8 +397,6 @@ export function LobbyMenu() {
     </div>
   );
 }
-
-type TFunc = ReturnType<typeof makeT>;
 
 function LobbyButton(props: {
   delay: string;
@@ -458,7 +430,7 @@ function LobbyButton(props: {
 }
 
 /** Character preview with client-side direction cycling */
-function CharacterPreview({ ss, t }: { ss: ServerState; t: TFunc }) {
+function CharacterPreview({ ss }: { ss: ServerState }) {
   const [dirIndex, setDirIndex] = useState(0);
   const [imgRetry, setImgRetry] = useState(0);
 
@@ -477,7 +449,7 @@ function CharacterPreview({ ss, t }: { ss: ServerState; t: TFunc }) {
 
   return (
     <div className="lobby__preview">
-      <div className="lobby__panel-title">{t('previewTitle')}</div>
+      <div className="lobby__panel-title">Character</div>
       <div className="lobby__preview-body">
         {url && (
           <img
@@ -510,7 +482,7 @@ function CharacterPreview({ ss, t }: { ss: ServerState; t: TFunc }) {
               setDirIndex((dirIndex + 1) % PREVIEW_DIRS.length);
             }}
           >
-            {t('rotate')}
+            Rotate
           </Button>
         </Stack.Item>
         <Stack.Item grow>
@@ -523,7 +495,7 @@ function CharacterPreview({ ss, t }: { ss: ServerState; t: TFunc }) {
               sendAction('refresh_preview');
             }}
           >
-            {t('refresh')}
+            Refresh
           </Button>
         </Stack.Item>
       </Stack>
@@ -543,37 +515,36 @@ function StatsRow({ label, value }: { label: string; value: string | null }) {
 /** Round/server statistics panel on the right edge */
 function StatsPanel({
   ss,
-  t,
-  language,
   pregame,
 }: {
   ss: ServerState;
-  t: TFunc;
-  language: LobbyLanguage;
   pregame: boolean;
 }) {
-  const statusKey = GAME_PHASE_STATUS[ss.gamePhase];
+  const statusText = {
+    startup: 'Starting up',
+    pregame: 'Pre-game',
+    setting_up: 'Setting up',
+    playing: 'Round in progress',
+    postgame: 'Round ended',
+  }[ss.gamePhase];
   return (
     <div className="lobby__stats">
-      <div className="lobby__panel-title">{t('statsTitle')}</div>
-      <StatsRow label={t('statsServer')} value={ss.serverName} />
-      <StatsRow label={t('statsMap')} value={ss.mapName} />
-      <StatsRow label={t('statsStatus')} value={t(statusKey)} />
+      <div className="lobby__panel-title">Server</div>
+      <StatsRow label="Server" value={ss.serverName} />
+      <StatsRow label="Map" value={ss.mapName} />
+      <StatsRow label="Status" value={statusText} />
       {pregame ? (
-        <StatsRow
-          label={t('statsTimeLeft')}
-          value={countdownLabel(ss.countdown, t)}
-        />
+        <StatsRow label="Time left" value={ss.countdown} />
       ) : (
-        <StatsRow label={t('statsShiftTime')} value={ss.shiftTime} />
+        <StatsRow label="Shift time" value={ss.shiftTime} />
       )}
       <StatsRow
-        label={t('statsPlayers')}
-        value={playerCountLabel(language, ss.playerCount)}
+        label="Players"
+        value={`${ss.playerCount} player${ss.playerCount !== 1 ? 's' : ''}`}
       />
-      <StatsRow label={t('statsReady')} value={String(ss.readyCount)} />
+      <StatsRow label="Ready" value={String(ss.readyCount)} />
       <StatsRow
-        label={t('statsAdmins')}
+        label="Admins"
         value={`${ss.adminReadyCount} / ${ss.adminCount}`}
       />
     </div>
@@ -601,8 +572,6 @@ function PreferenceIssues({ issues }: { issues: string[] }) {
 /** Settings button (bottom right) and its popup */
 function LobbySettings({
   ss,
-  t,
-  language,
   filterDisabled,
   setFilterDisabled,
   themeDisabled,
@@ -613,8 +582,6 @@ function LobbySettings({
   setSoundsOn,
 }: {
   ss: ServerState;
-  t: TFunc;
-  language: LobbyLanguage;
   filterDisabled: boolean;
   setFilterDisabled: (value: boolean) => void;
   themeDisabled: boolean;
@@ -640,9 +607,7 @@ function LobbySettings({
             playSelectSound();
             setOpen(true);
           }}
-        >
-          {language === 'russian' ? 'RU' : 'EN'}
-        </Button>
+        />
       </Box>
 
       {open && (
@@ -650,7 +615,7 @@ function LobbySettings({
           <Section
             p={3}
             className="settingsModal"
-            title={t('settingsTitle')}
+            title="Lobby Settings"
             buttons={
               <Button
                 icon="xmark"
@@ -662,28 +627,7 @@ function LobbySettings({
             }
           >
             <Stack vertical>
-              <SettingsRow label={t('languageLabel')}>
-                <Button
-                  selected={language === 'english'}
-                  onClick={() => {
-                    playSelectSound();
-                    sendAction('set_language', { language: 'english' });
-                  }}
-                >
-                  English
-                </Button>
-                <Button
-                  selected={language === 'russian'}
-                  onClick={() => {
-                    playSelectSound();
-                    sendAction('set_language', { language: 'russian' });
-                  }}
-                >
-                  Русский
-                </Button>
-              </SettingsRow>
-
-              <SettingsRow label={t('crtLabel')}>
+              <SettingsRow label="CRT filter">
                 <Button
                   selected={!filterDisabled}
                   onClick={() => {
@@ -693,11 +637,11 @@ function LobbySettings({
                     storage.set(FILTER_STORAGE_KEY, next);
                   }}
                 >
-                  {filterDisabled ? t('off') : t('on')}
+                  {filterDisabled ? 'Off' : 'On'}
                 </Button>
               </SettingsRow>
 
-              <SettingsRow label={t('themeLabel')}>
+              <SettingsRow label="CRT theme">
                 <Button
                   selected={!themeDisabled}
                   onClick={() => {
@@ -707,11 +651,11 @@ function LobbySettings({
                     storage.set(THEME_STORAGE_KEY, next);
                   }}
                 >
-                  {themeDisabled ? t('off') : t('on')}
+                  {themeDisabled ? 'Off' : 'On'}
                 </Button>
               </SettingsRow>
 
-              <SettingsRow label={t('soundsLabel')}>
+              <SettingsRow label="Interface sounds">
                 <Button
                   selected={soundsOn}
                   onClick={() => {
@@ -723,12 +667,12 @@ function LobbySettings({
                     }
                   }}
                 >
-                  {soundsOn ? t('on') : t('off')}
+                  {soundsOn ? 'On' : 'Off'}
                 </Button>
               </SettingsRow>
 
               {!!ss.videoUrl && (
-                <SettingsRow label={t('videoLabel')}>
+                <SettingsRow label="Video background">
                   <Button
                     selected={videoEnabled}
                     onClick={() => {
@@ -738,7 +682,7 @@ function LobbySettings({
                       storage.set(VIDEO_STORAGE_KEY, next);
                     }}
                   >
-                    {videoEnabled ? t('on') : t('off')}
+                    {videoEnabled ? 'On' : 'Off'}
                   </Button>
                 </SettingsRow>
               )}
@@ -751,7 +695,7 @@ function LobbySettings({
                     setOpen(false);
                   }}
                 >
-                  {t('closeLabel')}
+                  Close
                 </Button>
               </Stack.Item>
             </Stack>

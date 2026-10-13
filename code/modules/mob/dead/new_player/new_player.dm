@@ -348,16 +348,13 @@
 
 /// [HORIZON-ADD] Returns lobby-facing warnings about the player's current preference setup.
 /// Shown in the HTML lobby so players can notice problems before readying up.
-/mob/dead/new_player/proc/get_preference_issues(language)
+/mob/dead/new_player/proc/get_preference_issues()
 	var/list/issues = list()
 	if(!client?.prefs)
 		return issues
 	var/datum/preferences/prefs = client.prefs
 	if(prefs.job_preferences.len == 0 && prefs.read_preference(/datum/preference/choiced/jobless_role) == RETURNTOLOBBY)
-		if(language == LOBBY_LANGUAGE_RUSSIAN)
-			issues += "У вас не выбрано ни одной профессии, при этом включён возврат в лобби, если профессия недоступна. Вы не получите никакой роли в начале раунда — обновите настройки профессий."
-		else
-			issues += "You have no jobs enabled, along with return to lobby if job is unavailable. This makes you ineligible for any round start role, please update your job preferences."
+		issues += "You have no jobs enabled, along with return to lobby if job is unavailable. This makes you ineligible for any round start role, please update your job preferences."
 	return issues
 
 /**
