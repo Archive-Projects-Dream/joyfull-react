@@ -32,63 +32,74 @@ img {
   image-rendering: pixelated;
 }
 
-// ---------------------------------------------------------------------------
-// Original CRT lobby style (restored from the HorizonLobby design)
-// ---------------------------------------------------------------------------
-
 .LobbyScreen {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
+  background-color: #000;
   font-family: 'ChakraPetch', 'Segoe UI', sans-serif;
   font-weight: bold;
   line-height: 100%;
   font-size: large;
-  background-color: #000;
+  animation: lobby-fade-in 0.5s ease-out both;
 
   &--transparent {
     background: transparent !important;
   }
-}
 
-// CRT terminal theme (original crtlobby)
-.LobbyScreen--crt {
-  --color-base: hsl(220, 30%, 15%);
-  --color-primary: hsl(220, 50%, 40%);
-  --secondary-lightness-adjustment: 6.33;
-  --button-color-transparent: hsla(220, 50%, 40%, 0.75);
-  --progress-bar-background: hsla(0, 0%, 0%, 0.5);
-  --tooltip-background-lightness: 25;
-  --lobby-accent: hsl(0, 35%, 60%);
-  --lobby-accent-dim: hsla(355, 35%, 60%, 0.45);
-}
-
-// Neutral fallback theme (original weyland_yutani)
-.LobbyScreen--plain {
-  --color-base: hsl(213, 30%, 20%);
-  --color-primary: hsl(213, 30%, 40%);
-  --secondary-lightness-adjustment: 6.33;
-  --button-color-transparent: hsla(213, 30%, 40%, 0.75);
-  --progress-bar-background: hsla(0, 0%, 0%, 0.5);
-  --tooltip-background-lightness: 25;
-  --lobby-accent: hsl(355, 35%, 60%);
-  --lobby-accent-dim: hsla(347, 35%, 60%, 0.45);
-}
-
-// Entry animations, only while the CRT theme is active
-.LobbyScreen.crtTheme {
-  &.filterEnabled {
-    box-shadow: 0 0 15px;
+  .Button__content .Icon {
+    vertical-align: middle;
+    margin-bottom: 3px;
   }
+}
 
+// Blue palette
+.LobbyScreen--blue {
+  --lobby-accent: hsl(207, 60%, 62%);
+  --lobby-accent-bright: hsl(203, 80%, 78%);
+  --lobby-accent-dim: hsla(207, 60%, 62%, 0.45);
+  --lobby-accent-faint: hsla(207, 60%, 62%, 0.12);
+  --lobby-panel-bg: hsla(215, 55%, 7%, 0.72);
+  --lobby-panel-border: hsla(207, 55%, 55%, 0.4);
+  --lobby-panel-glow: hsla(207, 70%, 60%, 0.35);
+  --lobby-scanline-tint: hsla(207, 100%, 70%, 0.05);
+  --lobby-vignette: hsla(220, 60%, 3%, 0.9);
+  --color-base: hsl(215, 40%, 16%);
+  --color-primary: hsl(207, 50%, 42%);
+  --button-color-transparent: hsla(207, 50%, 42%, 0.75);
+  --progress-bar-background: hsla(0, 0%, 0%, 0.5);
+  --secondary-lightness-adjustment: 6.33;
+  --tooltip-background-lightness: 25;
+}
+
+// Orange palette
+.LobbyScreen--orange {
+  --lobby-accent: hsl(30, 65%, 60%);
+  --lobby-accent-bright: hsl(35, 85%, 76%);
+  --lobby-accent-dim: hsla(30, 65%, 60%, 0.45);
+  --lobby-accent-faint: hsla(30, 65%, 60%, 0.12);
+  --lobby-panel-bg: hsla(25, 50%, 7%, 0.72);
+  --lobby-panel-border: hsla(30, 60%, 55%, 0.4);
+  --lobby-panel-glow: hsla(30, 75%, 58%, 0.35);
+  --lobby-scanline-tint: hsla(30, 100%, 68%, 0.05);
+  --lobby-vignette: hsla(25, 60%, 3%, 0.9);
+  --color-base: hsl(25, 35%, 16%);
+  --color-primary: hsl(30, 45%, 42%);
+  --button-color-transparent: hsla(30, 45%, 42%, 0.75);
+  --progress-bar-background: hsla(0, 0%, 0%, 0.5);
+  --secondary-lightness-adjustment: 6.33;
+  --tooltip-background-lightness: 25;
+}
+
+.LobbyScreen {
   .typeEffect {
     overflow: hidden;
     white-space: nowrap;
     width: 0;
+    text-align: center;
     animation: typing 1s steps(20, end) forwards;
     animation-delay: 1.3s;
-    text-align: center;
   }
 
   .buttonEffect {
@@ -99,15 +110,15 @@ img {
   }
 
   .dividerEffect {
+    width: 0;
     animation: typing 1s steps(20, end) forwards;
     animation-delay: 1.5s;
-    width: 0;
   }
 
   .sectionLoad {
     animation: section-loading 1s forwards;
-    box-shadow: 0 0 15px;
-    background-color: hsla(120, 100%, 3%, 0.7);
+    box-shadow: 0 0 15px var(--lobby-panel-glow);
+    background-color: var(--lobby-panel-bg);
   }
 
   .bgLoad {
@@ -115,100 +126,82 @@ img {
     animation: bg-load 10s forwards;
     animation-delay: 5s;
   }
+}
 
-  @keyframes bg-load {
-    from {
+@keyframes bg-load {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes section-loading {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  to {
+    clip-path: inset(-20px);
+  }
+}
+
+.LobbyScreen.filterEnabled {
+  box-shadow: 0 0 15px var(--lobby-panel-glow);
+
+  .crt {
+    &::before {
+      content: ' ';
+      display: block;
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(hsla(0, 0%, 0%, 0) 50%, hsla(0, 0%, 0%, 0.25) 50%),
+        linear-gradient(
+          90deg,
+          var(--lobby-scanline-tint),
+          transparent,
+          var(--lobby-scanline-tint)
+        );
+      background-size:
+        100% 8px,
+        6px 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    &::after {
+      content: ' ';
+      display: block;
+      position: absolute;
+      inset: 0;
+      background: hsla(0, 0%, 0%, 0.1);
       opacity: 0;
+      z-index: 2;
+      pointer-events: none;
     }
-    to {
-      opacity: 1;
-    }
-  }
 
-  @keyframes typing {
-    from {
-      width: 0;
-    }
-    to {
-      width: 100%;
-    }
-  }
-
-  @keyframes section-loading {
-    from {
-      transform: scaleY(0);
-    }
-    to {
-      transform: scaleY(1);
-    }
-  }
-
-  // The classic scanline / phosphor overlay
-  &.filterEnabled {
-    .crt {
-      &::before {
-        content: ' ';
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background:
-          linear-gradient(hsla(0, 6%, 7%, 0) 50%, hsla(0, 0%, 0%, 0.25) 50%),
-          linear-gradient(
-            90deg,
-            hsla(0, 100%, 50%, 0.06),
-            hsla(120, 100%, 50%, 0.02),
-            hsla(240, 100%, 50%, 0.06)
-          );
-        z-index: 2;
-        background-size:
-          100% 8px,
-          6px 100%;
-        pointer-events: none;
-      }
-
-      &::after {
-        content: ' ';
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background: hsla(0, 6%, 7%, 0.1);
-        opacity: 0;
-        z-index: 2;
-        pointer-events: none;
-      }
-
-      @supports (not (-webkit-hyphens: none)) and (not (-moz-appearance: none)) {
-        box-shadow: 0 0 500px 25px hsla(0, 0%, 0%, 0.9) inset;
-      }
+    @supports (not (-webkit-hyphens: none)) and (not (-moz-appearance: none)) {
+      box-shadow: 0 0 500px 25px var(--lobby-vignette) inset;
     }
   }
 }
 
-// Plain theme section styling (original weyland_yutani look)
-.LobbyScreen--plain {
-  .sectionLoad {
-    border: 3px solid hsl(213, 30%, 31%);
-    background-color: hsla(0, 0%, 0%, 0.7);
-  }
-
-  .dividerEffect {
-    border-color: hsl(213, 30%, 31%);
-  }
-}
-
-// Background layers
 .bgBackground {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   z-index: 0;
   background-position: center;
   background-size: cover;
@@ -217,8 +210,7 @@ img {
 
 .bgVideo {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   z-index: 1;
@@ -228,20 +220,9 @@ img {
 
 .crt {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   z-index: 2;
   pointer-events: none;
-}
-
-// Menu section and buttons
-.LobbyScreen {
-  .Button__content .Icon {
-    vertical-align: middle;
-    margin-bottom: 3px;
-  }
 }
 
 .welcomeHolder {
@@ -252,7 +233,7 @@ img {
 .dividerEffect {
   border-style: solid;
   border-width: 1px;
-  border-color: var(--lobby-accent-dim, hsla(120, 55%, 45%, 0.45));
+  border-color: var(--lobby-accent-dim);
 }
 
 .styledText {
@@ -265,7 +246,7 @@ img {
 
   .badgeNotification {
     margin-left: 0.5em;
-    color: var(--lobby-accent, hsl(120, 55%, 45%));
+    color: var(--lobby-accent-bright);
     font-size: 0.75em;
   }
 }
@@ -278,7 +259,14 @@ img {
   z-index: 60;
 }
 
-// Preference warnings (left column, bottom)
+.lobby__panel-title {
+  color: var(--lobby-accent);
+  font-size: 1em;
+  border-bottom: 1px solid var(--lobby-accent-dim);
+  padding-bottom: 0.25em;
+  margin-bottom: 0.4em;
+}
+
 .messageHolder {
   position: absolute;
   left: 3px;
@@ -300,34 +288,26 @@ img {
   }
 }
 
-// Shared panel look for the v2 side panels
-.lobby__panel-title {
-  color: var(--lobby-accent, hsl(120, 55%, 45%));
-  font-size: 1em;
-  border-bottom: 1px solid var(--lobby-accent-dim, hsla(120, 55%, 45%, 0.45));
-  padding-bottom: 0.25em;
-  margin-bottom: 0.4em;
-}
-
-// Statistics panel (right edge)
-.lobby__stats {
+.lobby__stats-holder {
   position: absolute;
   right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
   z-index: 3;
+  pointer-events: none;
+}
+
+.lobby__stats {
   width: 250px;
   max-width: 30vw;
   padding: 0.6em 0.75em;
   box-sizing: border-box;
-  background-color: hsla(120, 100%, 3%, 0.7);
-  border: 1px solid var(--lobby-accent-dim, hsla(120, 55%, 45%, 0.45));
+  background-color: var(--lobby-panel-bg);
+  border: 1px solid var(--lobby-panel-border);
   font-size: 0.8em;
-}
-
-.LobbyScreen--plain .lobby__stats {
-  background-color: hsla(0, 0%, 0%, 0.7);
-  border-color: hsl(213, 30%, 31%);
+  pointer-events: auto;
 }
 
 .lobby__stats-row {
@@ -337,19 +317,18 @@ img {
   line-height: 1.6;
 }
 
-.LobbyScreen--plain .lobby__stats-label {
-  color: hsl(213, 35%, 70%);
+.lobby__stats-label {
+  color: var(--lobby-accent);
 }
 
 .lobby__stats-value {
-  color: #ffffff;
+  color: var(--color-white);
   text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-// Character preview (left edge)
 .lobby__preview {
   position: absolute;
   left: 12px;
@@ -358,14 +337,9 @@ img {
   width: 170px;
   padding: 0.5em;
   box-sizing: border-box;
-  background-color: hsla(120, 100%, 3%, 0.7);
-  border: 1px solid var(--lobby-accent-dim, hsla(120, 55%, 45%, 0.45));
+  background-color: var(--lobby-panel-bg);
+  border: 1px solid var(--lobby-panel-border);
   font-size: 0.8em;
-}
-
-.LobbyScreen--plain .lobby__preview {
-  background-color: hsla(0, 0%, 0%, 0.7);
-  border-color: hsl(213, 30%, 31%);
 }
 
 .lobby__preview-body {
@@ -375,8 +349,8 @@ img {
   height: 128px;
   background: radial-gradient(
     ellipse at center,
-    hsla(120, 55%, 45%, 0.12) 0%,
-    hsla(0, 0%, 0%, 0) 75%
+    var(--lobby-accent-faint) 0%,
+    transparent 75%
   );
 }
 
@@ -390,7 +364,6 @@ img {
   margin-top: 0.4em;
 }
 
-// Settings button and modal
 .settingsHolder {
   z-index: 60;
 }
@@ -400,15 +373,10 @@ img {
   max-width: 90vw;
 
   .settingsLabel {
-    color: var(--lobby-accent, hsl(120, 55%, 45%));
+    color: var(--lobby-accent);
   }
 }
 
-.LobbyScreen--plain .settingsModal .settingsLabel {
-  color: hsl(213, 35%, 70%);
-}
-
-// Disable entry animation delays once everything has played once
 .noAnimation {
   .typeEffect,
   .buttonEffect,
@@ -419,34 +387,9 @@ img {
   }
 }
 
-// Fade the lobby out when the player enters the game.
-// The page backdrop (--lobby-bg) is made transparent at the same time by
-// the fadeOut handler, so the fading lobby cross-fades into the live game
-// view rendered behind the see-through browser element.
 .lobbyFadeOut {
-  animation: lobby-fade-out 0.5s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+  animation: lobby-fade-out 0.8s ease-in both;
   pointer-events: none;
-}
-
-// Fade the lobby back in when it is re-shown after being in the game
-// (returning to the lobby, respawning) instead of popping into existence.
-.lobbyFadeIn {
-  animation: lobby-fade-in 0.4s cubic-bezier(0.2, 0, 0.4, 1);
-  pointer-events: none;
-}
-
-@keyframes lobby-fade-out {
-  from {
-    opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
-  }
-
-  to {
-    opacity: 0;
-    transform: scale(0.96);
-    filter: blur(8px);
-  }
 }
 
 @keyframes lobby-fade-in {
@@ -456,5 +399,15 @@ img {
 
   to {
     opacity: 1;
+  }
+}
+
+@keyframes lobby-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
   }
 }

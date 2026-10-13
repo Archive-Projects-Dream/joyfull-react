@@ -1,18 +1,13 @@
 import { storage } from 'common/storage';
 import { assetMap } from './assets';
 
-/// Whether interface sounds are allowed to play, persisted client-side
-let soundsEnabled = true;
+const SOUNDS_STORAGE_KEY = 'lobby-sounds-enabled';
 
-export const SOUNDS_STORAGE_KEY = 'lobby-sounds-enabled';
+let soundsEnabled = true;
 
 export function setSoundsEnabled(enabled: boolean) {
   soundsEnabled = enabled;
   storage.set(SOUNDS_STORAGE_KEY, enabled);
-}
-
-export function areSoundsEnabled() {
-  return soundsEnabled;
 }
 
 export function loadSoundsEnabled(): Promise<boolean> {
@@ -23,9 +18,7 @@ export function loadSoundsEnabled(): Promise<boolean> {
 }
 
 function playOneShot(name: string, volume = 0.6) {
-  if (!soundsEnabled) {
-    return;
-  }
+  if (!soundsEnabled) return;
   const url = assetMap[name];
   if (!url) return;
   const audio = new Audio(url);
@@ -37,7 +30,6 @@ export function playSelectSound() {
   playOneShot('ui_select1.ogg');
 }
 
-/// The ambient lobby load jingle, played once when the lobby opens
 export function playLoadSound() {
   playOneShot('load.mp3', 0.5);
 }

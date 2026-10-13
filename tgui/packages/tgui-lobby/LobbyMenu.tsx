@@ -1,13 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { classes } from 'tgui-core/react';
+import { type MouseEvent, type ReactNode, useEffect, useRef, useState } from 'react';
 import { storage } from 'common/storage';
-import {
-  Box,
-  Button,
-  Modal,
-  Section,
-  Stack,
-} from 'tgui-core/components';
+import { Box, Button, Modal, Section, Stack } from 'tgui-core/components';
+import { classes } from 'tgui-core/react';
+
 import {
   loadSoundsEnabled,
   playLoadSound,
@@ -34,86 +29,62 @@ export type ServerState = {
   hasNewPoll: boolean;
   canPoll: boolean;
   transparent: boolean;
-  // html-lobby-v2 additions
   characterName: string | null;
   preferenceIssues: string[];
-  previewUrls: Record<string, string> | null;
-  videoUrl: string | null;
-  backgroundUrl: string | null;
   serverName: string | null;
+  backgroundUrl: string | null;
+  videoUrl: string | null;
+  previewUrls: Record<string, string> | null;
+};
+
+type LobbyTheme = 'blue' | 'orange';
+
+const FILTER_STORAGE_KEY = 'lobby-filter-disabled';
+const THEME_STORAGE_KEY = 'lobby-theme';
+const VIDEO_STORAGE_KEY = 'lobby-video-enabled';
+
+const ANIMATION_DISABLE_MS = 10_000;
+const LOAD_SOUND_DELAY_MS = 250;
+const PREVIEW_DIRS = ['south', 'east', 'north', 'west'] as const;
+const PREVIEW_IMG_RETRIES = 12;
+const PREVIEW_IMG_RETRY_MS = 400;
+
+const GAME_PHASE_TEXT: Record<ServerState['gamePhase'], string> = {
+  startup: 'Starting up',
+  pregame: 'Pre-game',
+  setting_up: 'Setting up',
+  playing: 'Round in progress',
+  postgame: 'Round ended',
 };
 
 function sendAction(action: string, payload?: Record<string, unknown>) {
   Byond.sendMessage('action', { action, ...payload });
 }
 
-/** Client-side setting persistence keys (kept from the original lobby) */
-const FILTER_STORAGE_KEY = 'lobby-filter-disabled';
-const THEME_STORAGE_KEY = 'lobby-theme-disabled';
-const VIDEO_STORAGE_KEY = 'lobby-video-enabled';
-
-/** After this long, entry animations stop replaying on re-renders */
-const ANIMATION_DISABLE_MS = 10000;
-
-/** Delay before the lobby load jingle, mirrors the original lobby */
-const LOAD_SOUND_DELAY_MS = 250;
-
-/** Duration of the fade-back-in animation when the lobby is re-shown */
-const LOBBY_FADE_IN_MS = 400;
-
-/** How long to wait before re-asking the server for the character preview */
-const PREVIEW_REREQUEST_MS = [2500, 6000] as const;
-
-/** Retries for a preview image whose asset is still in transit */
-const PREVIEW_IMG_RETRIES = 12;
-
-/** Delay between preview image retries */
-const PREVIEW_IMG_RETRY_MS = 400;
-
-const PREVIEW_DIRS = ['south', 'east', 'north', 'west'] as const;
+/** Paints the page backdrop; the browser element behind it is made see-through by the server when needed */
+function applyBackdrop(transparent: boolean) {
+  const background = transparent ? 'transparent' : '#000';
+  document.documentElement.style.setProperty('--lobby-bg', background);
+  document.documentElement.style.backgroundColor = background;
+  document.body.style.backgroundColor = background;
+}
 
 export function LobbyMenu() {
   const [ss, setSs] = useState<ServerState | null>(null);
   const [fadingOut, setFadingOut] = useState(false);
-  const [fadingIn, setFadingIn] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const [animationsDisabled, setAnimationsDisabled] = useState(false);
+  const [theme, setTheme] = useState<LobbyTheme | undefined>();
   const [filterDisabled, setFilterDisabled] = useState<boolean | undefined>();
-  const [themeDisabled, setThemeDisabled] = useState<boolean | undefined>();
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [soundsOn, setSoundsOn] = useState(true);
+  const [hidden, setHidden] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  /** Set once the server has played a fade-out on us (leaving the lobby) */
-  const hadFadeOut = useRef(false);
-  /** Latest preview urls, read by the delayed re-request timers */
-  const previewUrlsRef = useRef<Record<string, string> | null>(null);
 
   useEffect(() => {
     Byond.subscribeTo('init', (payload: ServerState) => {
       setSs(payload);
-      // The lobby browser persists in the skin while the player is in the
-      // game, unlike the old setup where it was torn down and recreated.
-      // The server re-sends init whenever the lobby is shown again
-      // (returning to the lobby, respawning), so undo the fade-out that
-      // was applied on leaving - otherwise the finished fade-out animation
-      // keeps the whole lobby at opacity 0 and the screen stays black.
       setFadingOut(false);
-      setHidden(false);
-      // Restore the page backdrop for the current mode - the previous
-      // fade-out dropped it so the game could show through the cross-fade.
-      const bg = payload.transparent ? 'transparent' : '#000';
-      document.documentElement.style.setProperty('--lobby-bg', bg);
-      document.documentElement.style.backgroundColor = bg;
-      document.body.style.backgroundColor = bg;
-      // Coming back from a fade-out (returning to the lobby, respawning) -
-      // fade the menu back in instead of popping it into existence.
-      if (hadFadeOut.current) {
-        hadFadeOut.current = false;
-        setFadingIn(true);
-        setTimeout(() => setFadingIn(false), LOBBY_FADE_IN_MS + 100);
-      }
-      // The pane may have been hidden for a long time; nudge the
-      // background video to make sure it is still playing.
+      applyBackdrop(!!payload.transparent);
       videoRef.current?.play()?.catch(() => {});
     });
 
@@ -123,53 +94,30 @@ export function LobbyMenu() {
       );
     });
 
-    // The server hides the browser shortly after this message. Dropping the
-    // opaque backdrop at the same time lets the fading lobby cross-fade into
-    // the live game view behind the (now see-through) browser element.
+    // The server makes the browser element see-through right after this, so
+    // dropping the page backdrop at the same time cross-fades into the game
     Byond.subscribeTo('fadeOut', () => {
       setFadingOut(true);
-      hadFadeOut.current = true;
-      document.documentElement.style.setProperty('--lobby-bg', 'transparent');
-      document.documentElement.style.backgroundColor = 'transparent';
-      document.body.style.backgroundColor = 'transparent';
+      applyBackdrop(true);
     });
 
-    // The template-level "ready" fires before React has subscribed, so ask
-    // for a fresh state once we are actually mounted. If the character
-    // preview is still missing later, ask again - its render may have
-    // finished after our first init, or the update got lost in transit
-    // (which used to leave the preview blank until a manual reload).
-    const reRequestState = () => Byond.sendMessage('ready');
-    reRequestState();
-    const timers = PREVIEW_REREQUEST_MS.map((delay) =>
-      setTimeout(() => {
-        if (!previewUrlsRef.current) {
-          reRequestState();
-        }
-      }, delay),
-    );
-
-    return () => timers.forEach((timer) => clearTimeout(timer));
+    Byond.sendMessage('ready');
   }, []);
 
   useEffect(() => {
+    storage.get(FILTER_STORAGE_KEY).then((val) => setFilterDisabled(!!val));
     storage
-      .get(FILTER_STORAGE_KEY)
-      .then((val) => setFilterDisabled(!!val));
-
-    storage.get(THEME_STORAGE_KEY).then((val) => setThemeDisabled(!!val));
-
+      .get(THEME_STORAGE_KEY)
+      .then((val) => setTheme(val === 'orange' ? 'orange' : 'blue'));
     storage.get(VIDEO_STORAGE_KEY).then((val) => {
       setVideoEnabled(val === undefined || val === null ? true : !!val);
     });
-
     loadSoundsEnabled().then((enabled) => {
       setSoundsOn(enabled);
       if (enabled) {
         setTimeout(() => playLoadSound(), LOAD_SOUND_DELAY_MS);
       }
     });
-
     const timer = setTimeout(
       () => setAnimationsDisabled(true),
       ANIMATION_DISABLE_MS,
@@ -178,29 +126,14 @@ export function LobbyMenu() {
   }, []);
 
   useEffect(() => {
-    const bg = ss?.transparent ? 'transparent' : '#000';
-    document.documentElement.style.setProperty('--lobby-bg', bg);
-    document.documentElement.style.backgroundColor = bg;
-    document.body.style.backgroundColor = bg;
-  }, [ss?.transparent]);
-
-  // Track the latest preview urls for the delayed re-request timers above
-  useEffect(() => {
-    previewUrlsRef.current = ss?.previewUrls ?? null;
-  }, [ss?.previewUrls]);
-
-  // (Re)start playback whenever the video element (re)mounts or its
-  // source changes - autoplay attributes alone are not reliable for that.
-  useEffect(() => {
     videoRef.current?.play()?.catch(() => {});
   }, [ss?.videoUrl, videoEnabled, ss?.transparent]);
 
-  if (!ss || themeDisabled === undefined || filterDisabled === undefined) {
+  if (!ss || theme === undefined || filterDisabled === undefined) {
     return null;
   }
 
-  const crtTheme = !themeDisabled;
-  const crtFilter = crtTheme && !filterDisabled;
+  const crtFilter = !filterDisabled;
   const pregame = ss.gamePhase === 'pregame' || ss.gamePhase === 'startup';
   const typingDelay = (index: number) =>
     animationsDisabled ? '0s' : `${1.5 + index * 0.2}s`;
@@ -209,12 +142,10 @@ export function LobbyMenu() {
     <div
       className={classes([
         'LobbyScreen',
-        crtTheme ? 'LobbyScreen--crt' : 'LobbyScreen--plain',
-        crtTheme && 'crtTheme',
+        `LobbyScreen--${theme}`,
         crtFilter && 'filterEnabled',
         animationsDisabled && 'noAnimation',
         fadingOut && 'lobbyFadeOut',
-        fadingIn && 'lobbyFadeIn',
         ss.transparent && 'LobbyScreen--transparent',
       ])}
     >
@@ -238,12 +169,6 @@ export function LobbyMenu() {
       )}
 
       {crtFilter && !ss.transparent && <div className="crt" />}
-
-      {hidden && (
-        <Box position="absolute" top="10px" left="10px" className="floating">
-          <Button icon="check" onClick={() => setHidden(false)} />
-        </Box>
-      )}
 
       <Stack vertical height="100%" justify="space-around" align="center">
         <Stack.Item>
@@ -320,7 +245,7 @@ export function LobbyMenu() {
                 Observe
               </LobbyButton>
 
-              {ss.canReady && (
+              {!!ss.canReady && (
                 <LobbyButton
                   delay={typingDelay(6)}
                   icon={ss.isReady ? 'check' : 'xmark'}
@@ -331,7 +256,7 @@ export function LobbyMenu() {
                 </LobbyButton>
               )}
 
-              {!ss.canReady && ss.canJoin && (
+              {!ss.canReady && !!ss.canJoin && (
                 <LobbyButton
                   delay={typingDelay(6)}
                   icon="users"
@@ -367,7 +292,10 @@ export function LobbyMenu() {
                   fluid
                   className="hideButton"
                   icon="eye-slash"
-                  onClick={() => setHidden(true)}
+                  onClick={() => {
+                    playSelectSound();
+                    setHidden(true);
+                  }}
                 >
                   <span className="styledText">Hide Menu</span>
                 </Button>
@@ -376,6 +304,18 @@ export function LobbyMenu() {
           </Section>
         </Stack.Item>
       </Stack>
+
+      {hidden && (
+        <Box position="absolute" top="10px" left="10px" className="floating">
+          <Button
+            icon="check"
+            onClick={() => {
+              playSelectSound();
+              setHidden(false);
+            }}
+          />
+        </Box>
+      )}
 
       <CharacterPreview ss={ss} />
 
@@ -387,8 +327,8 @@ export function LobbyMenu() {
         ss={ss}
         filterDisabled={filterDisabled}
         setFilterDisabled={setFilterDisabled}
-        themeDisabled={themeDisabled}
-        setThemeDisabled={setThemeDisabled}
+        theme={theme}
+        setTheme={setTheme}
         videoEnabled={videoEnabled}
         setVideoEnabled={setVideoEnabled}
         soundsOn={soundsOn}
@@ -404,8 +344,8 @@ function LobbyButton(props: {
   selected?: boolean;
   disabled?: boolean;
   badge?: string | null;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  children: React.ReactNode;
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
+  children: ReactNode;
 }) {
   const { delay, icon, selected, disabled, badge, onClick, children } = props;
   return (
@@ -417,7 +357,9 @@ function LobbyButton(props: {
         selected={selected}
         disabled={disabled}
         onClick={(e) => {
-          if (disabled) return;
+          if (disabled) {
+            return;
+          }
           playSelectSound();
           onClick?.(e);
         }}
@@ -435,15 +377,14 @@ function CharacterPreview({ ss }: { ss: ServerState }) {
   const [imgRetry, setImgRetry] = useState(0);
 
   const urls = ss.previewUrls;
-  const dir = PREVIEW_DIRS[dirIndex];
+  const dir = PREVIEW_DIRS[dirIndex % PREVIEW_DIRS.length];
   const url = urls ? (urls[dir] ?? Object.values(urls)[0]) : null;
 
-  // A new set of urls resets the retry counter
   useEffect(() => {
     setImgRetry(0);
   }, [url]);
 
-  if (!urls) {
+  if (!urls || !url) {
     return null;
   }
 
@@ -451,25 +392,22 @@ function CharacterPreview({ ss }: { ss: ServerState }) {
     <div className="lobby__preview">
       <div className="lobby__panel-title">Character</div>
       <div className="lobby__preview-body">
-        {url && (
-          <img
-            key={`${url}-${imgRetry}`}
-            className="lobby__preview-img"
-            src={url}
-            alt=""
-            onError={() => {
-              // The asset can still be in transit right after login; a
-              // failed load never retries on its own, so remount the img
-              // until the file arrives in the client cache.
-              if (imgRetry < PREVIEW_IMG_RETRIES) {
-                setTimeout(
-                  () => setImgRetry((n) => n + 1),
-                  PREVIEW_IMG_RETRY_MS,
-                );
-              }
-            }}
-          />
-        )}
+        <img
+          key={`${url}-${imgRetry}`}
+          className="lobby__preview-img"
+          src={url}
+          alt=""
+          onError={() => {
+            // The asset may still be in transit right after login; remount
+            // the img until the file arrives in the client cache
+            if (imgRetry < PREVIEW_IMG_RETRIES) {
+              setTimeout(
+                () => setImgRetry((n) => n + 1),
+                PREVIEW_IMG_RETRY_MS,
+              );
+            }
+          }}
+        />
       </div>
       <Stack className="lobby__preview-buttons">
         <Stack.Item grow>
@@ -479,7 +417,7 @@ function CharacterPreview({ ss }: { ss: ServerState }) {
             icon="rotate"
             onClick={() => {
               playSelectSound();
-              setDirIndex((dirIndex + 1) % PREVIEW_DIRS.length);
+              setDirIndex((index) => (index + 1) % PREVIEW_DIRS.length);
             }}
           >
             Rotate
@@ -513,40 +451,26 @@ function StatsRow({ label, value }: { label: string; value: string | null }) {
 }
 
 /** Round/server statistics panel on the right edge */
-function StatsPanel({
-  ss,
-  pregame,
-}: {
-  ss: ServerState;
-  pregame: boolean;
-}) {
-  const statusText = {
-    startup: 'Starting up',
-    pregame: 'Pre-game',
-    setting_up: 'Setting up',
-    playing: 'Round in progress',
-    postgame: 'Round ended',
-  }[ss.gamePhase];
+function StatsPanel({ ss, pregame }: { ss: ServerState; pregame: boolean }) {
   return (
-    <div className="lobby__stats">
-      <div className="lobby__panel-title">Server</div>
-      <StatsRow label="Server" value={ss.serverName} />
-      <StatsRow label="Map" value={ss.mapName} />
-      <StatsRow label="Status" value={statusText} />
-      {pregame ? (
-        <StatsRow label="Time left" value={ss.countdown} />
-      ) : (
-        <StatsRow label="Shift time" value={ss.shiftTime} />
-      )}
-      <StatsRow
-        label="Players"
-        value={`${ss.playerCount} player${ss.playerCount !== 1 ? 's' : ''}`}
-      />
-      <StatsRow label="Ready" value={String(ss.readyCount)} />
-      <StatsRow
-        label="Admins"
-        value={`${ss.adminReadyCount} / ${ss.adminCount}`}
-      />
+    <div className="lobby__stats-holder">
+      <div className="lobby__stats">
+        <div className="lobby__panel-title">Server</div>
+        <StatsRow label="Server" value={ss.serverName} />
+        <StatsRow label="Map" value={ss.mapName} />
+        <StatsRow label="Status" value={GAME_PHASE_TEXT[ss.gamePhase]} />
+        {pregame ? (
+          <StatsRow label="Time left" value={ss.countdown} />
+        ) : (
+          <StatsRow label="Shift time" value={ss.shiftTime} />
+        )}
+        <StatsRow label="Players" value={String(ss.playerCount)} />
+        <StatsRow label="Ready" value={String(ss.readyCount)} />
+        <StatsRow
+          label="Admins"
+          value={`${ss.adminReadyCount} / ${ss.adminCount}`}
+        />
+      </div>
     </div>
   );
 }
@@ -574,8 +498,8 @@ function LobbySettings({
   ss,
   filterDisabled,
   setFilterDisabled,
-  themeDisabled,
-  setThemeDisabled,
+  theme,
+  setTheme,
   videoEnabled,
   setVideoEnabled,
   soundsOn,
@@ -584,14 +508,20 @@ function LobbySettings({
   ss: ServerState;
   filterDisabled: boolean;
   setFilterDisabled: (value: boolean) => void;
-  themeDisabled: boolean;
-  setThemeDisabled: (value: boolean) => void;
+  theme: LobbyTheme;
+  setTheme: (value: LobbyTheme) => void;
   videoEnabled: boolean;
   setVideoEnabled: (value: boolean) => void;
   soundsOn: boolean;
   setSoundsOn: (value: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
+
+  const pickTheme = (next: LobbyTheme) => {
+    playSelectSound();
+    setTheme(next);
+    storage.set(THEME_STORAGE_KEY, next);
+  };
 
   return (
     <>
@@ -627,6 +557,21 @@ function LobbySettings({
             }
           >
             <Stack vertical>
+              <SettingsRow label="Theme">
+                <Button
+                  selected={theme === 'blue'}
+                  onClick={() => pickTheme('blue')}
+                >
+                  Blue
+                </Button>
+                <Button
+                  selected={theme === 'orange'}
+                  onClick={() => pickTheme('orange')}
+                >
+                  Orange
+                </Button>
+              </SettingsRow>
+
               <SettingsRow label="CRT filter">
                 <Button
                   selected={!filterDisabled}
@@ -638,20 +583,6 @@ function LobbySettings({
                   }}
                 >
                   {filterDisabled ? 'Off' : 'On'}
-                </Button>
-              </SettingsRow>
-
-              <SettingsRow label="CRT theme">
-                <Button
-                  selected={!themeDisabled}
-                  onClick={() => {
-                    playSelectSound();
-                    const next = !themeDisabled;
-                    setThemeDisabled(next);
-                    storage.set(THEME_STORAGE_KEY, next);
-                  }}
-                >
-                  {themeDisabled ? 'Off' : 'On'}
                 </Button>
               </SettingsRow>
 
@@ -711,7 +642,7 @@ function SettingsRow({
   children,
 }: {
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <Stack.Item>
