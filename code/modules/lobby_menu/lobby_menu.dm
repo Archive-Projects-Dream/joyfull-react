@@ -63,7 +63,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 
 /datum/lobby_menu/proc/on_client_mob_login()
 	SIGNAL_HANDLER
-	update_visibility()
+	INVOKE_ASYNC(src, PROC_REF(update_visibility))
 
 /datum/lobby_menu/proc/update_visibility()
 	var/should_show = istype(client?.mob, /mob/dead/new_player) && !client.interviewee
