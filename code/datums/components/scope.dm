@@ -67,11 +67,11 @@
 	tracker.calculate_params()
 	if(!user_client.intended_direction)
 		user_mob.face_atom(tracker.given_turf)
-	animate(user_client, world.tick_lag, pixel_x = tracker.given_x, pixel_y = tracker.given_y)
+	animate(user_client, 2 * world.tick_lag, pixel_x = tracker.given_x, pixel_y = tracker.given_y)
 
 // [HORIZON]
 	for(var/atom/movable/screen/plane_master/wall_fov/PM in wall_fov_planes_cache)
-		PM.set_displace_offset(-tracker.given_x, -tracker.given_y, world.tick_lag)
+		PM.set_displace_offset(-tracker.given_x, -tracker.given_y, 2 * world.tick_lag)
 // [/HORIZON]
 
 /datum/component/scope/proc/on_move(atom/movable/source, atom/oldloc, dir, forced)
