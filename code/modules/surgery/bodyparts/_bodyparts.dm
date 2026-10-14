@@ -395,7 +395,7 @@
 		if(!shown_brute && !shown_burn)
 			status = "\[NO DAMAGE\]"
 		else
-			status = "<span class='brute'>BRUTE: [shown_brute]</span>\]\[<span class='burn'>BURN: [shown_burn]</span>"
+			status = "\[<span class='brute'>BRUTE: [shown_brute]</span>\]\[<span class='burn'>BURN: [shown_burn]</span>\]"
 	else
 		if(shown_brute > DAMAGE_PRECISION)
 			status += "\[<span class='brute'>"
@@ -445,8 +445,7 @@
 		if(embedded_thing.get_embed().stealthy_embed)
 			continue
 		var/harmless = embedded_thing.get_embed().is_harmless()
-		var/stuck_wordage = harmless ? "stuck to" : "embedded in"
-		var/embed_text = "<a href='byond://?src=[REF(examiner)];embedded_object=[REF(embedded_thing)];embedded_limb=[REF(src)]'>There is [icon2html(embedded_thing, examiner)] \a [embedded_thing] [stuck_wordage] your [plaintext_zone]!</a>"
+		var/embed_text = "<a href='byond://?src=[REF(examiner)];embedded_object=[REF(embedded_thing)];embedded_limb=[REF(src)]'>[icon2html(embedded_thing, examiner)] [uppertext(embedded_thing.name)]</a>"
 		if(harmless)
 			check_list += "\[[span_italics(span_notice(embed_text))]\]"
 		else
@@ -455,16 +454,14 @@
 	var/obj/item/stack/medical/wrap/current_gauze = LAZYACCESS(applied_items, LIMB_ITEM_GAUZE)
 	var/obj/item/tourniquet/current_tourniquet = LAZYACCESS(applied_items, LIMB_ITEM_TOURNIQUET)
 	if(current_tourniquet)
-		var/tourniquet_href = "<a href='byond://?src=[REF(owner)];remove_tourniquet=[REF(src)]'>[icon2html(current_tourniquet, examiner)] \a [current_tourniquet]</a>"
-		var/tourniquet_text = "There is [tourniquet_href] tightly secured around [body_zone == BODY_ZONE_HEAD ? "your neck!" : "it."]"
+		var/tourniquet_href = "<a href='byond://?src=[REF(owner)];remove_tourniquet=[REF(src)]'>[icon2html(current_tourniquet, examiner)] TOURNIQUET</a>"
 		if(body_zone == BODY_ZONE_HEAD)
-			check_list += "\[[span_boldwarning(tourniquet_text)]\]"
+			check_list += "\[[span_boldwarning(tourniquet_href)]\]"
 		else
-			check_list += "\[[span_warning(tourniquet_text)]\]"
+			check_list += "\[[span_warning(tourniquet_href)]\]"
 	if(current_gauze)
-		var/gauze_href = "<a href='byond://?src=[REF(examiner)];gauze_limb=[REF(src)]'>[icon2html(current_gauze, examiner)] \a [current_gauze]</a>"
-		var/gauze_text = "There is [gauze_href] wrapped around your [name]."
-		check_list += span_notice(gauze_text)
+		var/gauze_href = "<a href='byond://?src=[REF(examiner)];gauze_limb=[REF(src)]'>[icon2html(current_gauze, examiner)] GAUZE</a>"
+		check_list += "\[[span_notice(gauze_href)]\]"
 
 	else if(can_bleed())
 		var/bleed_text = ""
@@ -475,7 +472,7 @@
 				bleed_text = "\[<span class='bloodloss'>BLEEDING</span>\]"
 			if(3 to 4)
 				bleed_text = "\[<span class='bloodloss'><b>BLEEDING!</b></span>\]"
-		 if(4 to INFINITY)
+			if(4 to INFINITY)
 				bleed_text = "\[<span class='bloodloss slightly_larger'><b>BLEEDING!!!</b></span>\]"
 
 		if(bleed_text)

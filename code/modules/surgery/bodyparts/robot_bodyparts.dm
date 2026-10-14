@@ -3,7 +3,7 @@
 #define ROBOTIC_HEAVY_BRUTE_MSG "WRECKED"
 
 #define ROBOTIC_LIGHT_BURN_MSG "SCORCHED"
-#define ROBOTIC_MEDIUM_BURN_MSG "CHARRD"
+#define ROBOTIC_MEDIUM_BURN_MSG "CHARRED"
 #define ROBOTIC_HEAVY_BURN_MSG "SMOLDERING"
 
 //For ye whom may venture here, split up arm / hand sprites are formatted as "l_hand" & "l_arm".
