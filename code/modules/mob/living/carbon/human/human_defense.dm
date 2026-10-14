@@ -560,21 +560,23 @@
 
 	visible_message(span_notice("[src] examines [p_them()]self."))
 
-	combined_msg += span_notice("<b>I'm roughly in this condition:</b><hr><table>")
+	combined_msg += span_notice("<b>I'm roughly in this condition:</b><hr>")
 
 
+	var/table_html = "<table>"
 	for(var/part_zone, body_part_untyped in get_bodyparts_by_zones())
 		var/obj/item/bodypart/body_part = body_part_untyped
 		if(isnull(body_part) || IS_STUMP(body_part))
-			combined_msg += "<tr><td><b>[uppertext(parse_zone(body_part?.body_zone || part_zone))]:</b></td><td>\[<span class='missing_bodypart'>MISSING</span>\]</td></tr>"
+			table_html += "<tr><td><b>[uppertext(parse_zone(body_part?.body_zone || part_zone))]:</b></td><td>\[<span class='missing_bodypart'>MISSING</span>\]</td></tr>"
 			continue
 		if(body_part.bodypart_flags & BODYPART_PSEUDOPART) //don't show injury text for fake bodyparts; ie chainsaw arms or synthetic armblades
 			continue
 
 		var/bodypart_report = body_part.check_for_injuries(src)
 		if(bodypart_report)
-			combined_msg += bodypart_report
-	combined_msg += "</table>"
+			table_html += bodypart_report
+	table_html += "</table>"
+	combined_msg += table_html
 
 	var/tox = get_tox_loss() + (disgust / 5) + (HAS_TRAIT(src, TRAIT_SELF_AWARE) ? 0 : (rand(-3, 0) * 5))
 	switch(tox)

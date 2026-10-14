@@ -479,7 +479,7 @@
 			check_list += span_tooltip("You are loosing blood. You should wrap your limb in gauze \
 				or apply pressure to it by grabbing yourself (while targeting the limb) to stem the flow.", bleed_text)
 
-	return "<tr><td valign='top'><b>[uppertext(plaintext_zone)]:</b></td><td>[jointext(check_list, "<br>")]</td></tr>"
+	return "<tr><td valign='top'><b>[uppertext(plaintext_zone)]:</b></td><td>[jointext(check_list, " ")]</td></tr>"
 
 /// Returns all surgical states, filtering out stuff which should not be reported
 /obj/item/bodypart/proc/get_reported_surgery_state()
