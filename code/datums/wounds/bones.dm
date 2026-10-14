@@ -274,7 +274,7 @@
 	return ..()
 
 /datum/wound/blunt/bone/moderate/get_self_check_description(self_aware)
-	return span_warning("It feels dislocated!")
+	return "<span class='bonewreaking'>DISLOCATED</span>"
 
 /// Getting smushed in an airlock/firelock is a last-ditch attempt to try relocating your limb
 /datum/wound/blunt/bone/moderate/proc/door_crush()
