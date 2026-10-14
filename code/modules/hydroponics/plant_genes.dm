@@ -859,7 +859,7 @@
 /datum/plant_gene/trait/plant_laughter/on_new_plant(obj/item/our_plant, newloc)
 	. = ..()
 	if(!.)
-		returns
+		return
 
 	var/obj/item/food/grown/grown_plant = our_plant
 	if(istype(grown_plant) && ispath(grown_plant.trash_type, /obj/item/grown))
