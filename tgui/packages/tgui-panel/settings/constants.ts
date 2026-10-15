@@ -9,6 +9,15 @@ export const THEMES = ['light', 'dark'] as const;
 export const CHAT_CORNERS = ['top-right', 'top-left', 'bottom-right', 'bottom-left'] as const;
 export type ChatCorner = (typeof CHAT_CORNERS)[number];
 
+export const CHAT_DETACH_MODES = ['auto', 'onmap', 'window'] as const;
+export type ChatDetachMode = (typeof CHAT_DETACH_MODES)[number];
+
+export const CHAT_DETACH_MODE_NAMES: Record<ChatDetachMode, string> = {
+  auto: 'Auto',
+  onmap: 'On map',
+  window: 'Window',
+};
+
 export const COLORS = {
   DARK: {
     BG_BASE: '#202020',

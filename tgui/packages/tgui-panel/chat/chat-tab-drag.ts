@@ -1,5 +1,6 @@
 import { createUuid } from 'tgui-core/uuid';
 import { store } from '../events/store';
+import { settingsAtom } from '../settings/atoms';
 import {
   chatPagesAtom,
   chatPagesRecordAtom,
@@ -8,7 +9,7 @@ import {
   mainPage,
 } from './atom';
 import { chatRenderer } from './renderer';
-import type { DetachedChatPanel, Page } from './types';
+import type { DetachedChatPanel, DetachedChatPanelMode, Page } from './types';
 
 export type TabDragSource =
   | { kind: 'main' }
@@ -19,7 +20,11 @@ type TabDragState = {
   source: TabDragSource;
   lastX: number;
   lastY: number;
+  lastScreenX: number;
+  lastScreenY: number;
+  overMainDoc: boolean;
   resolved: boolean;
+  releaseFns: (() => void)[];
 };
 
 const MIN_PANEL_WIDTH = 320;
@@ -38,55 +43,14 @@ export function markTabDragResolved() {
   }
 }
 
-function onDocDragOver(e: DragEvent) {
-  if (!drag) {
-    return;
-  }
-  drag.lastX = e.clientX;
-  drag.lastY = e.clientY;
-}
-
-function onDocDragEnd() {
-  if (drag && !drag.resolved) {
-    resolveTabDragAtPoint(drag.lastX, drag.lastY);
-  }
-  cleanup();
-}
-
-function cleanup() {
-  drag = null;
-  document.removeEventListener('dragover', onDocDragOver);
-  document.removeEventListener('dragend', onDocDragEnd, true);
-}
-
-export function beginTabDrag(
-  e: React.DragEvent,
-  pageId: string,
-  source: TabDragSource,
-) {
-  drag = {
-    pageId,
-    source,
-    lastX: e.clientX,
-    lastY: e.clientY,
-    resolved: false,
-  };
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', pageId);
-  document.addEventListener('dragover', onDocDragOver);
-  document.addEventListener('dragend', onDocDragEnd, true);
-}
-
-export function endTabDrag() {
-  cleanup();
+function isPointInRect(x: number, y: number, rect: DOMRect) {
+  return (
+    x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+  );
 }
 
 function getMainWindow(): HTMLElement | null {
   return document.querySelector('.Panel__window');
-}
-
-function isPointInRect(x: number, y: number, rect: DOMRect) {
-  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 }
 
 function isPointOverFloatingPanel(x: number, y: number): boolean {
@@ -105,21 +69,18 @@ export function isPointOutsideMainWindow(x: number, y: number): boolean {
   if (!mainWindow) {
     return false;
   }
-  const rect = mainWindow.getBoundingClientRect();
-  return !isPointInRect(x, y, rect);
+  return !isPointInRect(x, y, mainWindow.getBoundingClientRect());
 }
 
-function resolveTabDragAtPoint(x: number, y: number) {
-  if (!drag) {
-    return;
-  }
-  const { pageId, source } = drag;
-  if (
-    isPointOutsideMainWindow(x, y) &&
-    (source.kind === 'main' || !isPointOverFloatingPanel(x, y))
-  ) {
-    detachChatTab(pageId, source, x, y);
-  }
+function isPointOverMainWindowScreen(x: number, y: number): boolean {
+  const left = window.screenX;
+  const top = window.screenY;
+  return (
+    x >= left &&
+    x <= left + window.outerWidth &&
+    y >= top &&
+    y <= top + window.outerHeight
+  );
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -146,6 +107,39 @@ function createPanelGeometry(x: number, y: number) {
   );
   const top = clamp(Math.round(y - PANEL_MARGIN), 0, viewportH - PANEL_MARGIN);
   return { x: left, y: top, width, height };
+}
+
+function createWindowGeometry(screenX: number, screenY: number) {
+  const width = Math.round(
+    clamp(window.innerWidth * 0.4, MIN_PANEL_WIDTH, 720),
+  );
+  const height = Math.round(
+    clamp(window.innerHeight * 0.5, MIN_PANEL_HEIGHT, 640),
+  );
+  const screen = window.screen as Screen & {
+    availLeft?: number;
+    availTop?: number;
+  };
+  const availLeft = screen.availLeft || 0;
+  const availTop = screen.availTop || 0;
+  const availWidth = screen.availWidth || screen.width;
+  const availHeight = screen.availHeight || screen.height;
+  const x = Math.round(
+    clamp(screenX - width / 2, availLeft, availLeft + availWidth - width),
+  );
+  const y = Math.round(
+    clamp(screenY - 32, availTop, availTop + availHeight - height),
+  );
+  return { x, y, width, height };
+}
+
+export function resolveDetachMode(): DetachedChatPanelMode {
+  const settings = store.get(settingsAtom);
+  const preference = settings.chatDetachMode ?? 'auto';
+  if (preference === 'onmap' || preference === 'window') {
+    return preference;
+  }
+  return document.body.classList.contains('onmap') ? 'onmap' : 'window';
 }
 
 function removePageFromSource(
@@ -191,8 +185,10 @@ function removePageFromSource(
 export function detachChatTab(
   pageId: string,
   source: TabDragSource,
-  x: number,
-  y: number,
+  screenX: number,
+  screenY: number,
+  clientX: number,
+  clientY: number,
 ) {
   const pagesRecord = store.get(chatPagesRecordAtom);
   const page = pagesRecord[pageId];
@@ -200,14 +196,149 @@ export function detachChatTab(
     return;
   }
   const panels = removePageFromSource(pageId, source);
-  const geometry = createPanelGeometry(x, y);
+  const mode = resolveDetachMode();
   const panel: DetachedChatPanel = {
     id: createUuid(),
+    mode,
     pageIds: [pageId],
     currentPageId: pageId,
-    ...geometry,
+    ...(mode === 'window'
+      ? createWindowGeometry(screenX, screenY)
+      : createPanelGeometry(clientX, clientY)),
   };
   store.set(detachedChatPanelsAtom, [...panels, panel]);
+}
+
+export function downgradeDetachedPanel(panelId: string) {
+  const panels = store.get(detachedChatPanelsAtom);
+  const panel = panels.find((entry) => entry.id === panelId);
+  if (!panel || panel.mode === 'onmap') {
+    return;
+  }
+  const viewportW = window.innerWidth;
+  const viewportH = window.innerHeight;
+  const width = clamp(panel.width, MIN_PANEL_WIDTH, viewportW - 16);
+  const height = clamp(panel.height, MIN_PANEL_HEIGHT, viewportH - 16);
+  const x = clamp(panel.x, 8, Math.max(8, viewportW - width - 8));
+  const y = clamp(panel.y, 8, Math.max(8, viewportH - height - 8));
+  store.set(
+    detachedChatPanelsAtom,
+    panels.map((entry) =>
+      entry.id === panelId ? { ...entry, mode: 'onmap', x, y, width, height } : entry,
+    ),
+  );
+}
+
+function resolveTabDrag(
+  rawClientX: number,
+  rawClientY: number,
+  screenX: number,
+  screenY: number,
+) {
+  if (!drag) {
+    return;
+  }
+  const { pageId, source } = drag;
+  const clientX = rawClientX || drag.lastX;
+  const clientY = rawClientY || drag.lastY;
+
+  if (source.kind === 'main') {
+    const droppedOutsideViewport = rawClientX === 0 && rawClientY === 0;
+    const outsideByScreen = !isPointOverMainWindowScreen(screenX, screenY);
+    const outsideByContainer =
+      drag.overMainDoc && isPointOutsideMainWindow(clientX, clientY);
+    if (droppedOutsideViewport || outsideByScreen || outsideByContainer) {
+      detachChatTab(pageId, source, screenX, screenY, clientX, clientY);
+    }
+    return;
+  }
+
+  if (
+    drag.overMainDoc &&
+    !isPointOutsideMainWindow(clientX, clientY) &&
+    !isPointOverFloatingPanel(clientX, clientY)
+  ) {
+    dropTabIntoMain(pageId, store.get(chatPagesAtom).length);
+  }
+}
+
+function attachDragListeners(doc: Document) {
+  if (!drag) {
+    return;
+  }
+  const isMainDoc = doc === document;
+  const onDragOver = (e: DragEvent) => {
+    if (!drag) {
+      return;
+    }
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move';
+    }
+    drag.lastX = e.clientX;
+    drag.lastY = e.clientY;
+    drag.lastScreenX = e.screenX;
+    drag.lastScreenY = e.screenY;
+    drag.overMainDoc = isMainDoc;
+  };
+  const onDragEnd = (e: DragEvent) => {
+    if (!drag) {
+      return;
+    }
+    if (drag.resolved) {
+      cleanup();
+      return;
+    }
+    const screenX = e.screenX || drag.lastScreenX;
+    const screenY = e.screenY || drag.lastScreenY;
+    resolveTabDrag(e.clientX, e.clientY, screenX, screenY);
+    cleanup();
+  };
+  doc.addEventListener('dragover', onDragOver);
+  doc.addEventListener('dragend', onDragEnd, true);
+  drag.releaseFns.push(() => {
+    doc.removeEventListener('dragover', onDragOver);
+    doc.removeEventListener('dragend', onDragEnd, true);
+  });
+}
+
+function cleanup() {
+  if (drag) {
+    for (const release of drag.releaseFns) {
+      release();
+    }
+  }
+  drag = null;
+}
+
+export function beginTabDrag(
+  e: React.DragEvent,
+  pageId: string,
+  source: TabDragSource,
+) {
+  const sourceDoc =
+    (e.target as HTMLElement | null)?.ownerDocument ?? document;
+  drag = {
+    pageId,
+    source,
+    lastX: e.clientX,
+    lastY: e.clientY,
+    lastScreenX: e.screenX,
+    lastScreenY: e.screenY,
+    overMainDoc: sourceDoc === document,
+    resolved: false,
+    releaseFns: [],
+  };
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', pageId);
+  attachDragListeners(sourceDoc);
+  if (sourceDoc !== document) {
+    attachDragListeners(document);
+  }
+}
+
+export function endTabDrag() {
+  cleanup();
 }
 
 function insertIntoList(list: string[], pageId: string, insertIndex: number) {

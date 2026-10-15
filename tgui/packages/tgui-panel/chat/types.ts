@@ -14,8 +14,11 @@ export type Page = {
   createdAt: number;
 };
 
+export type DetachedChatPanelMode = 'onmap' | 'window';
+
 export type DetachedChatPanel = {
   id: string;
+  mode?: DetachedChatPanelMode;
   pageIds: string[];
   currentPageId: string;
   x: number;
@@ -27,6 +30,7 @@ export type DetachedChatPanel = {
 
 export const detachedChatPanelSchema = z.object({
   id: z.string(),
+  mode: z.enum(['onmap', 'window']).optional(),
   pageIds: z.array(z.string()),
   currentPageId: z.string(),
   x: z.number(),

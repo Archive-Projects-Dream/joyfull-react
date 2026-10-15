@@ -9,6 +9,7 @@ const viewSchema = z.object({
 export const settingsSchema = z.object({
   adminMusicVolume: z.number(),
   chatCorner: z.string(),
+  chatDetachMode: z.enum(['auto', 'onmap', 'window']),
   chatFrameless: z.boolean(),
   chatHoverStrip: z.boolean(),
   chatMessageBg: z.boolean(),

@@ -12,7 +12,13 @@ import {
 import { toFixed } from 'tgui-core/math';
 import { capitalize } from 'tgui-core/string';
 import { chatRenderer, forEachChatRenderer } from '../chat/renderer';
-import { CHAT_CORNERS, FONTS, THEMES } from './constants';
+import {
+  CHAT_CORNERS,
+  CHAT_DETACH_MODES,
+  CHAT_DETACH_MODE_NAMES,
+  FONTS,
+  THEMES,
+} from './constants';
 import { resetPaneSplitters, setEditPaneSplitters } from './scaling';
 import { exportChatSettings, importChatSettings } from './settingsImExport';
 import { useSettings } from './use-settings';
@@ -39,6 +45,25 @@ export function SettingsGeneral(props) {
               }
             >
               {capitalize(THEME)}
+            </Button>
+          ))}
+        </LabeledList.Item>
+        <LabeledList.Item label="Detached chat window">
+          {CHAT_DETACH_MODES.map((mode) => (
+            <Button
+              key={mode}
+              selected={(settings.chatDetachMode ?? 'auto') === mode}
+              color="transparent"
+              tooltip={
+                mode === 'auto'
+                  ? 'On-map overlay when the chat is on the map, browser window otherwise'
+                  : mode === 'onmap'
+                    ? 'Dragging a tab out creates a floating in-game window'
+                    : 'Dragging a tab out creates a separate browser window'
+              }
+              onClick={() => updateSettings({ chatDetachMode: mode })}
+            >
+              {CHAT_DETACH_MODE_NAMES[mode]}
             </Button>
           ))}
         </LabeledList.Item>

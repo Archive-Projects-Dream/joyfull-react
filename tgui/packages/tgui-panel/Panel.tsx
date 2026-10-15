@@ -12,6 +12,7 @@ import { visibleAtom } from './audio/atoms';
 import { NowPlayingWidget } from './audio/NowPlayingWidget';
 import { detachedChatPanelsAtom } from './chat/atom';
 import { ChatFloatingPanel } from './chat/ChatFloatingPanel';
+import { ChatWindowPanel } from './chat/ChatWindowPanel';
 import { ChatPanel } from './chat/ChatPanel';
 import { ChatTabs } from './chat/ChatTabs';
 import {
@@ -303,9 +304,13 @@ export function Panel(props) {
           </Stack.Item>
         </Stack>
       </Pane>
-      {detachedPanels.map((panel) => (
-        <ChatFloatingPanel key={panel.id} panel={panel} />
-      ))}
+      {detachedPanels.map((panel) =>
+        panel.mode === 'window' ? (
+          <ChatWindowPanel key={panel.id} panel={panel} />
+        ) : (
+          <ChatFloatingPanel key={panel.id} panel={panel} />
+        ),
+      )}
     </>
   );
 }

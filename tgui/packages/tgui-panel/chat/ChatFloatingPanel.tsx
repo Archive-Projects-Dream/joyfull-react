@@ -6,6 +6,7 @@
 
 import { useAtom, useAtomValue } from 'jotai';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Pane } from 'tgui/layouts';
 import { Button, Section, Stack } from 'tgui-core/components';
 import { store } from '../events/store';
@@ -31,7 +32,7 @@ import type { DetachedChatPanel, Page } from './types';
 const MIN_WIDTH = 320;
 const MIN_HEIGHT = 240;
 
-const HEADER_DRAG_GUARD =
+export const HEADER_DRAG_GUARD =
   'button, a, input, [role="button"], .Button, .Tab, .Dropdown, .Tabs, .Chat__scrollButton';
 
 const RESIZE_DIRS = [
@@ -81,9 +82,9 @@ function clampPanelPosition(point: Point): Point {
   };
 }
 
-function startPointerDrag(
+export function startPointerDrag(
   e: React.PointerEvent,
-  onMove: (dx: number, dy: number) => void,
+  onMove: (ev: PointerEvent, dx: number, dy: number) => void,
   onEnd: () => void,
 ) {
   e.preventDefault();
@@ -104,7 +105,7 @@ function startPointerDrag(
       return;
     }
     ev.preventDefault();
-    onMove(ev.clientX - startX, ev.clientY - startY);
+    onMove(ev, ev.clientX - startX, ev.clientY - startY);
   };
 
   const finish = (ev: PointerEvent) => {
@@ -190,16 +191,25 @@ function seedDetachedRenderer(renderer: ChatRenderer): () => void {
   };
 }
 
-type Props = {
+type FrameProps = {
   panel: DetachedChatPanel;
+  rootRef?: React.Ref<HTMLDivElement>;
+  rootStyle?: React.CSSProperties;
+  onHeaderPointerDown?: (e: React.PointerEvent) => void;
+  resizeHandles?: React.ReactNode;
 };
 
-export function ChatFloatingPanel(props: Props) {
-  const { panel } = props;
+/**
+ * The exact chat panel structure of the main window (framed Pane, header with
+ * chat tabs, scrollable message log), mounted into whatever detached container
+ * its host provides. Owns a dedicated ChatRenderer instance so the detached
+ * copy carries its own page context while staying visually identical.
+ */
+export function DetachedChatPanelFrame(props: FrameProps) {
+  const { panel, rootRef, rootStyle, onHeaderPointerDown, resizeHandles } =
+    props;
   const settings = useAtomValue(settingsAtom);
   const [pagesRecord, setPagesRecord] = useAtom(chatPagesRecordAtom);
-  const [, setDetachedPanels] = useAtom(detachedChatPanelsAtom);
-  const rootRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   const renderer = useMemo(() => new ChatRenderer(), []);
@@ -253,151 +263,16 @@ export function ChatFloatingPanel(props: Props) {
     [panel.id],
   );
 
-  const applyGeometry = (point: Point) => {
-    const root = rootRef.current;
-    if (!root) {
-      return;
-    }
-    root.style.left = `${point.x}px`;
-    root.style.top = `${point.y}px`;
-    root.style.width = `${point.width}px`;
-    root.style.height = `${point.height}px`;
-  };
-
-  const beginMove = (e: React.PointerEvent) => {
-    if ((e.target as HTMLElement).closest(HEADER_DRAG_GUARD)) {
-      return;
-    }
-    const root = rootRef.current;
-    if (!root) {
-      return;
-    }
-    const start = root.getBoundingClientRect();
-    let current: Point = {
-      x: start.left,
-      y: start.top,
-      width: start.width,
-      height: start.height,
-    };
-    let mergeArmed = false;
-    const header = e.currentTarget as HTMLElement;
-
-    const setMergeHint = (value: boolean) => {
-      const strip = document.querySelector('.Panel__window .Panel__header');
-      if (strip) {
-        strip.classList.toggle('Panel__header--mergeHint', value);
-      }
-      root.classList.toggle('ChatFloatingPanel--merging', value);
-    };
-
-    startPointerDrag(
-      e,
-      (dx, dy) => {
-        current = clampPanelPosition({
-          x: start.left + dx,
-          y: start.top + dy,
-          width: start.width,
-          height: start.height,
-        });
-        applyGeometry(current);
-        const strip = document.querySelector('.Panel__window .Panel__header');
-        const armed =
-          !!strip &&
-          rectsIntersect(
-            header.getBoundingClientRect(),
-            strip.getBoundingClientRect(),
-          );
-        if (armed !== mergeArmed) {
-          mergeArmed = armed;
-          setMergeHint(armed);
-        }
-      },
-      () => {
-        setMergeHint(false);
-        if (mergeArmed) {
-          mergePanelIntoMain(panel.id);
-          return;
-        }
-        setDetachedPanels((panels) =>
-          panels.map((entry) =>
-            entry.id === panel.id ? { ...entry, ...current } : entry,
-          ),
-        );
-      },
-    );
-  };
-
-  const beginResize = (dir: ResizeDir) => (e: React.PointerEvent) => {
-    e.stopPropagation();
-    const root = rootRef.current;
-    if (!root) {
-      return;
-    }
-    const start = root.getBoundingClientRect();
-    let current: Point = {
-      x: start.left,
-      y: start.top,
-      width: start.width,
-      height: start.height,
-    };
-
-    startPointerDrag(
-      e,
-      (dx, dy) => {
-        let { x, y, width, height } = start;
-        if (dir.includes('e')) {
-          width = Math.max(MIN_WIDTH, start.width + dx);
-        }
-        if (dir.includes('s')) {
-          height = Math.max(MIN_HEIGHT, start.height + dy);
-        }
-        if (dir.includes('w')) {
-          width = Math.max(MIN_WIDTH, start.width - dx);
-          x = start.right - width;
-        }
-        if (dir.includes('n')) {
-          height = Math.max(MIN_HEIGHT, start.height - dy);
-          y = start.bottom - height;
-        }
-        current = { x, y, width, height };
-        applyGeometry(current);
-      },
-      () => {
-        setDetachedPanels((panels) =>
-          panels.map((entry) =>
-            entry.id === panel.id ? { ...entry, ...current } : entry,
-          ),
-        );
-      },
-    );
-  };
-
   return (
-    <div
-      className="ChatFloatingPanel"
-      ref={rootRef}
-      style={{
-        left: `${panel.x}px`,
-        top: `${panel.y}px`,
-        width: `${panel.width}px`,
-        height: `${panel.height}px`,
-      }}
-    >
+    <div className="ChatFloatingPanel" ref={rootRef} style={rootStyle}>
       <Pane theme={settings.theme} canSuspend={false}>
-        {RESIZE_DIRS.map((dir) => (
-          <div
-            key={dir}
-            className={`ResizeHandle ResizeHandle--${dir}`}
-            style={{ cursor: RESIZE_CURSORS[dir] }}
-            onPointerDown={beginResize(dir)}
-          />
-        ))}
+        {resizeHandles}
         <Stack fill vertical className="Panel__stack">
           <Stack.Item>
             <Section fitted className="Panel__header">
               <div
                 className="ChatFloatingPanel__drag"
-                onPointerDown={beginMove}
+                onPointerDown={onHeaderPointerDown}
               >
                 <Stack mr={1} align="center">
                   <Stack.Item grow>
@@ -451,5 +326,164 @@ export function ChatFloatingPanel(props: Props) {
         </Stack>
       </Pane>
     </div>
+  );
+}
+
+type Props = {
+  panel: DetachedChatPanel;
+};
+
+/**
+ * Detached chat in on-map mode: the shared chat panel frame portaled straight
+ * into document.body, floating above the map and the main UI layout with its
+ * own fixed geometry, pointer-driven move/resize and header-drag merge.
+ */
+export function ChatFloatingPanel(props: Props) {
+  const { panel } = props;
+  const [, setDetachedPanels] = useAtom(detachedChatPanelsAtom);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const applyGeometry = (point: Point) => {
+    const root = rootRef.current;
+    if (!root) {
+      return;
+    }
+    root.style.left = `${point.x}px`;
+    root.style.top = `${point.y}px`;
+    root.style.width = `${point.width}px`;
+    root.style.height = `${point.height}px`;
+  };
+
+  const beginMove = (e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest(HEADER_DRAG_GUARD)) {
+      return;
+    }
+    const root = rootRef.current;
+    if (!root) {
+      return;
+    }
+    const start = root.getBoundingClientRect();
+    let current: Point = {
+      x: start.left,
+      y: start.top,
+      width: start.width,
+      height: start.height,
+    };
+    let mergeArmed = false;
+    const header = e.currentTarget as HTMLElement;
+
+    const setMergeHint = (value: boolean) => {
+      const strip = document.querySelector('.Panel__window .Panel__header');
+      if (strip) {
+        strip.classList.toggle('Panel__header--mergeHint', value);
+      }
+      root.classList.toggle('ChatFloatingPanel--merging', value);
+    };
+
+    startPointerDrag(
+      e,
+      (_ev, dx, dy) => {
+        current = clampPanelPosition({
+          x: start.left + dx,
+          y: start.top + dy,
+          width: start.width,
+          height: start.height,
+        });
+        applyGeometry(current);
+        const strip = document.querySelector('.Panel__window .Panel__header');
+        const armed =
+          !!strip &&
+          rectsIntersect(
+            header.getBoundingClientRect(),
+            strip.getBoundingClientRect(),
+          );
+        if (armed !== mergeArmed) {
+          mergeArmed = armed;
+          setMergeHint(armed);
+        }
+      },
+      () => {
+        setMergeHint(false);
+        if (mergeArmed) {
+          mergePanelIntoMain(panel.id);
+          return;
+        }
+        setDetachedPanels((panels) =>
+          panels.map((entry) =>
+            entry.id === panel.id ? { ...entry, ...current } : entry,
+          ),
+        );
+      },
+    );
+  };
+
+  const beginResize = (dir: ResizeDir) => (e: React.PointerEvent) => {
+    e.stopPropagation();
+    const root = rootRef.current;
+    if (!root) {
+      return;
+    }
+    const start = root.getBoundingClientRect();
+    let current: Point = {
+      x: start.left,
+      y: start.top,
+      width: start.width,
+      height: start.height,
+    };
+
+    startPointerDrag(
+      e,
+      (_ev, dx, dy) => {
+        let { x, y, width, height } = start;
+        if (dir.includes('e')) {
+          width = Math.max(MIN_WIDTH, start.width + dx);
+        }
+        if (dir.includes('s')) {
+          height = Math.max(MIN_HEIGHT, start.height + dy);
+        }
+        if (dir.includes('w')) {
+          width = Math.max(MIN_WIDTH, start.width - dx);
+          x = start.right - width;
+        }
+        if (dir.includes('n')) {
+          height = Math.max(MIN_HEIGHT, start.height - dy);
+          y = start.bottom - height;
+        }
+        current = { x, y, width, height };
+        applyGeometry(current);
+      },
+      () => {
+        setDetachedPanels((panels) =>
+          panels.map((entry) =>
+            entry.id === panel.id ? { ...entry, ...current } : entry,
+          ),
+        );
+      },
+    );
+  };
+
+  const resizeHandles = RESIZE_DIRS.map((dir) => (
+    <div
+      key={dir}
+      className={`ResizeHandle ResizeHandle--${dir}`}
+      style={{ cursor: RESIZE_CURSORS[dir] }}
+      onPointerDown={beginResize(dir)}
+    />
+  ));
+
+  return createPortal(
+    <DetachedChatPanelFrame
+      panel={panel}
+      rootRef={rootRef}
+      rootStyle={{
+        left: `${panel.x}px`,
+        top: `${panel.y}px`,
+        width: `${panel.width}px`,
+        height: `${panel.height}px`,
+      }}
+      onHeaderPointerDown={beginMove}
+      resizeHandles={resizeHandles}
+    />,
+    document.body,
   );
 }

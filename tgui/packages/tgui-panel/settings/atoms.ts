@@ -5,6 +5,7 @@ import type { HighlightSetting, HighlightState, SettingsState } from './types';
 export const defaultSettings: SettingsState = {
   adminMusicVolume: 0.5,
   chatCorner: 'top-right',
+  chatDetachMode: 'auto',
   chatFrameless: true,
   chatHoverStrip: true,
   chatMessageBg: false,

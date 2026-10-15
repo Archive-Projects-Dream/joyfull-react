@@ -158,6 +158,7 @@ function normalizeDetachedPanels(
 
     panels.push({
       id: typeof rawPanel.id === 'string' ? rawPanel.id : '',
+      mode: rawPanel.mode === 'window' ? 'window' : 'onmap',
       pageIds,
       currentPageId,
       x,
