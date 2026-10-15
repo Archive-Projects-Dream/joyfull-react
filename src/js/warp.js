@@ -41,7 +41,7 @@ export function initWarp() {
       const py = (this.y / this.pz) * cy + cy;
       const brightness = 1 - this.z / MAX_DEPTH;
 
-      const rootStyles = getComputedStyle(document.documentElement);
+      const rootStyles = getComputedStyle(document.querySelector('body'));
       const r = Number(rootStyles.getPropertyValue('--star-r').trim()) || 220;
       const g = Number(rootStyles.getPropertyValue('--star-g').trim()) || 220;
       const b = Number(rootStyles.getPropertyValue('--star-b').trim()) || 220;
