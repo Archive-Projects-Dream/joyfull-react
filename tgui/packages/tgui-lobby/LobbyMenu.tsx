@@ -179,6 +179,9 @@ export function LobbyMenu() {
   const typingDelay = (index: number) =>
     animationsDisabled ? '0s' : `${1.5 + index * 0.2}s`;
 
+  // Всё лобби, кроме шестерёнки настроек, сворачивается вместе
+  const collapsible = classes(['menuCollapsible', hidden && 'menuHidden']);
+
   return (
     <div
       className={classes([
@@ -225,7 +228,7 @@ export function LobbyMenu() {
       )}
 
       <Stack vertical height="100%" justify="space-around" align="center">
-        <Stack.Item>
+        <Stack.Item className={collapsible}>
           <div className="brandLockup">
             <svg
               className="brandLockup__logo"
@@ -237,14 +240,7 @@ export function LobbyMenu() {
             <div className="brandLockup__name">Horizon-Dream</div>
             <div className="brandLockup__sub">// Beyond the station</div>
           </div>
-          <Section
-            p={3}
-            className={classes([
-              'sectionLoad',
-              'menuCollapsible',
-              hidden && 'menuHidden',
-            ])}
-          >
+          <Section p={3} className="sectionLoad">
             <Stack vertical>
               <Stack.Item>
                 <Stack vertical align="center" className="welcomeHolder">
@@ -355,7 +351,10 @@ export function LobbyMenu() {
                 </LobbyButton>
               )}
 
-              <Stack.Item>
+              <Stack.Item
+                className="buttonEffect"
+                style={{ animationDelay: typingDelay(9) }}
+              >
                 <Button
                   fluid
                   className="hideButton"
@@ -373,31 +372,16 @@ export function LobbyMenu() {
         </Stack.Item>
       </Stack>
 
-      {hidden && (
-        <Box
-          position="absolute"
-          top="10px"
-          left="10px"
-          className="floating floatingAppear"
-        >
-          <Button
-            icon="check"
-            onClick={() => {
-              playSelectSound();
-              setHidden(false);
-            }}
-          />
-        </Box>
-      )}
+      <CharacterPreview ss={ss} hidden={hidden} />
 
-      <CharacterPreview ss={ss} />
+      <StatsPanel ss={ss} pregame={pregame} hidden={hidden} />
 
-      <StatsPanel ss={ss} pregame={pregame} />
-
-      <PreferenceIssues issues={ss.preferenceIssues} />
+      <PreferenceIssues issues={ss.preferenceIssues} hidden={hidden} />
 
       <LobbySettings
         ss={ss}
+        menuHidden={hidden}
+        onShowMenu={() => setHidden(false)}
         filterDisabled={filterDisabled}
         setFilterDisabled={setFilterDisabled}
         tintDisabled={tintDisabled}
@@ -447,7 +431,13 @@ function LobbyButton(props: {
 }
 
 /** Character preview with client-side direction cycling */
-function CharacterPreview({ ss }: { ss: ServerState }) {
+function CharacterPreview({
+  ss,
+  hidden,
+}: {
+  ss: ServerState;
+  hidden: boolean;
+}) {
   const [dirIndex, setDirIndex] = useState(0);
   const [imgRetry, setImgRetry] = useState(0);
 
@@ -464,7 +454,13 @@ function CharacterPreview({ ss }: { ss: ServerState }) {
   }
 
   return (
-    <div className="lobby__preview">
+    <div
+      className={classes([
+        'lobby__preview',
+        'menuCollapsible',
+        hidden && 'menuHidden',
+      ])}
+    >
       <div className="lobby__panel-title">Character</div>
       <div className="lobby__preview-body">
         <img
@@ -526,9 +522,23 @@ function StatsRow({ label, value }: { label: string; value: string | null }) {
 }
 
 /** Round/server statistics panel on the right edge */
-function StatsPanel({ ss, pregame }: { ss: ServerState; pregame: boolean }) {
+function StatsPanel({
+  ss,
+  pregame,
+  hidden,
+}: {
+  ss: ServerState;
+  pregame: boolean;
+  hidden: boolean;
+}) {
   return (
-    <div className="lobby__stats-holder">
+    <div
+      className={classes([
+        'lobby__stats-holder',
+        'menuCollapsible',
+        hidden && 'menuHidden',
+      ])}
+    >
       <div className="lobby__stats">
         <div className="lobby__panel-title">Server</div>
         <StatsRow label="Map" value={ss.mapName} />
@@ -550,12 +560,24 @@ function StatsPanel({ ss, pregame }: { ss: ServerState; pregame: boolean }) {
 }
 
 /** CM13-style warnings about the player's current preferences */
-function PreferenceIssues({ issues }: { issues: string[] }) {
+function PreferenceIssues({
+  issues,
+  hidden,
+}: {
+  issues: string[];
+  hidden: boolean;
+}) {
   if (!issues || issues.length === 0) {
     return null;
   }
   return (
-    <div className="messageHolder">
+    <div
+      className={classes([
+        'messageHolder',
+        'menuCollapsible',
+        hidden && 'menuHidden',
+      ])}
+    >
       <Stack vertical justify="flex-end" fill>
         {issues.map((issue, index) => (
           <Section key={index} className="sectionLoad issueSection">
@@ -567,9 +589,11 @@ function PreferenceIssues({ issues }: { issues: string[] }) {
   );
 }
 
-/** Settings button (bottom right) and its popup */
+/** Settings corner (bottom left) and its popup */
 function LobbySettings({
   ss,
+  menuHidden,
+  onShowMenu,
   filterDisabled,
   setFilterDisabled,
   tintDisabled,
@@ -582,6 +606,8 @@ function LobbySettings({
   setSoundsOn,
 }: {
   ss: ServerState;
+  menuHidden: boolean;
+  onShowMenu: () => void;
   filterDisabled: boolean;
   setFilterDisabled: (value: boolean) => void;
   tintDisabled: boolean;
@@ -600,9 +626,19 @@ function LobbySettings({
       <Box
         position="absolute"
         bottom="10px"
-        right="10px"
+        left="10px"
         className="settingsHolder"
       >
+        {menuHidden && (
+          <Button
+            icon="check"
+            className="floatingAppear"
+            onClick={() => {
+              playSelectSound();
+              onShowMenu();
+            }}
+          />
+        )}
         <Button
           icon="cog"
           onClick={() => {

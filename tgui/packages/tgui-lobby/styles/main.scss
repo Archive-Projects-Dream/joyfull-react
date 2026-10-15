@@ -495,10 +495,6 @@ img {
     visibility 0s linear 0.3s;
 }
 
-.floating {
-  z-index: 60;
-}
-
 .floatingAppear {
   animation: floating-appear 0.3s ease-out both;
 }
@@ -628,6 +624,13 @@ img {
 
 .settingsHolder {
   z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+
+  .Button {
+    margin: 0;
+  }
 }
 
 .settingsModal {
