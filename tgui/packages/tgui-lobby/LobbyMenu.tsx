@@ -36,7 +36,7 @@ export type ServerState = {
   previewUrls: Record<string, string> | null;
 };
 
-type LobbyTheme = 'blue' | 'orange';
+type LobbyTheme = 'blue' | 'green' | 'orange';
 
 const FILTER_STORAGE_KEY = 'lobby-filter-disabled';
 const THEME_STORAGE_KEY = 'lobby-theme';
@@ -105,9 +105,13 @@ export function LobbyMenu() {
 
   useEffect(() => {
     storage.get(FILTER_STORAGE_KEY).then((val) => setFilterDisabled(!!val));
-    storage
-      .get(THEME_STORAGE_KEY)
-      .then((val) => setTheme(val === 'orange' ? 'orange' : 'blue'));
+    storage.get(THEME_STORAGE_KEY).then((val) =>
+      setTheme(
+        val === 'blue' || val === 'green' || val === 'orange'
+          ? val
+          : 'green',
+      ),
+    );
     storage.get(VIDEO_STORAGE_KEY).then((val) => {
       setVideoEnabled(val === undefined || val === null ? true : !!val);
     });
@@ -561,6 +565,12 @@ function LobbySettings({
                   onClick={() => pickTheme('blue')}
                 >
                   Blue
+                </Button>
+                <Button
+                  selected={theme === 'green'}
+                  onClick={() => pickTheme('green')}
+                >
+                  Green
                 </Button>
                 <Button
                   selected={theme === 'orange'}

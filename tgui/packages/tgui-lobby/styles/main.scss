@@ -58,6 +58,7 @@ img {
 .LobbyScreen--blue {
   --lobby-accent: hsl(207, 60%, 62%);
   --lobby-accent-bright: hsl(203, 80%, 78%);
+  --lobby-fg: #c5dcff;
   --lobby-accent-dim: hsla(207, 60%, 62%, 0.45);
   --lobby-accent-faint: hsla(207, 60%, 62%, 0.12);
   --lobby-panel-bg: hsla(215, 55%, 7%, 0.72);
@@ -68,6 +69,29 @@ img {
   --color-base: hsl(215, 40%, 16%);
   --color-primary: hsl(207, 50%, 42%);
   --button-color-transparent: hsla(207, 50%, 42%, 0.75);
+  --button-background-disabled: transparent;
+  --progress-bar-background: hsla(0, 0%, 0%, 0.5);
+  --secondary-lightness-adjustment: 6.33;
+  --tooltip-background-lightness: 25;
+}
+
+
+// Green palette (the Horizon-Dream site "green" phosphor, exact site colors)
+.LobbyScreen--green {
+  --lobby-accent: #8cf0a7;
+  --lobby-accent-bright: #c4e2cc;
+  --lobby-fg: #c4e2cc;
+  --lobby-accent-dim: rgba(140, 240, 167, 0.45);
+  --lobby-accent-faint: rgba(91, 255, 140, 0.11);
+  --lobby-panel-bg: hsla(150, 45%, 6%, 0.72);
+  --lobby-panel-border: hsla(146, 26%, 19%, 0.85);
+  --lobby-panel-glow: rgba(91, 255, 140, 0.22);
+  --lobby-scanline-tint: hsla(140, 100%, 70%, 0.05);
+  --lobby-vignette: hsla(150, 60%, 3%, 0.9);
+  --color-base: hsl(150, 35%, 14%);
+  --color-primary: hsl(140, 45%, 44%);
+  --button-color-transparent: hsla(140, 45%, 44%, 0.75);
+  --button-background-disabled: transparent;
   --progress-bar-background: hsla(0, 0%, 0%, 0.5);
   --secondary-lightness-adjustment: 6.33;
   --tooltip-background-lightness: 25;
@@ -77,6 +101,7 @@ img {
 .LobbyScreen--orange {
   --lobby-accent: hsl(30, 65%, 60%);
   --lobby-accent-bright: hsl(35, 85%, 76%);
+  --lobby-fg: #e9bd72;
   --lobby-accent-dim: hsla(30, 65%, 60%, 0.45);
   --lobby-accent-faint: hsla(30, 65%, 60%, 0.12);
   --lobby-panel-bg: hsla(25, 50%, 7%, 0.72);
@@ -87,6 +112,7 @@ img {
   --color-base: hsl(25, 35%, 16%);
   --color-primary: hsl(30, 45%, 42%);
   --button-color-transparent: hsla(30, 45%, 42%, 0.75);
+  --button-background-disabled: transparent;
   --progress-bar-background: hsla(0, 0%, 0%, 0.5);
   --secondary-lightness-adjustment: 6.33;
   --tooltip-background-lightness: 25;
@@ -249,6 +275,42 @@ img {
     color: var(--lobby-accent-bright);
     font-size: 0.75em;
   }
+}
+
+// Terminal-style buttons, matching the Horizon-Dream site controls
+.LobbyScreen .Button {
+  background-color: transparent;
+  color: var(--lobby-accent);
+  border: 1px solid var(--lobby-panel-border);
+  border-radius: 0;
+  box-shadow: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition-property:
+    background-color, color, border-color, box-shadow, opacity;
+}
+
+.LobbyScreen .Button:hover:not(.Button--disabled) {
+  background-color: var(--lobby-accent-faint);
+  color: var(--lobby-accent-bright);
+  border-color: var(--lobby-accent);
+  box-shadow: 0 0 10px var(--lobby-panel-glow);
+}
+
+.LobbyScreen .Button:active:not(.Button--disabled) {
+  background-color: var(--lobby-accent-dim);
+}
+
+.LobbyScreen .Button.Button--selected {
+  background-color: var(--lobby-accent-dim);
+  color: var(--lobby-accent-bright);
+  border-color: var(--lobby-accent);
+  box-shadow: 0 0 12px var(--lobby-panel-glow);
+}
+
+.LobbyScreen .Button.Button--disabled {
+  opacity: 0.35;
+  color: var(--lobby-accent-dim);
 }
 
 .hideButton {
