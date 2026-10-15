@@ -10,6 +10,24 @@
   animation: screen-flicker 9s steps(1, end) infinite;
 }
 
+.camera-rig {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--camera-pitch, 0deg)) rotateY(var(--camera-yaw, 0deg));
+  transform-origin: 50% 50%;
+  touch-action: none;
+  cursor: grab;
+  transition: transform 80ms linear;
+  will-change: transform;
+}
+
+.camera-rig.is-dragging {
+  cursor: grabbing;
+  transition: none;
+  user-select: none;
+}
+
 .core-center {
   position: absolute;
   z-index: 2;
@@ -27,6 +45,30 @@
   animation: pulse 8s ease-in-out infinite;
 }
 
+/* Keep the center dot facing the viewer as the orbital camera moves. */
+.camera-rig .core-center {
+  transform: translate(-50%, -50%)
+    rotateY(calc(0deg - var(--camera-yaw, 0deg)))
+    rotateX(calc(0deg - var(--camera-pitch, 0deg)));
+  animation: camera-facing-pulse 8s ease-in-out infinite;
+}
+
+@keyframes camera-facing-pulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%)
+      rotateY(calc(0deg - var(--camera-yaw, 0deg)))
+      rotateX(calc(0deg - var(--camera-pitch, 0deg))) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%)
+      rotateY(calc(0deg - var(--camera-yaw, 0deg)))
+      rotateX(calc(0deg - var(--camera-pitch, 0deg))) scale(1.3);
+  }
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 0.8;
@@ -36,5 +78,30 @@
   50% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1.3);
+  }
+}
+
+@media (max-width: 600px) {
+  .cosmic-core {
+    width: min(76vw, 42vh);
+    height: min(76vw, 42vh);
+    min-width: 250px;
+    min-height: 250px;
+    margin-bottom: 18px;
+  }
+
+  .core-center {
+    width: 14px;
+    height: 14px;
+    box-shadow:
+      0 0 20px 8px var(--accent),
+      0 0 52px 20px var(--glow),
+      0 0 95px 38px var(--glow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .camera-rig {
+    transition: none;
   }
 }
