@@ -1,7 +1,7 @@
 import { storage } from 'common/storage';
 import { useAtom, useAtomValue } from 'jotai';
 import { createUuid } from 'tgui-core/uuid';
-import { chatRenderer } from '../chat/renderer';
+import { forEachChatRenderer } from '../chat/renderer';
 import { defaultHighlightSetting, highlightsAtom, settingsAtom } from './atoms';
 import type { HighlightSetting, HighlightState } from './types';
 
@@ -16,9 +16,11 @@ export function useHighlights() {
       ...settings,
       ...update,
     });
-    chatRenderer.setHighlight(
-      update.highlightSettings,
-      update.highlightSettingById,
+    forEachChatRenderer((renderer) =>
+      renderer.setHighlight(
+        update.highlightSettings,
+        update.highlightSettingById,
+      ),
     );
   }
 

@@ -1,4 +1,4 @@
-import { chatRenderer } from '../../chat/renderer';
+import { forEachChatRenderer } from '../../chat/renderer';
 import {
   characterProfilesAtom,
   currentCharacterAtom,
@@ -22,6 +22,8 @@ export function playerSet(payload: PlayerSetPayload) {
   store.set(currentJobAtom, job);
   store.set(currentCharacterAtom, character);
   store.set(characterProfilesAtom, characters);
-  chatRenderer.setJob(job);
-  chatRenderer.setCharacter(character);
+  forEachChatRenderer((renderer) => {
+    renderer.setJob(job);
+    renderer.setCharacter(character);
+  });
 }

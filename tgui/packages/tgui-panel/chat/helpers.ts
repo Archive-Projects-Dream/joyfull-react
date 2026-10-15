@@ -6,12 +6,13 @@ import {
   chatPagesAtom,
   chatPagesRecordAtom,
   currentPageAtom,
+  detachedChatPanelsAtom,
   scrollTrackingAtom,
 } from './atom';
 import { MAX_PERSISTED_MESSAGES } from './constants';
 import { canPageAcceptType, serializeMessage } from './model';
 import { chatRenderer } from './renderer';
-import type { StoredChatSettings } from './types';
+import type { DetachedChatPanel, StoredChatSettings } from './types';
 
 chatRenderer.events.on(
   'batchProcessed',
@@ -30,34 +31,54 @@ function updateMessageCount(countByType: Record<string, number>): void {
   const pages = store.get(chatPagesAtom);
   const currentPage = store.get(currentPageAtom);
   const scrollTracking = store.get(scrollTrackingAtom);
+  const detachedPanels = store.get(detachedChatPanelsAtom);
 
   const draftpagesRecord = { ...pagesRecord };
 
-  for (const pageId of pages) {
-    const page = pagesRecord[pageId];
-    let unreadCount = 0;
-
-    for (const type in countByType) {
-      /// Message does not belong here
-      if (!canPageAcceptType(page, type)) continue;
-
-      // Current page scroll tracked
-      if (page === currentPage && scrollTracking) continue;
-
-      // This page received the same message which we can read on the current
-      // page
-      if (page !== currentPage && canPageAcceptType(currentPage, type)) {
+  const applyUnread = (
+    pageIds: string[],
+    currentPageId: string,
+    tracked: boolean,
+  ) => {
+    for (const pageId of pageIds) {
+      const page = pagesRecord[pageId];
+      if (!page) {
         continue;
       }
-      unreadCount += countByType[type];
-    }
+      let unreadCount = 0;
 
-    if (unreadCount > 0) {
-      draftpagesRecord[page.id] = {
-        ...page,
-        unreadCount: page.unreadCount + unreadCount,
-      };
+      for (const type in countByType) {
+        /// Message does not belong here
+        if (!canPageAcceptType(page, type)) continue;
+
+        // Current page scroll tracked
+        if (pageId === currentPageId && tracked) continue;
+
+        // This page received the same message which we can read on the current
+        // page
+        const current = pagesRecord[currentPageId];
+        if (
+          pageId !== currentPageId &&
+          current &&
+          canPageAcceptType(current, type)
+        ) {
+          continue;
+        }
+        unreadCount += countByType[type];
+      }
+
+      if (unreadCount > 0) {
+        draftpagesRecord[page.id] = {
+          ...page,
+          unreadCount: page.unreadCount + unreadCount,
+        };
+      }
     }
+  };
+
+  applyUnread(pages, currentPage?.id ?? 'main', scrollTracking);
+  for (const panel of detachedPanels) {
+    applyUnread(panel.pageIds, panel.currentPageId, !!panel.scrollTracking);
   }
 
   store.set(chatPagesRecordAtom, draftpagesRecord);
@@ -93,9 +114,16 @@ export function saveChatState(state: StoredChatSettings): void {
       },
     ]),
   );
+  const detachedPanels = (state.detachedPanels ?? []).map(
+    (panel: DetachedChatPanel) => {
+      const { scrollTracking, ...rest } = panel;
+      return rest;
+    },
+  );
 
   storage.set('chat-state', {
     ...state,
     pageById,
+    detachedPanels,
   });
 }

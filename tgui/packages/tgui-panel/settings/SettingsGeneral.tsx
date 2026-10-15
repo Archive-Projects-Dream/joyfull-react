@@ -11,7 +11,7 @@ import {
 } from 'tgui-core/components';
 import { toFixed } from 'tgui-core/math';
 import { capitalize } from 'tgui-core/string';
-import { chatRenderer } from '../chat/renderer';
+import { chatRenderer, forEachChatRenderer } from '../chat/renderer';
 import { CHAT_CORNERS, FONTS, THEMES } from './constants';
 import { resetPaneSplitters, setEditPaneSplitters } from './scaling';
 import { exportChatSettings, importChatSettings } from './settingsImExport';
@@ -95,9 +95,7 @@ export function SettingsGeneral(props) {
                 <Button
                   selected={settings.chatHoverStrip}
                   color="transparent"
-                  icon={
-                    settings.chatHoverStrip ? 'toggle-on' : 'toggle-off'
-                  }
+                  icon={settings.chatHoverStrip ? 'toggle-on' : 'toggle-off'}
                   onClick={() =>
                     updateSettings({ chatHoverStrip: !settings.chatHoverStrip })
                   }
@@ -271,7 +269,9 @@ export function SettingsGeneral(props) {
           <Button.Confirm
             icon="trash"
             tooltip="Erase current tab history"
-            onClick={() => chatRenderer.clearChat()}
+            onClick={() =>
+              forEachChatRenderer((renderer) => renderer.clearChat())
+            }
           >
             Clear chat
           </Button.Confirm>

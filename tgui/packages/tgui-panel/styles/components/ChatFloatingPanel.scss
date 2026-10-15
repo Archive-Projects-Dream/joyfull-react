@@ -1,0 +1,98 @@
+.ChatFloatingPanel {
+  position: fixed;
+  z-index: 200;
+}
+
+.ChatFloatingPanel .Window {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--border-radius-large);
+  box-shadow: 0 4px 16px hsla(225, 30%, 5%, 0.6);
+  overflow: hidden;
+}
+
+.ChatFloatingPanel .ResizeHandle {
+  position: absolute;
+  z-index: 20;
+}
+
+.ChatFloatingPanel .Chat__scrollButton {
+  position: absolute;
+  right: 1em;
+  bottom: 1em;
+}
+
+.ChatFloatingPanel__drag {
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.ChatFloatingPanel--merging .Window {
+  border-color: var(--color-text-translucent);
+  box-shadow: 0 0 12px hsla(225, 30%, 60%, 0.5);
+}
+
+.ChatTabDropIndicator {
+  width: 2px;
+  align-self: stretch;
+  margin: 2px 1px;
+  border-radius: 1px;
+  background-color: var(--color-text-translucent);
+}
+
+.Tab--dragging {
+  opacity: 0.4;
+}
+
+.Panel__header--mergeHint {
+  background-color: hsl(from var(--color-base) h s calc(l + 15) / 0.35);
+  outline: 1px dashed var(--color-text-translucent);
+  outline-offset: -2px;
+}
+
+body.onmap .ChatFloatingPanel .Chat {
+  margin-top: 0;
+}
+
+body.onmap .ChatFloatingPanel .Window {
+  overflow: hidden;
+}
+
+body.onmap.frameless .ChatFloatingPanel .Window {
+  background-color: var(--color-base);
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-base-start) 0%,
+    var(--color-base-end) 50%
+  );
+  border-color: var(--onmap-window-border);
+  box-shadow: 0 4px 16px hsla(225, 30%, 5%, 0.6);
+}
+
+body.onmap.frameless .ChatFloatingPanel .Section {
+  background-color: var(--color-section);
+}
+
+body.onmap.frameless .ChatFloatingPanel .Panel__header {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.onmap.frameless .ChatFloatingPanel .ResizeHandle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.onmap.frameless .ChatFloatingPanel .Chat__scrollButton {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.onmap.frameless .ChatFloatingPanel .ChatMessage {
+  opacity: 1;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}

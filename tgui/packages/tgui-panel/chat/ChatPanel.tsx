@@ -5,61 +5,82 @@
  */
 
 import { useAtom, useAtomValue } from 'jotai';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from 'tgui-core/components';
 import {
   chatPagesRecordAtom,
   chatReversedAtom,
   currentPageIdAtom,
-  scrollTrackingAtom,
 } from './atom';
-import { chatRenderer } from './renderer';
+import { type ChatRenderer, chatRenderer } from './renderer';
 import type { Page } from './types';
 
 type Props = {
   fontSize?: string;
   lineHeight: string | number;
+  renderer?: ChatRenderer;
+  scrollerRef?: React.RefObject<HTMLElement | null>;
+  pageId?: string;
+  reversed?: boolean;
 };
 
 export function ChatPanel(props: Props) {
+  const {
+    fontSize,
+    lineHeight,
+    renderer = chatRenderer,
+    scrollerRef,
+    pageId,
+  } = props;
   const ref = useRef<HTMLDivElement>(null);
-  const scrollTracking = useAtomValue(scrollTrackingAtom);
-  const reversed = useAtomValue(chatReversedAtom);
+  const atomReversed = useAtomValue(chatReversedAtom);
+  const reversed = props.reversed ?? atomReversed;
   // Page stuff
-  const currentPageId = useAtomValue(currentPageIdAtom);
+  const globalPageId = useAtomValue(currentPageIdAtom);
+  const currentId = pageId ?? globalPageId;
   const [pagesRecord, setPagesRecord] = useAtom(chatPagesRecordAtom);
+  const [scrollTracking, setScrollTracking] = useState(renderer.scrollTracking);
 
   /** Mounts the renderer */
   useEffect(() => {
     if (ref.current) {
-      chatRenderer.mount(ref.current);
+      renderer.mount(ref.current, scrollerRef?.current);
     }
-  }, []);
+    return () => renderer.unmount();
+  }, [renderer, scrollerRef]);
+
+  /** Keeps the scroll button in sync with the renderer's tracking state */
+  useEffect(() => {
+    const listener = (value: boolean) => setScrollTracking(value);
+    renderer.events.on('scrollTracking', listener);
+    setScrollTracking(renderer.scrollTracking);
+    return () => renderer.events.off('scrollTracking', listener);
+  }, [renderer]);
 
   /** Resets unread count when scroll tracking is enabled */
   useEffect(() => {
     if (scrollTracking) {
       const draft: Page = {
-        ...pagesRecord[currentPageId],
+        ...pagesRecord[currentId],
         unreadCount: 0,
       };
 
       setPagesRecord({
         ...pagesRecord,
-        [currentPageId]: draft,
+        [currentId]: draft,
       });
     }
   }, [scrollTracking]);
 
   /** Updates the style of the chat panel */
   useEffect(() => {
-    chatRenderer.assignStyle({
+    renderer.assignStyle({
       width: '100%',
       'white-space': 'pre-wrap',
-      'font-size': props.fontSize,
-      'line-height': props.lineHeight,
+      'font-size': fontSize,
+      'line-height': lineHeight,
     });
-  }, [props.fontSize, props.lineHeight]);
+  }, [renderer, fontSize, lineHeight]);
 
   return (
     <>
@@ -72,7 +93,7 @@ export function ChatPanel(props: Props) {
               : 'Chat__scrollButton'
           }
           icon={reversed ? 'arrow-up' : 'arrow-down'}
-          onClick={() => chatRenderer.scrollToBottom()}
+          onClick={() => renderer.scrollToBottom()}
         >
           {reversed ? 'Scroll to top' : 'Scroll to bottom'}
         </Button>

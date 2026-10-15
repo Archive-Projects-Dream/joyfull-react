@@ -5,12 +5,13 @@
  */
 
 import { useAtom, useAtomValue } from 'jotai';
-import { useEffect } from 'react';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Pane } from 'tgui/layouts';
 import { Button, Icon, Section, Stack } from 'tgui-core/components';
 import { visibleAtom } from './audio/atoms';
 import { NowPlayingWidget } from './audio/NowPlayingWidget';
+import { detachedChatPanelsAtom } from './chat/atom';
+import { ChatFloatingPanel } from './chat/ChatFloatingPanel';
 import { ChatPanel } from './chat/ChatPanel';
 import { ChatTabs } from './chat/ChatTabs';
 import {
@@ -25,9 +26,14 @@ import {
   setStripChromeHovered,
   startChatStripPeekResize,
 } from './chat/chat-hover-strip';
+import {
+  ResizeHandles,
+  startChatMove,
+  startPopupMove,
+} from './chat/ResizeHandles';
+import { chatRenderer } from './chat/renderer';
 import { useChatPersistence } from './chat/use-chat-persistence';
 import { useChatPlacement } from './chat/use-chat-placement';
-import { chatRenderer } from './chat/renderer';
 import { gameAtom } from './game/atoms';
 import { useKeepAlive } from './game/use-keep-alive';
 import { Notifications } from './Notifications';
@@ -36,11 +42,6 @@ import { ReconnectButton } from './reconnect';
 import { settingsVisibleAtom } from './settings/atoms';
 import { SettingsPanel } from './settings/SettingsPanel';
 import { useSettings } from './settings/use-settings';
-import {
-  ResizeHandles,
-  startChatMove,
-  startPopupMove,
-} from './chat/ResizeHandles';
 import { CommandBar } from './verbs/CommandBar';
 
 export function Panel(props) {
@@ -48,6 +49,7 @@ export function Panel(props) {
   const game = useAtomValue(gameAtom);
   const { settings, updateSettings } = useSettings();
   const [settingsVisible, setSettingsVisible] = useAtom(settingsVisibleAtom);
+  const detachedPanels = useAtomValue(detachedChatPanelsAtom);
   useChatPersistence();
   const { isOnMap, isPopup, chatCorner } = useChatPlacement();
   useKeepAlive();
@@ -86,8 +88,7 @@ export function Panel(props) {
     body.classList.toggle(
       'frameless-visible',
       hoverStrip
-        ? settingsVisible ||
-            (body.matches(':hover') && !isChatStripCollapsed())
+        ? settingsVisible || (body.matches(':hover') && !isChatStripCollapsed())
         : body.matches(':hover') || settingsVisible,
     );
     if (hoverStrip && !settingsVisible && !body.matches(':hover')) {
@@ -181,7 +182,7 @@ export function Panel(props) {
           <span className="ChatPeekEdge__pill" />
         </div>
       )}
-      <Pane theme={settings.theme} canSuspend={false}>
+      <Pane theme={settings.theme} canSuspend={false} className="Panel__window">
         {isOnMap && <ResizeHandles corner={chatCorner} />}
         {isPopup && (
           <>
@@ -203,60 +204,64 @@ export function Panel(props) {
                   <Stack.Item>
                     <PingIndicator />
                   </Stack.Item>
-                <Stack.Item>
-                  <Button
-                    color="transparent"
-                    icon={isOnMap ? 'columns' : 'window-maximize'}
-                    tooltip={isOnMap ? 'Switch to panel' : 'Switch to overlay'}
-                    tooltipPosition="bottom-start"
-                    onClick={() => {
-                      console.log(
-                        'panel/toggle_layout: sending, isOnMap =',
-                        isOnMap,
-                      );
-                      Byond.sendMessage('panel/toggle_layout');
-                    }}
-                  />
-                </Stack.Item>
-                {isOnMap && (
                   <Stack.Item>
                     <Button
                       color="transparent"
-                      icon={settings.chatFrameless ? 'eye-slash' : 'eye'}
+                      icon={isOnMap ? 'columns' : 'window-maximize'}
                       tooltip={
-                        settings.chatFrameless
-                          ? 'Show chat frame'
-                          : 'Hide chat frame'
+                        isOnMap ? 'Switch to panel' : 'Switch to overlay'
                       }
                       tooltipPosition="bottom-start"
-                      onClick={() =>
-                        updateSettings({
-                          chatFrameless: !settings.chatFrameless,
-                        })
-                      }
+                      onClick={() => {
+                        console.log(
+                          'panel/toggle_layout: sending, isOnMap =',
+                          isOnMap,
+                        );
+                        Byond.sendMessage('panel/toggle_layout');
+                      }}
                     />
                   </Stack.Item>
-                )}
-                <Stack.Item>
-                  <Button
-                    color="grey"
-                    selected={audioVisible}
-                    icon="music"
-                    tooltip="Music player"
-                    tooltipPosition="bottom-start"
-                    onClick={() => setAudioVisible((v) => !v)}
-                  />
-                </Stack.Item>
-                <Stack.Item>
-                  <Button
-                    icon={settingsVisible ? 'times' : 'cog'}
-                    selected={settingsVisible}
-                    tooltip={settingsVisible ? 'Close settings' : 'Open settings'}
-                    tooltipPosition="bottom-start"
-                    onClick={() => setSettingsVisible((v) => !v)}
-                  />
-                </Stack.Item>
-              </Stack>
+                  {isOnMap && (
+                    <Stack.Item>
+                      <Button
+                        color="transparent"
+                        icon={settings.chatFrameless ? 'eye-slash' : 'eye'}
+                        tooltip={
+                          settings.chatFrameless
+                            ? 'Show chat frame'
+                            : 'Hide chat frame'
+                        }
+                        tooltipPosition="bottom-start"
+                        onClick={() =>
+                          updateSettings({
+                            chatFrameless: !settings.chatFrameless,
+                          })
+                        }
+                      />
+                    </Stack.Item>
+                  )}
+                  <Stack.Item>
+                    <Button
+                      color="grey"
+                      selected={audioVisible}
+                      icon="music"
+                      tooltip="Music player"
+                      tooltipPosition="bottom-start"
+                      onClick={() => setAudioVisible((v) => !v)}
+                    />
+                  </Stack.Item>
+                  <Stack.Item>
+                    <Button
+                      icon={settingsVisible ? 'times' : 'cog'}
+                      selected={settingsVisible}
+                      tooltip={
+                        settingsVisible ? 'Close settings' : 'Open settings'
+                      }
+                      tooltipPosition="bottom-start"
+                      onClick={() => setSettingsVisible((v) => !v)}
+                    />
+                  </Stack.Item>
+                </Stack>
               </div>
             </Section>
           </Stack.Item>
@@ -298,6 +303,9 @@ export function Panel(props) {
           </Stack.Item>
         </Stack>
       </Pane>
+      {detachedPanels.map((panel) => (
+        <ChatFloatingPanel key={panel.id} panel={panel} />
+      ))}
     </>
   );
 }

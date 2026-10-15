@@ -3,7 +3,7 @@ import { smoothMerge } from 'common/type-safety';
 import { omit, pick } from 'es-toolkit';
 import { wsUpdate } from 'tgui-panel/websocket/helpers';
 import { setMusicVolume } from '../audio/handlers';
-import { chatRenderer } from '../chat/renderer';
+import { forEachChatRenderer } from '../chat/renderer';
 import { store } from '../events/store';
 import {
   defaultHighlightSetting,
@@ -140,9 +140,11 @@ export function startSettingsMigration(next: MergedSettings): void {
     return;
   }
 
-  chatRenderer.setHighlight(
-    migratedHighlights.highlightSettings,
-    migratedHighlights.highlightSettingById,
+  forEachChatRenderer((renderer) =>
+    renderer.setHighlight(
+      migratedHighlights.highlightSettings,
+      migratedHighlights.highlightSettingById,
+    ),
   );
   store.set(highlightsAtom, migratedHighlights);
   console.log('Migrated panel highlight settings:', migratedHighlights);

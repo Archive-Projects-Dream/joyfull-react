@@ -16,7 +16,7 @@ import {
 } from 'tgui-core/components';
 import { toFixed } from 'tgui-core/math';
 
-import { chatRenderer } from '../chat/renderer';
+import { forEachChatRenderer } from '../chat/renderer';
 import { characterProfilesAtom, currentCharacterAtom } from '../game/atoms';
 import { WARN_AFTER_HIGHLIGHT_AMT } from './constants';
 import { useHighlights } from './use-highlights';
@@ -58,7 +58,12 @@ export function TextHighlightSettings(props) {
       </Stack>
       <Divider />
       <Box>
-        <Button icon="check" onClick={() => chatRenderer.rebuildChat()}>
+        <Button
+          icon="check"
+          onClick={() =>
+            forEachChatRenderer((renderer) => renderer.rebuildChat())
+          }
+        >
           Apply now
         </Button>
         <Box inline fontSize="0.9em" ml={1} color="label">

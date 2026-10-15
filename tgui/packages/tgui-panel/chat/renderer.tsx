@@ -130,8 +130,8 @@ function isRadioChannelName(node: Text): boolean {
   const match = RADIO_CHANNEL_LABEL.exec(text);
   return Boolean(
     node.parentElement?.classList.contains('name') &&
-    match &&
-    match[0].length === text.length,
+      match &&
+      match[0].length === text.length,
   );
 }
 
@@ -160,7 +160,7 @@ function isSelfActionMessage(text: string): boolean {
 const FRAMELESS_MESSAGE_LINGER = 8000;
 const FRAMELESS_FADE_DURATION = 600;
 
-class ChatRenderer {
+export class ChatRenderer {
   loaded: boolean;
   rootNode: HTMLElement | null;
   queue: Array<any>;
@@ -179,9 +179,13 @@ class ChatRenderer {
   // Top-corner chats display the log reversed (newest at the corner) and
   // stick to the top of the scroller instead of the bottom
   reversed: boolean;
+  // The primary renderer drives the globally shared scroll tracking atom.
+  // Detached renderers keep their tracking state to themselves.
+  isPrimary: boolean;
   private framelessTimers: Map<HTMLElement, ReturnType<typeof setTimeout>>;
+  private pruneTimer: ReturnType<typeof setInterval> | null;
 
-  constructor() {
+  constructor(isPrimary = false) {
     this.loaded = false;
     this.rootNode = null;
     this.queue = [];
@@ -191,6 +195,7 @@ class ChatRenderer {
     this.events = new EventEmitter();
     this.frameless = false;
     this.reversed = false;
+    this.isPrimary = isPrimary;
     this.framelessTimers = new Map();
     // Scroll handler
 
@@ -206,6 +211,7 @@ class ChatRenderer {
       }
       // Frameless chat isn't scrollable while hidden, so never drop scroll tracking
       if (
+        this.isPrimary &&
         this.frameless &&
         !document.body.classList.contains('frameless-visible')
       ) {
@@ -222,20 +228,33 @@ class ChatRenderer {
         : Math.abs(height - bottom) < SCROLL_TRACKING_TOLERANCE ||
           this.lastScrollHeight === 0;
       if (scrollTracking !== this.scrollTracking) {
-        this.scrollTracking = scrollTracking;
-        store.set(scrollTrackingAtom, scrollTracking);
+        this.setScrollTracking(scrollTracking);
         logger.debug('tracking', this.scrollTracking);
       }
     };
     // Periodic message pruning
-    setInterval(() => this.pruneMessages(), MESSAGE_PRUNE_INTERVAL);
+    this.pruneTimer = setInterval(
+      () => this.pruneMessages(),
+      MESSAGE_PRUNE_INTERVAL,
+    );
+  }
+
+  private setScrollTracking(value: boolean) {
+    if (this.scrollTracking === value) {
+      return;
+    }
+    this.scrollTracking = value;
+    if (this.isPrimary) {
+      store.set(scrollTrackingAtom, value);
+    }
+    this.events.emit('scrollTracking', value);
   }
 
   isReady() {
     return this.loaded && this.rootNode && this.page;
   }
 
-  mount(node) {
+  mount(node, scrollNode?) {
     // Mount existing root node on top of the new node
     if (this.rootNode) {
       node.appendChild(this.rootNode);
@@ -245,13 +264,41 @@ class ChatRenderer {
       this.rootNode = node;
     }
     // Find scrollable parent
-    this.scrollNode = document.getElementById('chat-pane');
+    this.scrollNode = scrollNode ?? document.getElementById('chat-pane');
     this.scrollNode?.addEventListener('scroll', this.handleScroll);
     setTimeout(() => {
       this.scrollToBottom();
     });
     // Flush the queue
     this.tryFlushQueue();
+  }
+
+  unmount() {
+    if (this.scrollNode) {
+      this.scrollNode.removeEventListener('scroll', this.handleScroll);
+      this.scrollNode = null;
+    }
+  }
+
+  destroy() {
+    this.unmount();
+    if (this.pruneTimer !== null) {
+      clearInterval(this.pruneTimer);
+      this.pruneTimer = null;
+    }
+    for (const [node, timer] of this.framelessTimers) {
+      clearTimeout(timer);
+    }
+    this.framelessTimers.clear();
+    this.messages = [];
+    this.visibleMessages = [];
+    this.queue = [];
+  }
+
+  copyConfigFrom(other: ChatRenderer) {
+    this.highlightParsers = other.highlightParsers;
+    this.currentJob = other.currentJob;
+    this.currentCharacter = other.currentCharacter;
   }
 
   onStateLoaded() {
@@ -271,8 +318,7 @@ class ChatRenderer {
   setFrameless(value: boolean) {
     this.frameless = value;
     if (value) {
-      this.scrollTracking = true;
-      store.set(scrollTrackingAtom, true);
+      this.setScrollTracking(true);
       this.scrollToBottom();
       return;
     }
@@ -294,8 +340,7 @@ class ChatRenderer {
     }
     this.reversed = value;
     store.set(chatReversedAtom, value);
-    this.scrollTracking = true;
-    store.set(scrollTrackingAtom, true);
+    this.setScrollTracking(true);
     this.scrollToBottom();
   }
 
@@ -887,7 +932,28 @@ class ChatRenderer {
 // Make chat renderer global so that we can continue using the same
 // instance after hot code replacement.
 if (!window.__chatRenderer__) {
-  window.__chatRenderer__ = new ChatRenderer();
+  window.__chatRenderer__ = new ChatRenderer(true);
 }
 
 export const chatRenderer: ChatRenderer = window.__chatRenderer__;
+
+const chatRenderers: ChatRenderer[] = [chatRenderer];
+
+export function registerChatRenderer(renderer: ChatRenderer) {
+  if (!chatRenderers.includes(renderer)) {
+    chatRenderers.push(renderer);
+  }
+}
+
+export function unregisterChatRenderer(renderer: ChatRenderer) {
+  const index = chatRenderers.indexOf(renderer);
+  if (index >= 0) {
+    chatRenderers.splice(index, 1);
+  }
+}
+
+export function forEachChatRenderer(fn: (renderer: ChatRenderer) => void) {
+  for (const renderer of [...chatRenderers]) {
+    fn(renderer);
+  }
+}

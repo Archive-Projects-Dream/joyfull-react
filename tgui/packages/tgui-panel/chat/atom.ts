@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
 import { createMainPage } from './model';
+import type { DetachedChatPanel } from './types';
 
 export const mainPage = createMainPage();
 
@@ -12,6 +13,7 @@ export const currentPageIdAtom = atom(mainPage.id);
 export const chatPagesRecordAtom = atom({
   [mainPage.id]: mainPage,
 });
+export const detachedChatPanelsAtom = atom<DetachedChatPanel[]>([]);
 
 /** Chat has been initialized from storage */
 export const chatLoadedAtom = atom(false);
@@ -22,6 +24,7 @@ export const allChatAtom = atom((get) => ({
   scrollTracking: get(scrollTrackingAtom),
   pages: get(chatPagesAtom),
   pageById: get(chatPagesRecordAtom),
+  detachedPanels: get(detachedChatPanelsAtom),
 }));
 
 export const currentPageAtom = atom((get) => {

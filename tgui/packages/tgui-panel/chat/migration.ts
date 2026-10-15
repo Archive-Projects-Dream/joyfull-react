@@ -3,12 +3,14 @@ import {
   chatPagesAtom,
   chatPagesRecordAtom,
   currentPageIdAtom,
+  detachedChatPanelsAtom,
   mainPage,
   versionAtom,
 } from './atom';
 import { saveChatState } from './helpers';
 import { chatRenderer } from './renderer';
 import {
+  type DetachedChatPanel,
   type Page,
   type StoredChatSettings,
   storedSettingsSchema,
@@ -76,6 +78,7 @@ function normalizePageById(input: Record<string, any>): {
 function createOrderedPages(
   storedPages: string[],
   pageById: Record<string, any>,
+  excludedIds?: Set<string>,
 ): { pages: string[]; dirty: boolean } {
   const pageIds = new Set(Object.keys(pageById));
   const pages: string[] = [];
@@ -83,7 +86,7 @@ function createOrderedPages(
   let dirty = false;
 
   for (const id of storedPages) {
-    if (!pageIds.has(id) || seen.has(id)) {
+    if (!pageIds.has(id) || seen.has(id) || excludedIds?.has(id)) {
       dirty = true;
       continue;
     }
@@ -92,13 +95,79 @@ function createOrderedPages(
   }
 
   for (const id of Object.keys(pageById)) {
-    if (seen.has(id)) continue;
+    if (seen.has(id) || excludedIds?.has(id)) continue;
     seen.add(id);
     pages.push(id);
     dirty = true;
   }
 
   return { pages, dirty };
+}
+
+function normalizeDetachedPanels(
+  rawPanels: unknown,
+  pageById: Record<string, Page>,
+): { panels: DetachedChatPanel[]; claimedIds: Set<string>; dirty: boolean } {
+  const panels: DetachedChatPanel[] = [];
+  const claimedIds = new Set<string>();
+  let dirty = false;
+
+  if (!Array.isArray(rawPanels)) {
+    return { panels, claimedIds, dirty };
+  }
+
+  for (const rawPanel of rawPanels) {
+    if (!isRecord(rawPanel)) {
+      dirty = true;
+      continue;
+    }
+
+    const pageIds: string[] = [];
+    const rawPageIds = Array.isArray(rawPanel.pageIds) ? rawPanel.pageIds : [];
+    for (const id of rawPageIds) {
+      if (
+        typeof id !== 'string' ||
+        claimedIds.has(id) ||
+        !pageById[id] ||
+        pageById[id].isMain ||
+        id === mainPage.id
+      ) {
+        dirty = true;
+        continue;
+      }
+      claimedIds.add(id);
+      pageIds.push(id);
+    }
+
+    if (pageIds.length === 0) {
+      dirty = true;
+      continue;
+    }
+
+    let currentPageId =
+      typeof rawPanel.currentPageId === 'string' ? rawPanel.currentPageId : '';
+    if (!pageIds.includes(currentPageId)) {
+      currentPageId = pageIds[0];
+      dirty = true;
+    }
+
+    const x = Number(rawPanel.x) || 0;
+    const y = Number(rawPanel.y) || 0;
+    const width = Math.max(320, Number(rawPanel.width) || 320);
+    const height = Math.max(240, Number(rawPanel.height) || 240);
+
+    panels.push({
+      id: typeof rawPanel.id === 'string' ? rawPanel.id : '',
+      pageIds,
+      currentPageId,
+      x,
+      y,
+      width,
+      height,
+    });
+  }
+
+  return { panels, claimedIds, dirty };
 }
 
 export function normalizeChatSettings(loaded: StoredChatSettings): {
@@ -120,13 +189,24 @@ export function normalizeChatSettings(loaded: StoredChatSettings): {
     dirty = true;
   }
 
+  const {
+    panels: detachedPanels,
+    claimedIds,
+    dirty: panelsDirty,
+  } = normalizeDetachedPanels(loaded.detachedPanels, draft);
+  dirty ||= panelsDirty;
+
   // Remap `pages` according to any id changes.
   const remappedPages = loaded.pages.map((id) => idRemap[id] ?? id);
   if (remappedPages.some((id, idx) => id !== loaded.pages[idx])) {
     dirty = true;
   }
 
-  const { pages, dirty: pagesDirty } = createOrderedPages(remappedPages, draft);
+  const { pages, dirty: pagesDirty } = createOrderedPages(
+    remappedPages,
+    draft,
+    claimedIds,
+  );
   dirty ||= pagesDirty;
 
   // Ensures at least one page exists.
@@ -135,7 +215,7 @@ export function normalizeChatSettings(loaded: StoredChatSettings): {
 
   let currentPageId = idRemap[loaded.currentPageId] ?? loaded.currentPageId;
   if (currentPageId !== loaded.currentPageId) dirty = true;
-  if (!draft[currentPageId]) {
+  if (!draft[currentPageId] || claimedIds.has(currentPageId)) {
     currentPageId = normalizedPages[0];
     dirty = true;
   }
@@ -175,6 +255,7 @@ export function normalizeChatSettings(loaded: StoredChatSettings): {
       pages: normalizedPages,
       currentPageId,
       pageById: draft,
+      detachedPanels,
     },
     dirty,
   };
@@ -199,6 +280,7 @@ export function startChatStateMigration(state: StoredChatSettings): void {
   store.set(chatPagesAtom, loaded.pages);
   store.set(currentPageIdAtom, loaded.currentPageId);
   store.set(chatPagesRecordAtom, loaded.pageById);
+  store.set(detachedChatPanelsAtom, loaded.detachedPanels ?? []);
 
   chatRenderer.changePage(loaded.pageById[loaded.currentPageId]);
 

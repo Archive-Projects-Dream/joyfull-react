@@ -1,5 +1,5 @@
 import { createLogger } from 'tgui/logging';
-import { chatRenderer } from 'tgui-panel/chat/renderer';
+import { chatRenderer, forEachChatRenderer } from 'tgui-panel/chat/renderer';
 import { store } from 'tgui-panel/events/store';
 import { settingsAtom } from 'tgui-panel/settings/atoms';
 
@@ -19,13 +19,20 @@ let retryCount = 0;
 let manuallyClosed = false;
 
 function sendWSNotice(message, small = false) {
-  chatRenderer.processBatch([
-    {
-      html: small
-        ? `<span class='adminsay'>${message}</span>`
-        : `<div class="boxed_message"><center><span class='alertwarning'>${message}</span></center></div>`,
-    },
-  ]);
+  forEachChatRenderer((renderer) =>
+    renderer.processBatch(
+      [
+        {
+          html: small
+            ? `<span class='adminsay'>${message}</span>`
+            : `<div class="boxed_message"><center><span class='alertwarning'>${message}</span></center></div>`,
+        },
+      ],
+      {
+        notifyListeners: renderer === chatRenderer,
+      },
+    ),
+  );
 }
 
 function clearReconnectTimer() {

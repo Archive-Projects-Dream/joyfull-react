@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { chatRenderer } from './renderer';
+import { chatRenderer, forEachChatRenderer } from './renderer';
 
 const sequences: number[] = [];
 const sequences_requested: number[] = [];
@@ -13,7 +13,11 @@ type ChatMessage = z.infer<typeof messageSchema>;
 
 function pushMessage(message: ChatMessage): void {
   sequences.push(message.sequence);
-  chatRenderer.processBatch([message.content]);
+  forEachChatRenderer((renderer) =>
+    renderer.processBatch([message.content], {
+      notifyListeners: renderer === chatRenderer,
+    }),
+  );
 }
 
 export function chatMessage(payload: string): void {
