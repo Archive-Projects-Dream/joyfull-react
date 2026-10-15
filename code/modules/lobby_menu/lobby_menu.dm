@@ -34,6 +34,8 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	/// Bumped on every re-render to bust the client asset cache
 	var/preview_sequence = 0
 	var/list/preview_urls
+	/// Asset names registered by the latest preview render
+	var/list/preview_asset_names
 	var/preview_dirty = TRUE
 	var/issues_dirty = FALSE
 
@@ -48,6 +50,13 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	update_visibility()
 
 /datum/lobby_menu/Destroy(force)
+	// [HORIZON-ADD] A reconnect builds a fresh lobby_menu with a reset
+	// preview_sequence - drop our preview assets so re-registering the same
+	// names does not trip the asset cache's hash-conflict check.
+	for(var/asset_name in preview_asset_names)
+		SSassets.transport.unregister_asset(asset_name)
+	preview_asset_names = null
+	// [/HORIZON-ADD]
 	GLOB.lobby_menus -= src
 	STOP_PROCESSING(SSlobby_menu, src)
 	if(client)
@@ -436,11 +445,17 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 			player.make_me_an_observer()
 		if("character_setup")
 			var/datum/preferences/prefs = client.prefs
+			if(SSearly_assets.initialized != INITIALIZATION_INNEW_REGULAR)
+				to_chat(player, span_notice("Character setup is still loading, try again in a moment."))
+				return TRUE
 			prefs.current_window = PREFERENCE_TAB_CHARACTER_PREFERENCES
 			prefs.update_static_data(player)
 			prefs.ui_interact(player)
 		if("settings")
 			var/datum/preferences/prefs = client.prefs
+			if(SSearly_assets.initialized != INITIALIZATION_INNEW_REGULAR)
+				to_chat(player, span_notice("Game preferences are still loading, try again in a moment."))
+				return TRUE
 			prefs.current_window = PREFERENCE_TAB_GAME_PREFERENCES
 			prefs.update_static_data(player)
 			prefs.ui_interact(player)
@@ -514,13 +529,23 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 
 	var/list/new_urls = list()
 	preview_sequence += 1
+	// [HORIZON-ADD] The previous render's files already reached the client
+	// (urls are content-hashed), so their cache entries can be dropped; stale
+	// same-named entries left behind by a reconnect are cleared as well, which
+	// is what used to log hash-conflict errors on re-registration.
+	for(var/old_asset in preview_asset_names)
+		SSassets.transport.unregister_asset(old_asset)
+	preview_asset_names = list()
 	for(var/dir_name in LOBBY_PREVIEW_DIRS)
 		var/icon/flat = getFlatIcon(icon_source, LOBBY_PREVIEW_DIRS[dir_name])
 		if(!flat)
 			continue
 		var/asset_name = "lobby_preview_[client.ckey]_[preview_sequence]_[dir_name].png"
+		if(SSassets.cache[asset_name])
+			SSassets.transport.unregister_asset(asset_name)
 		SSassets.transport.register_asset(asset_name, flat)
 		SSassets.transport.send_assets(client, asset_name)
+		preview_asset_names += asset_name
 		new_urls[dir_name] = SSassets.transport.get_asset_url(asset_name)
 
 	qdel(mannequin)

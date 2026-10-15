@@ -174,6 +174,14 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		ui.set_autoupdate(FALSE)
 		ui.open()
 		character_preview_view.display_to(user, ui.window)
+	else if(isnull(character_preview_view) && ui.window)
+		// [HORIZON-ADD] The window outlived its preview map view (suspend or
+		// zombie-window races while client assets are still loading) - rebuild
+		// it instead of leaving the character preview broken for the session.
+		character_preview_view = create_character_preview_view(user)
+		character_preview_view.display_to(user, ui.window)
+		ui.send_full_update()
+		// [/HORIZON-ADD]
 
 /datum/preferences/ui_state(mob/user)
 	return GLOB.always_state
