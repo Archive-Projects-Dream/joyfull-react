@@ -177,8 +177,11 @@ export function LobbyMenu() {
         <Stack.Item>
           <Section
             p={3}
-            className="sectionLoad"
-            style={{ opacity: hidden ? '0' : '1' }}
+            className={classes([
+              'sectionLoad',
+              'menuCollapsible',
+              hidden && 'menuHidden',
+            ])}
           >
             <Stack vertical>
               <Stack.Item>
@@ -309,7 +312,12 @@ export function LobbyMenu() {
       </Stack>
 
       {hidden && (
-        <Box position="absolute" top="10px" left="10px" className="floating">
+        <Box
+          position="absolute"
+          top="10px"
+          left="10px"
+          className="floating floatingAppear"
+        >
           <Button
             icon="check"
             onClick={() => {

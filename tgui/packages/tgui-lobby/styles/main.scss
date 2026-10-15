@@ -120,24 +120,23 @@ img {
 
 .LobbyScreen {
   .typeEffect {
-    overflow: hidden;
     white-space: nowrap;
-    width: 0;
     text-align: center;
-    animation: typing 1s steps(20, end) forwards;
+    // Middle-out step reveal: the text keeps its exact centered position at
+    // every frame - no growing sliver, no left-anchored drift while typing
+    clip-path: inset(-4% 50% -4% 50%);
+    animation: type-reveal 0.9s steps(18, end) forwards;
     animation-delay: 1.3s;
   }
 
   .buttonEffect {
-    overflow: hidden;
-    white-space: nowrap;
-    width: 0;
-    animation: typing 1s steps(20, end) forwards;
+    clip-path: inset(-4% 50% -4% 50%);
+    animation: type-reveal 0.7s steps(14, end) forwards;
   }
 
   .dividerEffect {
-    width: 0;
-    animation: typing 1s steps(20, end) forwards;
+    opacity: 0;
+    animation: divider-appear 0.6s ease forwards;
     animation-delay: 1.5s;
   }
 
@@ -164,13 +163,13 @@ img {
   }
 }
 
-@keyframes typing {
+@keyframes type-reveal {
   from {
-    width: 0;
+    clip-path: inset(-4% 50% -4% 50%);
   }
 
   to {
-    width: 100%;
+    clip-path: inset(-4% -2% -4% -2%);
   }
 }
 
@@ -181,6 +180,28 @@ img {
 
   to {
     clip-path: inset(-20px);
+  }
+}
+
+@keyframes divider-appear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes floating-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -257,9 +278,17 @@ img {
 }
 
 .dividerEffect {
-  border-style: solid;
-  border-width: 1px;
-  border-color: var(--lobby-accent-dim);
+  height: 1px;
+  border: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--lobby-accent-dim) 20%,
+    var(--lobby-accent) 50%,
+    var(--lobby-accent-dim) 80%,
+    transparent
+  );
+  box-shadow: 0 0 8px var(--lobby-panel-glow);
 }
 
 .styledText {
@@ -317,8 +346,31 @@ img {
   margin-top: 0.5em;
 }
 
+// Hide Menu / restore: fade + slight scale, no layout jump
+.menuCollapsible {
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease,
+    visibility 0s linear 0s;
+}
+
+.menuCollapsible.menuHidden {
+  opacity: 0;
+  transform: scale(0.96) translateY(-8px);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    visibility 0s linear 0.3s;
+}
+
 .floating {
   z-index: 60;
+}
+
+.floatingAppear {
+  animation: floating-appear 0.3s ease-out both;
 }
 
 .lobby__panel-title {
