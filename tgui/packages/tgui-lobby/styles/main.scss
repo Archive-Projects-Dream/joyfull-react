@@ -325,23 +325,40 @@ img {
 
 // Brand lockup ported from the Horizon-Dream site: крупный полупрозрачный
 // водяной знак за текстом, подчёркивание под названием и свечение текста
+// Логотип теперь НАД окном меню, а не внутри него: свободный блок со
+// свечением как на сайте Horizon-Dream
 .brandLockup {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 260px;
-  padding: 1.2em 1.5em 1em;
+  margin: 0 auto 1.2em;
+  padding: 0.6em 2em 0.9em;
   isolation: isolate;
   animation: brand-appear 1.2s ease-out both,
     screen-flicker 9s steps(1, end) infinite;
+
+  // Мягкое свечение вокруг лого, как на сайте
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -3em -5em;
+    z-index: -1;
+    background: radial-gradient(
+      ellipse at center,
+      var(--lobby-glow) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
 }
 
 .brandLockup__logo {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 120px;
+  width: 170px;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   fill: var(--lobby-accent);

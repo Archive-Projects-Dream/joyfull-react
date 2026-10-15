@@ -217,6 +217,17 @@ export function LobbyMenu() {
 
       <Stack vertical height="100%" justify="space-around" align="center">
         <Stack.Item>
+          <div className="brandLockup">
+            <svg
+              className="brandLockup__logo"
+              viewBox="0 0 350 350"
+              focusable="false"
+            >
+              <path d="M230.9 257.5h26.7v20.7h-68.7V71.8h68.7v20.7h-26.7c-7.1 0-12.8 5.7-12.8 12.8v139.5c0 7.1 5.7 12.8 12.8 12.8ZM92.4 71.8v20.7h26.7c7.1 0 12.8 5.7 12.8 12.8v139.5c0 7.1-5.7 12.8-12.8 12.8h-26.7v20.7h68.7V71.8H92.4ZM92.4 188.7v27.6H0v-27.6h92.4ZM257.6 188.7v27.6h92.4v-27.6h-92.4ZM0 133.4v27.9h92.4v-27.9H0ZM257.6 133.4v27.9h92.4v-27.9h-92.4Z" />
+            </svg>
+            <div className="brandLockup__name">Horizon-Dream</div>
+            <div className="brandLockup__sub">// Beyond the station</div>
+          </div>
           <Section
             p={3}
             className={classes([
@@ -226,20 +237,6 @@ export function LobbyMenu() {
             ])}
           >
             <Stack vertical>
-              <Stack.Item>
-                <div className="brandLockup">
-                  <svg
-                    className="brandLockup__logo"
-                    viewBox="0 0 350 350"
-                    focusable="false"
-                  >
-                    <path d="M230.9 257.5h26.7v20.7h-68.7V71.8h68.7v20.7h-26.7c-7.1 0-12.8 5.7-12.8 12.8v139.5c0 7.1 5.7 12.8 12.8 12.8ZM92.4 71.8v20.7h26.7c7.1 0 12.8 5.7 12.8 12.8v139.5c0 7.1-5.7 12.8-12.8 12.8h-26.7v20.7h68.7V71.8H92.4ZM92.4 188.7v27.6H0v-27.6h92.4ZM257.6 188.7v27.6h92.4v-27.6h-92.4ZM0 133.4v27.9h92.4v-27.9H0ZM257.6 133.4v27.9h92.4v-27.9h-92.4Z" />
-                  </svg>
-                  <div className="brandLockup__name">Horizon-Dream</div>
-                  <div className="brandLockup__sub">// Beyond the station</div>
-                </div>
-              </Stack.Item>
-
               <Stack.Item>
                 <Stack vertical align="center" className="welcomeHolder">
                   <Stack.Item>
