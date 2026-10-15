@@ -56,6 +56,17 @@ img {
   }
 }
 
+// Лёгкая покраска фона под цвет темы (основа фона как на сайте Horizon-Dream),
+// выключается в настройках лобби — по аналогии с CRT-фильтром
+.LobbyScreen--bgTint {
+  background-color: var(--lobby-tint-bg, #000);
+  background-image: radial-gradient(
+    ellipse at 50% 42%,
+    var(--lobby-tint-glow) 0%,
+    transparent 65%
+  );
+}
+
 // Blue palette
 .LobbyScreen--blue {
   --lobby-accent: hsl(207, 60%, 62%);
@@ -78,6 +89,8 @@ img {
   --lobby-glow: rgba(54, 132, 255, 0.16);
   --lobby-line: #243d68;
   --lobby-dim: #6984b0;
+  --lobby-tint-bg: #030711;
+  --lobby-tint-glow: rgba(54, 132, 255, 0.06);
 }
 
 // Green palette (the Horizon-Dream site "green" phosphor, exact site colors)
@@ -102,6 +115,8 @@ img {
   --lobby-glow: rgba(91, 255, 140, 0.11);
   --lobby-line: #243d2d;
   --lobby-dim: #668773;
+  --lobby-tint-bg: #040806;
+  --lobby-tint-glow: rgba(91, 255, 140, 0.05);
 }
 
 // Orange palette
@@ -126,6 +141,8 @@ img {
   --lobby-glow: rgba(255, 174, 58, 0.12);
   --lobby-line: #4a3820;
   --lobby-dim: #967849;
+  --lobby-tint-bg: #090704;
+  --lobby-tint-glow: rgba(255, 174, 58, 0.05);
 }
 
 // Phosphor swap blink, ported from the Horizon-Dream site (the .theme-swap
