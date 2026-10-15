@@ -43,6 +43,8 @@ img {
   line-height: 100%;
   font-size: large;
   animation: lobby-fade-in 0.5s ease-out both;
+  // Phosphor swap blink, mirroring the Horizon-Dream site theme switch
+  transition: filter 0.12s ease;
 
   &--transparent {
     background: transparent !important;
@@ -74,7 +76,6 @@ img {
   --secondary-lightness-adjustment: 6.33;
   --tooltip-background-lightness: 25;
 }
-
 
 // Green palette (the Horizon-Dream site "green" phosphor, exact site colors)
 .LobbyScreen--green {
@@ -116,6 +117,12 @@ img {
   --progress-bar-background: hsla(0, 0%, 0%, 0.5);
   --secondary-lightness-adjustment: 6.33;
   --tooltip-background-lightness: 25;
+}
+
+// Phosphor swap blink, ported from the Horizon-Dream site (the .theme-swap
+// brightness dip). Transition based, so it never restarts the fade-in.
+.LobbyScreen--themeSwap {
+  filter: brightness(0.2);
 }
 
 .LobbyScreen {
@@ -163,16 +170,6 @@ img {
   }
 }
 
-@keyframes type-reveal {
-  from {
-    clip-path: inset(-4% 50% -4% 50%);
-  }
-
-  to {
-    clip-path: inset(-4% -2% -4% -2%);
-  }
-}
-
 @keyframes section-loading {
   from {
     clip-path: inset(0 0 100% 0);
@@ -183,7 +180,28 @@ img {
   }
 }
 
+// Terminal decode-style reveal used by the welcome text and menu buttons
+@keyframes type-reveal {
+  from {
+    clip-path: inset(-4% 50% -4% 50%);
+  }
+
+  to {
+    clip-path: inset(-4% -2% -4% -2%);
+  }
+}
+
 @keyframes divider-appear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes brand-appear {
   from {
     opacity: 0;
   }
@@ -205,46 +223,30 @@ img {
   }
 }
 
-.LobbyScreen.filterEnabled {
-  box-shadow: 0 0 15px var(--lobby-panel-glow);
+// Occasional CRT jolt, straight from the Horizon-Dream site
+@keyframes screen-flicker {
+  0%,
+  89%,
+  91%,
+  96%,
+  to {
+    opacity: 1;
+    transform: translate(0);
+  }
 
-  .crt {
-    &::before {
-      content: ' ';
-      display: block;
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(hsla(0, 0%, 0%, 0) 50%, hsla(0, 0%, 0%, 0.25) 50%),
-        linear-gradient(
-          90deg,
-          var(--lobby-scanline-tint),
-          transparent,
-          var(--lobby-scanline-tint)
-        );
-      background-size:
-        100% 8px,
-        6px 100%;
-      z-index: 2;
-      pointer-events: none;
-    }
+  90% {
+    opacity: 0.82;
+    transform: translate(1px);
+  }
 
-    &::after {
-      content: ' ';
-      display: block;
-      position: absolute;
-      inset: 0;
-      background: hsla(0, 0%, 0%, 0.1);
-      opacity: 0;
-      z-index: 2;
-      pointer-events: none;
-    }
-
-    @supports (not (-webkit-hyphens: none)) and (not (-moz-appearance: none)) {
-      box-shadow: 0 0 500px 25px var(--lobby-vignette) inset;
-    }
+  95% {
+    opacity: 0.93;
+    transform: translate(-1px);
   }
 }
+
+// CRT stack ported from the Horizon-Dream site. The overlays only mount
+// while the CRT filter is on (see LobbyMenu.tsx), no extra gating needed.
 
 .bgBackground {
   position: absolute;
@@ -270,11 +272,94 @@ img {
   inset: 0;
   z-index: 2;
   pointer-events: none;
+  opacity: 0.23;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 3px,
+    rgba(0, 0, 0, 0.68) 4px 5px
+  );
+}
+
+.crtNoise {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.crtVignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 48%,
+    transparent 20%,
+    rgba(0, 0, 0, 0.35) 74%,
+    rgba(0, 0, 0, 0.85) 120%
+  );
+}
+
+.crtStars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .welcomeHolder {
   min-width: 260px;
   text-align: center;
+}
+
+// Brand lockup ported from the Horizon-Dream site
+.brandLockup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 260px;
+  padding: 1.6em 1.5em 1.2em;
+  isolation: isolate;
+  animation: brand-appear 1.2s ease-out both,
+    screen-flicker 9s steps(1, end) infinite;
+}
+
+.brandLockup__logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 88px;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  fill: var(--lobby-accent);
+  opacity: 0.13;
+  filter: drop-shadow(0 0 18px var(--lobby-panel-glow));
+  pointer-events: none;
+}
+
+.brandLockup__name {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0.6em;
+  color: var(--lobby-fg, #fff);
+  font-size: 15px;
+  letter-spacing: 8px;
+  text-indent: 8px;
+  text-transform: uppercase;
+  text-shadow: 0 0 18px var(--lobby-panel-glow);
+}
+
+.brandLockup__sub {
+  position: relative;
+  z-index: 1;
+  color: var(--lobby-accent-dim);
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-indent: 4px;
+  text-transform: uppercase;
 }
 
 .dividerEffect {

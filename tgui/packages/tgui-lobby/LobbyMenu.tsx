@@ -56,6 +56,23 @@ const GAME_PHASE_TEXT: Record<ServerState['gamePhase'], string> = {
   postgame: 'Round ended',
 };
 
+/** Starfield colors and backdrops per theme, ported from the Horizon site */
+const STAR_COLORS: Record<LobbyTheme, [number, number, number]> = {
+  green: [166, 255, 190],
+  blue: [136, 190, 255],
+  orange: [255, 207, 142],
+};
+
+const STAR_BACKGROUNDS: Record<LobbyTheme, string> = {
+  green: '#040806',
+  blue: '#030711',
+  orange: '#090704',
+};
+
+const STAR_COUNT = 260;
+const STAR_DEPTH = 1500;
+const STAR_SPEED = 5.5;
+
 function sendAction(action: string, payload?: Record<string, unknown>) {
   Byond.sendMessage('action', { action, ...payload });
 }
@@ -77,6 +94,7 @@ export function LobbyMenu() {
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [soundsOn, setSoundsOn] = useState(true);
   const [hidden, setHidden] = useState(false);
+  const [themeFlash, setThemeFlash] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -136,6 +154,18 @@ export function LobbyMenu() {
     return null;
   }
 
+  // Repaints the theme and blinks the screen the same way the Horizon-Dream
+  // site does when swapping phosphor modes
+  const pickTheme = (next: LobbyTheme) => {
+    playSelectSound();
+    setTheme(next);
+    storage.set(THEME_STORAGE_KEY, next);
+    if (next !== theme) {
+      setThemeFlash(true);
+      window.setTimeout(() => setThemeFlash(false), 160);
+    }
+  };
+
   const crtFilter = !filterDisabled;
   const pregame = ss.gamePhase === 'pregame' || ss.gamePhase === 'startup';
   const typingDelay = (index: number) =>
@@ -149,9 +179,15 @@ export function LobbyMenu() {
         crtFilter && 'filterEnabled',
         animationsDisabled && 'noAnimation',
         fadingOut && 'lobbyFadeOut',
+        themeFlash && 'LobbyScreen--themeSwap',
         ss.transparent && 'LobbyScreen--transparent',
       ])}
     >
+      {crtFilter &&
+        !ss.transparent &&
+        !ss.backgroundUrl &&
+        !(videoEnabled && ss.videoUrl) && <Starfield theme={theme} />}
+
       {!ss.transparent && ss.backgroundUrl && (
         <div
           className="bgBackground bgLoad"
@@ -171,7 +207,13 @@ export function LobbyMenu() {
         />
       )}
 
-      {crtFilter && !ss.transparent && <div className="crt" />}
+      {crtFilter && !ss.transparent && (
+        <>
+          <div className="crt" />
+          <div className="crtNoise" />
+          <div className="crtVignette" />
+        </>
+      )}
 
       <Stack vertical height="100%" justify="space-around" align="center">
         <Stack.Item>
@@ -184,6 +226,20 @@ export function LobbyMenu() {
             ])}
           >
             <Stack vertical>
+              <Stack.Item>
+                <div className="brandLockup">
+                  <svg
+                    className="brandLockup__logo"
+                    viewBox="0 0 350 350"
+                    focusable="false"
+                  >
+                    <path d="M230.9 257.5h26.7v20.7h-68.7V71.8h68.7v20.7h-26.7c-7.1 0-12.8 5.7-12.8 12.8v139.5c0 7.1 5.7 12.8 12.8 12.8ZM92.4 71.8v20.7h26.7c7.1 0 12.8 5.7 12.8 12.8v139.5c0 7.1-5.7 12.8-12.8 12.8h-26.7v20.7h68.7V71.8H92.4ZM92.4 188.7v27.6H0v-27.6h92.4ZM257.6 188.7v27.6h92.4v-27.6h-92.4ZM0 133.4v27.9h92.4v-27.9H0ZM257.6 133.4v27.9h92.4v-27.9h-92.4Z" />
+                  </svg>
+                  <div className="brandLockup__name">Horizon-Dream</div>
+                  <div className="brandLockup__sub">// Beyond the station</div>
+                </div>
+              </Stack.Item>
+
               <Stack.Item>
                 <Stack vertical align="center" className="welcomeHolder">
                   <Stack.Item>
@@ -339,7 +395,7 @@ export function LobbyMenu() {
         filterDisabled={filterDisabled}
         setFilterDisabled={setFilterDisabled}
         theme={theme}
-        setTheme={setTheme}
+        pickTheme={pickTheme}
         videoEnabled={videoEnabled}
         setVideoEnabled={setVideoEnabled}
         soundsOn={soundsOn}
@@ -509,7 +565,7 @@ function LobbySettings({
   filterDisabled,
   setFilterDisabled,
   theme,
-  setTheme,
+  pickTheme,
   videoEnabled,
   setVideoEnabled,
   soundsOn,
@@ -519,19 +575,13 @@ function LobbySettings({
   filterDisabled: boolean;
   setFilterDisabled: (value: boolean) => void;
   theme: LobbyTheme;
-  setTheme: (value: LobbyTheme) => void;
+  pickTheme: (value: LobbyTheme) => void;
   videoEnabled: boolean;
   setVideoEnabled: (value: boolean) => void;
   soundsOn: boolean;
   setSoundsOn: (value: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
-
-  const pickTheme = (next: LobbyTheme) => {
-    playSelectSound();
-    setTheme(next);
-    storage.set(THEME_STORAGE_KEY, next);
-  };
 
   return (
     <>
@@ -670,4 +720,98 @@ function SettingsRow({
       </Stack>
     </Stack.Item>
   );
+}
+
+/** Warp starfield canvas, ported from the Horizon-Dream site */
+function Starfield({ theme }: { theme: LobbyTheme }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return;
+    }
+    const ctx = canvas.getContext('2d', { alpha: false });
+    if (!ctx) {
+      return;
+    }
+
+    const [starR, starG, starB] = STAR_COLORS[theme];
+    const background = STAR_BACKGROUNDS[theme];
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+
+    let width = 0;
+    let height = 0;
+    let centerX = 0;
+    let centerY = 0;
+    let raf = 0;
+
+    type Star = { x: number; y: number; z: number; pz: number };
+    const stars: Star[] = [];
+
+    const resetStar = (star: Star, initial: boolean) => {
+      star.x = (Math.random() - 0.5) * width * 3.5;
+      star.y = (Math.random() - 0.5) * height * 3.5;
+      star.z = initial ? Math.random() * STAR_DEPTH : STAR_DEPTH;
+      star.pz = star.z;
+    };
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      centerX = width / 2;
+      centerY = height / 2;
+    };
+
+    const drawFrame = () => {
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, width, height);
+      for (const star of stars) {
+        star.pz = star.z;
+        star.z -= STAR_SPEED;
+        if (star.z < 2) {
+          resetStar(star, false);
+        }
+        const sx = (star.x / star.z) * centerX + centerX;
+        const sy = (star.y / star.z) * centerY + centerY;
+        const px = (star.x / star.pz) * centerX + centerX;
+        const py = (star.y / star.pz) * centerY + centerY;
+        const shade = 1 - star.z / STAR_DEPTH;
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(sx, sy);
+        ctx.strokeStyle = `rgba(${starR},${starG},${starB},${shade * 0.8})`;
+        ctx.lineWidth = Math.max(0.4, shade * 2);
+        ctx.stroke();
+      }
+      if (!reducedMotion) {
+        raf = requestAnimationFrame(drawFrame);
+      }
+    };
+
+    resize();
+    stars.length = 0;
+    for (let i = 0; i < STAR_COUNT; i++) {
+      const star: Star = { x: 0, y: 0, z: 0, pz: 0 };
+      resetStar(star, true);
+      stars.push(star);
+    }
+    drawFrame();
+
+    window.addEventListener('resize', resize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+    };
+  }, [theme]);
+
+  return <canvas className="crtStars" ref={canvasRef} />;
 }
