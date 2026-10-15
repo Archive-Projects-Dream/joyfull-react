@@ -1,8 +1,8 @@
 export function initTheme(warpRedraw) {
-  const themeButtons = [...document.querySelectorAll('[data-theme]')];
+  const themeButtons = [...document.querySelectorAll('button[data-theme]')];
   let swapping = false;
 
-  themeButtons.forEach(button => {
+  themeButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const theme = button.dataset.theme;
       if (swapping || document.body.dataset.theme === theme) return;
@@ -10,10 +10,13 @@ export function initTheme(warpRedraw) {
       swapping = true;
       document.body.classList.add('theme-swap');
 
-      setTimeout(() => {
+      window.setTimeout(() => {
         document.body.dataset.theme = theme;
-        themeButtons.forEach(b => b.setAttribute('aria-pressed', String(b === button)));
-        if (warpRedraw) warpRedraw(); // Перерисовываем канвас с новыми цветами
+        themeButtons.forEach((item) => {
+          item.setAttribute('aria-pressed', String(item === button));
+        });
+
+        if (warpRedraw) warpRedraw();
         document.body.classList.remove('theme-swap');
         swapping = false;
       }, 200);

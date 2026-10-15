@@ -12,7 +12,7 @@
   --scan: 0.23;
 }
 
-[data-theme="green"] {
+body[data-theme='green'] {
   --bg: #040806;
   --fg: #c4e2cc;
   --dim: #668773;
@@ -24,14 +24,16 @@
   --star-b: 190;
 }
 
-[data-theme="blue"] {
-  --bg: #04060a;
-  --fg: #c4d4e2;
-  --dim: #667a87;
-  --line: #24303d;
-  --accent: #a7d4f0;
-  --glow: rgba(91, 180, 255, 0.11);
-  --star-r: 142;
+body[data-theme='blue'] {
+  --bg: #030711;
+  --fg: #c5dcff;
+  --dim: #6984b0;
+  --line: #243d68;
+  --accent: #72b2ff;
+  --glow: rgba(54, 132, 255, 0.16);
+  --star-r: 136;
   --star-g: 190;
   --star-b: 255;
 }
+
+$mobile-breakpoint: 600px;

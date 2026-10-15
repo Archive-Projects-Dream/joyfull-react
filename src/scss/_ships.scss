@@ -1,0 +1,84 @@
+.ships-layer {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ship {
+  position: absolute;
+  width: 25px;
+  height: 8px;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 9px var(--glow));
+  will-change: left, top, transform, opacity;
+
+  &::before {
+    position: absolute;
+    top: 1px;
+    left: 8px;
+    width: 15px;
+    height: 6px;
+    background: linear-gradient(90deg, var(--dim), var(--accent) 70%, var(--fg));
+    clip-path: polygon(0 35%, 60% 35%, 80% 0, 100% 50%, 80% 100%, 60% 65%, 0 65%);
+    content: '';
+  }
+
+  &::after {
+    position: absolute;
+    top: 3px;
+    left: -8px;
+    width: 17px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent));
+    box-shadow: 0 0 5px var(--glow);
+    content: '';
+  }
+}
+
+.ship--a {
+  animation: ship-route-a 22s linear infinite;
+}
+
+.ship--b {
+  animation: ship-route-b 28s linear infinite -9s;
+}
+
+.ship--c {
+  animation: ship-route-c 25s linear infinite -17s;
+}
+
+@keyframes ship-route-a {
+  0% { left: 9%; top: 30%; transform: rotate(20deg) scale(0.75); opacity: 0; }
+  5% { opacity: 0.95; }
+  21% { left: 31%; top: 23%; transform: rotate(10deg) scale(1); }
+  37% { left: 48%; top: 34%; transform: rotate(33deg); }
+  52% { left: 63%; top: 49%; transform: rotate(56deg); }
+  66% { left: 72%; top: 67%; transform: rotate(100deg); }
+  79% { left: 55%; top: 75%; transform: rotate(174deg); }
+  92% { left: 30%; top: 55%; transform: rotate(220deg); opacity: 0.95; }
+  100% { left: 9%; top: 30%; transform: rotate(20deg) scale(0.75); opacity: 0; }
+}
+
+@keyframes ship-route-b {
+  0% { left: 78%; top: 26%; transform: rotate(145deg) scale(0.7); opacity: 0; }
+  7% { left: 71%; top: 34%; transform: rotate(150deg) scale(1); opacity: 0.8; }
+  22% { left: 60%; top: 43%; transform: rotate(165deg); }
+  37% { left: 48%; top: 51%; transform: rotate(195deg); }
+  52% { left: 33%; top: 53%; transform: rotate(220deg); }
+  67% { left: 22%; top: 43%; transform: rotate(255deg); }
+  80% { left: 34%; top: 33%; transform: rotate(310deg); }
+  91% { left: 57%; top: 37%; transform: rotate(345deg); opacity: 0.8; }
+  100% { left: 78%; top: 26%; transform: rotate(385deg) scale(0.7); opacity: 0; }
+}
+
+@keyframes ship-route-c {
+  0% { left: 20%; top: 76%; transform: rotate(300deg) scale(0.55); opacity: 0; }
+  9% { opacity: 0.65; }
+  28% { left: 35%; top: 62%; transform: rotate(320deg) scale(0.7); }
+  46% { left: 49%; top: 46%; transform: rotate(335deg); }
+  64% { left: 62%; top: 34%; transform: rotate(350deg); }
+  83% { left: 78%; top: 39%; transform: rotate(25deg); opacity: 0.65; }
+  100% { left: 20%; top: 76%; transform: rotate(60deg) scale(0.55); opacity: 0; }
+}

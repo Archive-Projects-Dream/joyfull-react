@@ -1,5 +1,7 @@
-@import 'scss/variables';
-@import 'scss/base';
-@import 'scss/effects';
-@import 'scss/core';
-@import 'scss/layout';
+@use './scss/variables';
+@use './scss/base';
+@use './scss/effects';
+@use './scss/core';
+@use './scss/orbits';
+@use './scss/ships';
+@use './scss/layout';

@@ -1,9 +1,11 @@
+@use 'variables' as vars;
+
 .header {
   position: fixed;
   z-index: 5;
   top: 22px;
-  left: clamp(18px, 3.2vw, 42px);
   right: clamp(18px, 3.2vw, 42px);
+  left: clamp(18px, 3.2vw, 42px);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -13,50 +15,58 @@
   letter-spacing: 2px;
   text-transform: uppercase;
   animation: appear 1.5s ease-out both;
+}
 
-  .live-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    margin-right: 8px;
-    box-shadow: 0 0 8px var(--accent);
-    animation: blink 2s ease-in-out infinite;
-  }
+.header__system {
+  display: flex;
+  align-items: center;
+}
+
+.live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: blink 2s ease-in-out infinite;
 }
 
 .controls {
   position: fixed;
+  z-index: 10;
   top: 54px;
   right: clamp(18px, 3.2vw, 42px);
-  z-index: 10;
   display: flex;
   align-items: center;
   gap: 5px;
   padding: 6px;
   border: 1px solid var(--line);
-  background: rgba(0,0,0,0.24);
+  background: rgba(0, 0, 0, 0.24);
   backdrop-filter: blur(8px);
   color: var(--dim);
   font-size: 9px;
   letter-spacing: 1.2px;
 
-  &-label { padding: 0 5px; }
+  &__label {
+    padding: 0 5px;
+  }
 
   button {
+    padding: 6px 7px;
     border: 1px solid transparent;
     background: transparent;
     color: var(--dim);
     font: inherit;
     letter-spacing: inherit;
-    padding: 6px 7px;
     cursor: pointer;
     transition: color 0.2s, border-color 0.2s;
 
-    &[aria-pressed="true"], &:hover {
-      color: var(--accent);
+    &[aria-pressed='true'],
+    &:hover {
       border-color: var(--line);
+      color: var(--accent);
     }
 
     &:focus-visible {
@@ -78,66 +88,94 @@
   animation: appear 2s ease-out both;
 }
 
+.brand-lockup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  isolation: isolate;
+  min-width: 290px;
+  padding: 16px 24px 18px;
+}
+
+.brand-lockup__logo {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: min(28vw, 120px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  fill: var(--accent);
+  opacity: 0.13;
+  pointer-events: none;
+}
+
 .project-name {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 9px;
+  color: var(--fg);
   font-size: 12px;
   letter-spacing: 8px;
-  color: var(--fg);
-  text-transform: uppercase;
-  margin: 0 0 9px;
   text-shadow: 0 0 18px var(--glow);
+  text-transform: uppercase;
 }
 
 .project-sub {
+  position: relative;
+  z-index: 1;
+  color: var(--dim);
   font-size: 9px;
   letter-spacing: 4px;
-  color: var(--dim);
   text-transform: uppercase;
 }
 
 .footer {
   position: fixed;
+  z-index: 5;
+  right: 0;
   bottom: 28px;
   left: 0;
-  right: 0;
-  z-index: 5;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
   animation: appear 2.4s ease-out both;
 }
 
 .link-item {
   position: relative;
-  text-decoration: none;
+  padding: 8px 20px;
   color: var(--dim);
   font-size: 11px;
   letter-spacing: 3px;
+  text-decoration: none;
   text-transform: uppercase;
-  padding: 8px 20px;
-  transition: color 0.25s, letter-spacing 0.25s;
   text-shadow: 0 0 0 transparent;
+  transition: color 0.25s, letter-spacing 0.25s;
 
   &::after {
-    content: "";
     position: absolute;
-    left: 50%;
+    right: 50%;
     bottom: 0;
-    width: 0;
+    left: 50%;
     height: 1px;
     background: var(--accent);
     box-shadow: 0 0 6px var(--accent);
-    transition: width 0.25s, left 0.25s;
+    content: '';
+    transition: left 0.25s, right 0.25s;
   }
 
-  &:hover, &:focus-visible {
+  &:hover,
+  &:focus-visible {
     color: var(--accent);
     letter-spacing: 4px;
     text-shadow: 0 0 10px var(--glow);
     outline: none;
 
     &::after {
-      width: 100%;
+      right: 0;
       left: 0;
     }
   }
@@ -149,27 +187,37 @@
   user-select: none;
 }
 
-// Адаптив
-@media (max-width: 600px) {
+@media (max-width: vars.$mobile-breakpoint) {
   .header {
     top: 15px;
+    gap: 8px;
     font-size: 8px;
     letter-spacing: 1px;
-    gap: 8px;
-    div:last-child { display: none; }
+  }
+
+  .header__status {
+    display: none;
   }
 
   .controls {
     top: 42px;
-    left: 18px;
     right: 18px;
+    left: 18px;
     justify-content: center;
     font-size: 8px;
-    &-label { display: none; }
-    button { padding: 6px; }
+
+    &__label {
+      display: none;
+    }
+
+    button {
+      padding: 6px;
+    }
   }
 
-  .container { padding: 105px 12px 112px; }
+  .container {
+    padding: 105px 12px 112px;
+  }
 
   .cosmic-core {
     width: min(76vw, 42vh);
@@ -182,21 +230,47 @@
   .core-center {
     width: 14px;
     height: 14px;
-    box-shadow: 0 0 20px 8px var(--accent), 0 0 52px 20px var(--glow), 0 0 95px 38px var(--glow);
+    box-shadow:
+      0 0 20px 8px var(--accent),
+      0 0 52px 20px var(--glow),
+      0 0 95px 38px var(--glow);
   }
 
-  .project-name { font-size: 10px; letter-spacing: 5px; }
-  .project-sub { font-size: 8px; letter-spacing: 2px; }
+  .brand-lockup {
+    min-width: 0;
+    padding: 12px 15px;
+  }
 
-  .footer { bottom: 15px; gap: 7px 0; }
-  .link-item { font-size: 9px; letter-spacing: 1.5px; padding: 8px 11px; }
-  .separator { font-size: 8px; }
-}
+  .brand-lockup__logo {
+    width: min(30vw, 96px);
+  }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  .project-name {
+    font-size: 10px;
+    letter-spacing: 5px;
+  }
+
+  .project-sub {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+
+  .footer {
+    bottom: 15px;
+    gap: 7px 0;
+  }
+
+  .link-item {
+    padding: 8px 11px;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+
+  .separator {
+    font-size: 8px;
+  }
+
+  .ship {
+    transform-origin: center;
   }
 }
