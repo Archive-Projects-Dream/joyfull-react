@@ -75,6 +75,9 @@ img {
   --progress-bar-background: hsla(0, 0%, 0%, 0.5);
   --secondary-lightness-adjustment: 6.33;
   --tooltip-background-lightness: 25;
+  --lobby-glow: rgba(54, 132, 255, 0.16);
+  --lobby-line: #243d68;
+  --lobby-dim: #6984b0;
 }
 
 // Green palette (the Horizon-Dream site "green" phosphor, exact site colors)
@@ -96,6 +99,9 @@ img {
   --progress-bar-background: hsla(0, 0%, 0%, 0.5);
   --secondary-lightness-adjustment: 6.33;
   --tooltip-background-lightness: 25;
+  --lobby-glow: rgba(91, 255, 140, 0.11);
+  --lobby-line: #243d2d;
+  --lobby-dim: #668773;
 }
 
 // Orange palette
@@ -117,6 +123,9 @@ img {
   --progress-bar-background: hsla(0, 0%, 0%, 0.5);
   --secondary-lightness-adjustment: 6.33;
   --tooltip-background-lightness: 25;
+  --lobby-glow: rgba(255, 174, 58, 0.12);
+  --lobby-line: #4a3820;
+  --lobby-dim: #967849;
 }
 
 // Phosphor swap blink, ported from the Horizon-Dream site (the .theme-swap
@@ -314,14 +323,15 @@ img {
   text-align: center;
 }
 
-// Brand lockup ported from the Horizon-Dream site
+// Brand lockup ported from the Horizon-Dream site: крупный полупрозрачный
+// водяной знак за текстом, подчёркивание под названием и свечение текста
 .brandLockup {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 260px;
-  padding: 1.6em 1.5em 1.2em;
+  padding: 1.2em 1.5em 1em;
   isolation: isolate;
   animation: brand-appear 1.2s ease-out both,
     screen-flicker 9s steps(1, end) infinite;
@@ -331,34 +341,35 @@ img {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 88px;
+  width: 120px;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   fill: var(--lobby-accent);
-  opacity: 0.13;
-  filter: drop-shadow(0 0 18px var(--lobby-panel-glow));
+  opacity: 0.19;
   pointer-events: none;
 }
 
 .brandLockup__name {
   position: relative;
   z-index: 1;
-  margin-bottom: 0.6em;
+  margin-bottom: 0.55em;
+  padding-bottom: 0.3em;
   color: var(--lobby-fg, #fff);
-  font-size: 15px;
-  letter-spacing: 8px;
-  text-indent: 8px;
+  font-size: 19px;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
   text-transform: uppercase;
-  text-shadow: 0 0 18px var(--lobby-panel-glow);
+  border-bottom: 1px solid var(--lobby-line);
+  text-shadow: 0 0 18px var(--lobby-glow);
 }
 
 .brandLockup__sub {
   position: relative;
   z-index: 1;
-  color: var(--lobby-accent-dim);
-  font-size: 10px;
-  letter-spacing: 4px;
-  text-indent: 4px;
+  color: var(--lobby-dim);
+  font-size: 11px;
+  letter-spacing: 0.36em;
+  text-indent: 0.36em;
   text-transform: uppercase;
 }
 
