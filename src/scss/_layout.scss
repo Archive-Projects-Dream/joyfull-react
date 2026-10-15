@@ -250,8 +250,9 @@
   }
 
   .brand-lockup {
+    bottom: clamp(100px, 13vh, 116px);
     min-width: 0;
-    padding: 12px 15px;
+    padding: 12px 18px 14px;
   }
 
   .brand-lockup__logo {
