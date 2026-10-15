@@ -8,12 +8,11 @@ const ORBITS = [
 
 function createOrbit({ id, duration, direction, label, tracerOnly = false }) {
   const plane = document.createElement('div');
-  plane.className = `ring-plane ring-plane--${id}${tracerOnly ? ' ring-plane--tracer-only' : ''}`;
-  plane.setAttribute('role', 'presentation');
+  plane.className = `ring-plane ring-plane-${id}${tracerOnly ? ' ring-plane-tracer-only' : ''}`;
   plane.setAttribute('aria-label', label);
 
   const ring = document.createElement('div');
-  ring.className = 'ring-plane__ring';
+  ring.className = `ring ring-${id}`;
 
   const track = document.createElement('div');
   track.className = 'orbit-track';
@@ -30,6 +29,7 @@ function createOrbit({ id, duration, direction, label, tracerOnly = false }) {
 
 export function mountOrbitalScene(container) {
   if (!container) return;
+
   const fragment = document.createDocumentFragment();
   ORBITS.forEach((orbit) => fragment.append(createOrbit(orbit)));
   container.replaceChildren(fragment);

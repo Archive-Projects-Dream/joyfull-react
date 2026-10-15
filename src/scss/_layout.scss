@@ -103,7 +103,7 @@
   z-index: 0;
   top: 50%;
   left: 50%;
-  width: min(28vw, 120px);
+  width: min(22vw, 96px);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   fill: var(--accent);
@@ -242,7 +242,7 @@
   }
 
   .brand-lockup__logo {
-    width: min(30vw, 96px);
+    width: min(26vw, 84px);
   }
 
   .project-name {
@@ -268,9 +268,5 @@
 
   .separator {
     font-size: 8px;
-  }
-
-  .ship {
-    transform-origin: center;
   }
 }

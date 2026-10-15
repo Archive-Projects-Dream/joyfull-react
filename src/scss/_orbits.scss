@@ -1,4 +1,4 @@
-/* Orbital planes stay fixed; only the objects and tracer arcs move. */
+/* Match the reference landing: fixed planes, rotating markers, no rotating rings. */
 .orbital-layer {
   position: absolute;
   inset: 0;
@@ -14,63 +14,77 @@
   transform-style: preserve-3d;
 }
 
-.ring-plane--1 {
+.ring-plane-1 {
   width: 50%;
   height: 50%;
   margin: -25% 0 0 -25%;
   transform: rotateX(70deg) rotateY(10deg);
 }
 
-.ring-plane--2 {
+.ring-plane-2 {
   width: 75%;
   height: 75%;
   margin: -37.5% 0 0 -37.5%;
   transform: rotateX(60deg) rotateY(-20deg);
 }
 
-.ring-plane--3 {
+.ring-plane-3 {
   width: 100%;
   height: 100%;
   margin: -50% 0 0 -50%;
   transform: rotateX(80deg) rotateY(30deg);
 }
 
-.ring-plane--4 {
+.ring-plane-4 {
   width: 115%;
   height: 115%;
   margin: -57.5% 0 0 -57.5%;
   transform: rotateX(48deg) rotateY(26deg);
 }
 
-.ring-plane--5 {
+.ring-plane-5 {
   width: 132%;
   height: 132%;
   margin: -66% 0 0 -66%;
   transform: rotateX(74deg) rotateY(-12deg);
 }
 
-.ring-plane__ring {
+.ring-plane .ring {
   position: absolute;
   inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   border: 1px solid color-mix(in srgb, var(--fg) 34%, transparent);
   border-radius: 50%;
+  transform: none;
+  animation: none;
 }
 
-.ring-plane--2 .ring-plane__ring {
+.ring-plane-2 .ring {
   border-style: dashed;
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
-.ring-plane--3 .ring-plane__ring {
+.ring-plane-3 .ring {
   border-color: color-mix(in srgb, var(--fg) 24%, transparent);
 }
 
-.ring-plane--4 .ring-plane__ring {
-  border: 0;
+/* The fourth plane has no permanent line: only its moving tracer is visible. */
+.ring-plane-4 .ring {
+  border: 0 !important;
 }
 
-.ring-plane--5 .ring-plane__ring {
+/* The fifth plane keeps its permanent visual orbit. */
+.ring-plane-5 .ring {
   border-color: color-mix(in srgb, var(--fg) 30%, transparent);
+}
+
+.ring-plane .ring::before,
+.ring-plane .ring::after {
+  display: none;
 }
 
 .orbit-track {
@@ -91,54 +105,34 @@
   transform: translate(-50%, -50%);
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent), 0 0 18px var(--glow);
-
-  &::after {
-    position: absolute;
-    top: 50%;
-    right: calc(100% - 1px);
-    width: 19px;
-    height: 2px;
-    border-radius: 2px;
-    transform: translateY(-50%);
-    background: linear-gradient(90deg, transparent, var(--accent));
-    box-shadow: 0 0 8px var(--glow);
-    content: '';
-    opacity: 0.95;
-  }
 }
 
-.ring-plane--2 .orbit-point::after {
-  width: 15px;
-  opacity: 0.8;
-}
-
-.ring-plane--3 .orbit-point::after {
-  width: 23px;
-}
-
-.ring-plane--4 .orbit-point::after {
-  width: 17px;
-  opacity: 0.85;
-}
-
-.ring-plane--5 .orbit-point::after {
-  width: 25px;
-}
-
-/* Orbit four reveals a short-lived arc only; orbit five keeps its full ring. */
-.ring-plane--4 .orbit-track::before,
-.ring-plane--5 .orbit-track::before {
+/* A short conic-gradient arc follows the marker and fades into the background. */
+.ring-plane-4 .orbit-track::before,
+.ring-plane-5 .orbit-track::before {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   filter: drop-shadow(0 0 4px var(--glow));
   pointer-events: none;
   content: '';
-  -webkit-mask: radial-gradient(circle closest-side, transparent 99.3%, #000 99.65%, #000 99.9%, transparent 100%);
-  mask: radial-gradient(circle closest-side, transparent 99.3%, #000 99.65%, #000 99.9%, transparent 100%);
+  -webkit-mask: radial-gradient(
+    circle closest-side,
+    transparent 99.3%,
+    #000 99.65%,
+    #000 99.9%,
+    transparent 100%
+  );
+  mask: radial-gradient(
+    circle closest-side,
+    transparent 99.3%,
+    #000 99.65%,
+    #000 99.9%,
+    transparent 100%
+  );
 }
 
-.ring-plane--4 .orbit-track::before {
+.ring-plane-4 .orbit-track::before {
   background: conic-gradient(
     from 0deg,
     var(--accent) 0deg,
@@ -147,7 +141,7 @@
   );
 }
 
-.ring-plane--5 .orbit-track::before {
+.ring-plane-5 .orbit-track::before {
   background: conic-gradient(
     from 294deg,
     transparent 0deg 30deg,
@@ -160,4 +154,18 @@
 @keyframes orbit-path {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+  .ring-plane-4 {
+    width: 112%;
+    height: 112%;
+    margin: -56% 0 0 -56%;
+  }
+
+  .ring-plane-5 {
+    width: 122%;
+    height: 122%;
+    margin: -61% 0 0 -61%;
+  }
 }
