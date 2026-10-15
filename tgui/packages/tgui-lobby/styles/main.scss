@@ -643,11 +643,13 @@ img {
 }
 
 .noAnimation {
+  // bgLoad намеренно не трогаем: проявление фона идёт с 5-й по 15-ю секунду,
+  // и сброс его задержки на 10-й секунде дёргал картинку — затемнение резко
+  // пропадало вместо плавного завершения
   .typeEffect,
   .buttonEffect,
   .dividerEffect,
-  .sectionLoad,
-  .bgLoad {
+  .sectionLoad {
     animation-delay: 0s !important;
   }
 }
