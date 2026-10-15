@@ -34,6 +34,7 @@
 
 #endif
 
+// [HORIZON-EDIT] LOBBY
 /datum/asset/simple/namespaced/escape_menu_font
 	assets = list(
 		"Pixellari.ttf" = file("interface/fonts/Pixellari.ttf"),
@@ -78,6 +79,7 @@
 		"ui_select1.ogg" = file("sound/misc/menu/ui_select1.ogg"),
 		"load.mp3" = file("sound/lobby/lobby_load.mp3"),
 	)
+// [/HORIZON-EDIT]
 
 /datum/asset/simple/chat_dark
 	keep_local_name = FALSE

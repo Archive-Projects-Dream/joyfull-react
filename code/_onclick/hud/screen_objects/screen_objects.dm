@@ -1055,7 +1055,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 	var/client/holder
 
 
-/atom/movable/screen/splash/Initialize(mapload, datum/hud/hud_owner, client/C, visible)
+/atom/movable/screen/splash/Initialize(mapload, datum/hud/hud_owner, client/C, visible) // [HORIZON-EDIT] LOBBY
 	. = ..()
 	if(!istype(C))
 		return

@@ -263,6 +263,7 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 	else
 		persistent_client = new(ckey)
 	persistent_client.set_client(src)
+	connection_handed_off = TRUE // [HORIZON-ADD] LOBBY
 
 	winset(src, null, list("browser-options" = "find,refresh"))
 
@@ -620,7 +621,7 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 	GLOB.directory -= ckey
 	if(persistent_client)
 		persistent_client.set_client(null)
-	else
+	else if(connection_handed_off) // [HORIZON-ADD] LOBBY
 		stack_trace("A client was Del()'d without a persistent_client! This should not be happening.")
 
 	log_access("Logout: [key_name(src)]")

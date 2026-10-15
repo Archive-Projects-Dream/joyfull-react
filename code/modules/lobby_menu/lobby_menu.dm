@@ -1,8 +1,8 @@
 GLOBAL_LIST_EMPTY(lobby_menus)
 GLOBAL_VAR(lobby_background_transparent)
+// [HORIZON-ADD] LOBBY
 GLOBAL_VAR(lobby_video_asset_name)
 GLOBAL_VAR(lobby_background_asset_name)
-GLOBAL_VAR(lobby_background_asset_map)
 
 #define LOBBY_FADE_OUT_TIME 1 SECONDS
 #define LOBBY_PREVIEW_DIRS list("south" = SOUTH, "east" = EAST, "north" = NORTH, "west" = WEST)
@@ -28,12 +28,15 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	/// Only set while the lobby is shown
 	var/datum/tgui_window/window
 	var/shown = FALSE
+	var/ever_hidden = FALSE
 	var/fade_timer
 	var/assets_signals_registered = FALSE
 	var/ticker_signals_registered = FALSE
 	/// Bumped on every re-render to bust the client asset cache
 	var/preview_sequence = 0
 	var/list/preview_urls
+	/// Asset names registered by the latest preview render
+	var/list/preview_asset_names
 	var/preview_dirty = TRUE
 	var/issues_dirty = FALSE
 
@@ -42,12 +45,13 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	RegisterSignal(client, COMSIG_QDELETING, PROC_REF(on_client_qdel))
 	RegisterSignal(client, COMSIG_CLIENT_MOB_LOGIN, PROC_REF(on_client_mob_login))
 	GLOB.lobby_menus += src
-	// The browser always overlays the map pane, so the pane never has to be
-	// swapped (which used to flash the title screen).
 	winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
 	update_visibility()
 
 /datum/lobby_menu/Destroy(force)
+	for(var/asset_name in preview_asset_names)
+		SSassets.transport.unregister_asset(asset_name)
+	preview_asset_names = null
 	GLOB.lobby_menus -= src
 	STOP_PROCESSING(SSlobby_menu, src)
 	if(client)
@@ -84,26 +88,27 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	if(fade_timer)
 		deltimer(fade_timer)
 		fade_timer = null
+	var/returning = ever_hidden
 	if(!window)
-		create_window()
-	apply_element_background()
+		create_window(returning)
+	else if(returning && !is_lobby_transparent())
+		winset(client, "lobby_menu", list(
+			"background-color" = "none",
+			"inner-background-color" = "transparent",
+		))
+	else
+		apply_element_background()
 	register_ticker_signals()
 	START_PROCESSING(SSlobby_menu, src)
 	preview_dirty = TRUE
 	issues_dirty = FALSE
-	send_init()
+	send_init(returning)
 	update_character_preview()
 
-/**
- * always overlays the map pane; in opaque mode it is painted black to hide
- * the map, and is made see-through during the fade-out so the lobby
- * cross-fades into the game view behind it.
- */
-/datum/lobby_menu/proc/create_window()
+/datum/lobby_menu/proc/create_window(returning = FALSE)
 	// Remove a stale element, if any
 	winset(client, "lobby_menu", list("parent" = ""))
-	// Match the pane size up front, otherwise the window visibly stretches
-	// from its default size once the page loads
+	// Match the pane size up front, otherwise the window visibly stretches from its default size once the page loads
 	var/selector_size = winget(client, SKIN_MAP_LOBBY_SELECTOR, "size")
 	winset(client, "lobby_menu", list(
 		"parent" = SKIN_MAP_SCREEN,
@@ -114,7 +119,13 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"anchor2" = "100,100",
 		"is-visible" = "false",
 	))
-	apply_element_background()
+	if(returning && !is_lobby_transparent())
+		winset(client, "lobby_menu", list(
+			"background-color" = "none",
+			"inner-background-color" = "transparent",
+		))
+	else
+		apply_element_background()
 	window = new(client, "lobby_menu")
 	window.is_browser = TRUE
 	window.initialize(
@@ -128,7 +139,6 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	window.send_asset(get_asset_datum(/datum/asset/simple/namespaced/fontawesome))
 	winset(client, "lobby_menu", "is-visible=true")
 
-/// [HORIZON-ADD] Applies the opaque/see-through element background
 /datum/lobby_menu/proc/apply_element_background()
 	if(!client)
 		return
@@ -144,13 +154,13 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		))
 
 /**
- * [HORIZON-ADD] Fades the lobby out and tears the browser down once the
  * client has had time to play its fade-out animation.
  */
 /datum/lobby_menu/proc/hide()
 	if(!shown)
 		return
 	shown = FALSE
+	ever_hidden = TRUE
 	STOP_PROCESSING(SSlobby_menu, src)
 	unregister_ticker_signals()
 	if(!window)
@@ -170,8 +180,10 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	if(shown || !client)
 		return
 	close_window()
+	winset(client, SKIN_MAPWINDOW, "focus=true")
+	winset(client, SKIN_MAPWINDOW_MAP, "focus=true")
 
-/// [HORIZON-ADD] Destroys the browser element and the tgui window, if any
+/// Destroys the browser element and the tgui window, if any
 /datum/lobby_menu/proc/close_window()
 	if(window)
 		window.unsubscribe(src)
@@ -199,6 +211,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"adminReadyCount" = SSticker.total_admins_ready,
 		"adminCount" = length(GLOB.admins),
 		"shiftTime" = (SSticker.round_start_time == 0) ? "Pre-Game" : round_timestamp(),
+		"characterName" = get_character_name(),
 	))
 	if(preview_dirty)
 		update_character_preview()
@@ -206,12 +219,13 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		issues_dirty = FALSE
 		send_update(list("preferenceIssues" = get_preference_issues()))
 
-/// [HORIZON-ADD] Marks the preview and preference issues for a refresh
+/// Marks the preview and preference issues for a refresh
 /datum/lobby_menu/proc/queue_character_refresh()
 	if(!shown)
 		return
 	preview_dirty = TRUE
 	issues_dirty = TRUE
+	send_update(list("characterName" = get_character_name()))
 
 /datum/lobby_menu/proc/register_ticker_signals()
 	if(ticker_signals_registered)
@@ -284,7 +298,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		return "DELAYED"
 	return "SOON"
 
-/datum/lobby_menu/proc/send_init()
+/datum/lobby_menu/proc/send_init(returning = FALSE)
 	if(!window)
 		return
 	var/mob/dead/new_player/player = client?.mob
@@ -305,17 +319,16 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"mapName" = SSmapping.current_map?.map_name || "Loading...",
 		"shiftTime" = (SSticker.round_start_time == 0) ? "Pre-Game" : round_timestamp(),
 		"isAdmin" = !isnull(client?.holder),
-		"isLocalhost" = client?.is_localhost(),
+		"canStartNow" = check_rights_for(client, R_SERVER),
 		"hasNewPoll" = FALSE,
 		"canPoll" = !is_guest_key(client?.key) && SSdbcore.Connect(),
 		"transparent" = is_lobby_transparent(),
-		// [HORIZON-ADD] html lobby extras
 		"characterName" = get_character_name(),
 		"preferenceIssues" = get_preference_issues(),
 		"backgroundUrl" = get_lobby_background_url(),
 		"videoUrl" = get_lobby_video_url(),
 		"previewUrls" = preview_urls,
-		// [/HORIZON-ADD]
+		"returning" = returning,
 	))
 
 	check_new_polls()
@@ -330,6 +343,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	if(SSatoms.initialized != INITIALIZATION_INNEW_REGULAR)
 		RegisterSignal(SSatoms, COMSIG_SUBSYSTEM_POST_INITIALIZE, PROC_REF(on_assets_ready))
 		assets_signals_registered = TRUE
+// [/HORIZON-EDIT]
 
 /datum/lobby_menu/proc/on_assets_ready(datum/source)
 	SIGNAL_HANDLER
@@ -374,13 +388,12 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	send_update(list("hasNewPoll" = has_new))
 
 /datum/lobby_menu/proc/send_update(list/data)
-	if(!window)
+	if(!window) // [HORIZON-ADD] LOBBY
 		return
 	window.send_message("state", data)
 
 /datum/lobby_menu/proc/on_message(type, payload, href_list)
 	if(type == "ready")
-		// The page loaded and subscribed to our messages - (re)send the full state
 		send_init()
 		return TRUE
 
@@ -389,7 +402,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 
 	var/action = payload["action"]
 	var/mob/dead/new_player/player = client?.mob
-	if(!istype(player) || client.interviewee)
+	if(!istype(player) || client.interviewee) // [/HORIZON-EDIT] LOBBY
 		return TRUE
 
 	switch(action)
@@ -436,11 +449,17 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 			player.make_me_an_observer()
 		if("character_setup")
 			var/datum/preferences/prefs = client.prefs
+			if(SSearly_assets.initialized != INITIALIZATION_INNEW_REGULAR) // [HORIZON-ADD] LOBBY
+				to_chat(player, span_notice("Character setup is still loading, try again in a moment."))
+				return TRUE
 			prefs.current_window = PREFERENCE_TAB_CHARACTER_PREFERENCES
 			prefs.update_static_data(player)
 			prefs.ui_interact(player)
 		if("settings")
 			var/datum/preferences/prefs = client.prefs
+			if(SSearly_assets.initialized != INITIALIZATION_INNEW_REGULAR)// [HORIZON-ADD] LOBBY
+				to_chat(player, span_notice("Game preferences are still loading, try again in a moment."))
+				return TRUE
 			prefs.current_window = PREFERENCE_TAB_GAME_PREFERENCES
 			prefs.update_static_data(player)
 			prefs.ui_interact(player)
@@ -451,19 +470,18 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		if("poll")
 			player.handle_player_polling()
 		if("start_now")
-			if(!client.is_localhost() || !check_rights_for(client, R_SERVER))
+			if(!check_rights_for(client, R_SERVER)) // [HORIZON-EDIT] LOBBY
 				return TRUE
 			SSticker.start_immediately = TRUE
 			if(SSticker.current_state == GAME_STATE_STARTUP)
 				to_chat(player, span_admin("The server is still setting up, but the round will be started as soon as possible."))
-		// [HORIZON-ADD] html lobby extras
-		if("refresh_preview")
+		if("refresh_preview") // [HORIZON-ADD] LOBBY
 			preview_dirty = TRUE
 			update_character_preview()
 
 	return TRUE
 
-// [HORIZON-ADD] Renders the current character into four directional preview
+// [HORIZON-ADD] LOBBY
 /datum/lobby_menu/proc/get_character_name()
 	return client?.prefs?.read_preference(/datum/preference/name/real_name)
 
@@ -514,13 +532,19 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 
 	var/list/new_urls = list()
 	preview_sequence += 1
+	for(var/old_asset in preview_asset_names)
+		SSassets.transport.unregister_asset(old_asset)
+	preview_asset_names = list()
 	for(var/dir_name in LOBBY_PREVIEW_DIRS)
 		var/icon/flat = getFlatIcon(icon_source, LOBBY_PREVIEW_DIRS[dir_name])
 		if(!flat)
 			continue
 		var/asset_name = "lobby_preview_[client.ckey]_[preview_sequence]_[dir_name].png"
+		if(SSassets.cache[asset_name])
+			SSassets.transport.unregister_asset(asset_name)
 		SSassets.transport.register_asset(asset_name, flat)
 		SSassets.transport.send_assets(client, asset_name)
+		preview_asset_names += asset_name
 		new_urls[dir_name] = SSassets.transport.get_asset_url(asset_name)
 
 	qdel(mannequin)
@@ -532,18 +556,16 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	preview_urls = new_urls
 	send_update(list("previewUrls" = preview_urls))
 
-/// config/lobby_art/ (.webm or .mp4) and cached per server boot
 /datum/lobby_menu/proc/get_lobby_video_url()
 	if(is_lobby_transparent())
 		return null
 	if(isnull(GLOB.lobby_video_asset_name))
 		var/list/candidates = list()
 		for(var/filename in flist("[global.config.directory]/lobby_art/"))
-			var/extension = copytext(filename, findlasttext(filename, "."))
+			var/extension = LOWER_TEXT(copytext(filename, findlasttext(filename, ".")))
 			if(extension in list(".webm", ".mp4"))
 				candidates += filename
 		if(!length(candidates))
-			// Negative cache so we don't rescan on every init
 			GLOB.lobby_video_asset_name = ""
 			return null
 		var/chosen = pick(candidates)
@@ -554,31 +576,20 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	SSassets.transport.send_assets(client, GLOB.lobby_video_asset_name)
 	return SSassets.transport.get_asset_url(GLOB.lobby_video_asset_name)
 
-/// "<map name>.png" from config/lobby_art/ wins, then "default.<ext>". Cached per map.
 /datum/lobby_menu/proc/get_lobby_background_url()
 	if(is_lobby_transparent())
 		return null
-	var/map_name = SSmapping.current_map?.map_name
-	if(GLOB.lobby_background_asset_map != map_name)
-		GLOB.lobby_background_asset_map = map_name
-		GLOB.lobby_background_asset_name = null
 	if(isnull(GLOB.lobby_background_asset_name))
 		var/art_dir = "[global.config.directory]/lobby_art/"
-		var/chosen
-		if(map_name && fexists("[art_dir][map_name].png"))
-			chosen = "[map_name].png"
-		else if(map_name && fexists("[art_dir][map_name].jpg"))
-			chosen = "[map_name].jpg"
-		else
-			for(var/filename in flist(art_dir))
-				var/lower_name = LOWER_TEXT(filename)
-				if(lower_name == "default.png" || lower_name == "default.jpg" || lower_name == "default.jpeg")
-					chosen = filename
-					break
-		if(!chosen)
-			// Negative cache so we don't rescan on every init
+		var/list/candidates = list()
+		for(var/filename in flist(art_dir))
+			var/extension = LOWER_TEXT(copytext(filename, findlasttext(filename, ".")))
+			if(extension in list(".png", ".jpg", ".jpeg"))
+				candidates += filename
+		if(!length(candidates))
 			GLOB.lobby_background_asset_name = ""
 			return null
+		var/chosen = pick(candidates)
 		GLOB.lobby_background_asset_name = "lobby_background_[ckey(chosen)]"
 		SSassets.transport.register_asset(GLOB.lobby_background_asset_name, fcopy_rsc("[art_dir][chosen]"))
 	if(!GLOB.lobby_background_asset_name)

@@ -349,8 +349,7 @@
 		return FALSE //This is the only case someone should actually be completely blocked from antag rolling as well
 	return TRUE
 
-/// [HORIZON-ADD] Returns lobby-facing warnings about the player's current preference setup.
-/// Shown in the HTML lobby so players can notice problems before readying up.
+// [HORIZON-ADD]
 /mob/dead/new_player/proc/get_preference_issues()
 	var/list/issues = list()
 	if(!client?.prefs)
@@ -359,6 +358,7 @@
 	if(prefs.job_preferences.len == 0 && prefs.read_preference(/datum/preference/choiced/jobless_role) == RETURNTOLOBBY)
 		issues += "You have no jobs enabled, along with return to lobby if job is unavailable. This makes you ineligible for any round start role, please update your job preferences."
 	return issues
+// [/HORIZON-ADD]
 
 /**
  * Prepares a client for the interview system, and provides them with a new interview

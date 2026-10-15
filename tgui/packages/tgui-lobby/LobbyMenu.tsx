@@ -1,4 +1,12 @@
-import { type MouseEvent, type ReactNode, useEffect, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type MouseEvent,
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { storage } from 'common/storage';
 import { Box, Button, Modal, Section, Stack } from 'tgui-core/components';
 import { classes } from 'tgui-core/react';
@@ -9,6 +17,7 @@ import {
   playSelectSound,
   setSoundsEnabled,
 } from './audio';
+import { updateScaling } from './scaling';
 
 export type ServerState = {
   gamePhase: 'startup' | 'pregame' | 'setting_up' | 'playing' | 'postgame';
@@ -25,7 +34,7 @@ export type ServerState = {
   mapName: string;
   shiftTime: string;
   isAdmin: boolean;
-  isLocalhost: boolean;
+  canStartNow: boolean;
   hasNewPoll: boolean;
   canPoll: boolean;
   transparent: boolean;
@@ -34,11 +43,14 @@ export type ServerState = {
   backgroundUrl: string | null;
   videoUrl: string | null;
   previewUrls: Record<string, string> | null;
+  returning?: boolean;
 };
 
-type LobbyTheme = 'blue' | 'orange';
+type LobbyTheme = 'orange' | 'green' | 'blue';
 
 const FILTER_STORAGE_KEY = 'lobby-filter-disabled';
+const TINT_STORAGE_KEY = 'lobby-bg-tint-disabled';
+const BG_STORAGE_KEY = 'lobby-bg-image-disabled';
 const THEME_STORAGE_KEY = 'lobby-theme';
 const VIDEO_STORAGE_KEY = 'lobby-video-enabled';
 
@@ -74,16 +86,36 @@ export function LobbyMenu() {
   const [animationsDisabled, setAnimationsDisabled] = useState(false);
   const [theme, setTheme] = useState<LobbyTheme | undefined>();
   const [filterDisabled, setFilterDisabled] = useState<boolean | undefined>();
+  const [tintDisabled, setTintDisabled] = useState<boolean | undefined>();
+  const [bgDisabled, setBgDisabled] = useState<boolean | undefined>();
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [soundsOn, setSoundsOn] = useState(true);
   const [hidden, setHidden] = useState(false);
+  const [themeFlash, setThemeFlash] = useState(false);
+  const [bootEpoch, setBootEpoch] = useState(0);
+  const [returnBoot, setReturnBoot] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useLayoutEffect(() => {
+    updateScaling();
+    const onResize = () => updateScaling();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     Byond.subscribeTo('init', (payload: ServerState) => {
       setSs(payload);
       setFadingOut(false);
-      applyBackdrop(!!payload.transparent);
+      if (payload.returning && !payload.transparent) {
+        applyBackdrop(true);
+        setHidden(false);
+        setReturnBoot(true);
+        setBootEpoch((epoch) => epoch + 1);
+      } else {
+        setReturnBoot(false);
+        applyBackdrop(!!payload.transparent);
+      }
       videoRef.current?.play()?.catch(() => {});
     });
 
@@ -105,9 +137,15 @@ export function LobbyMenu() {
 
   useEffect(() => {
     storage.get(FILTER_STORAGE_KEY).then((val) => setFilterDisabled(!!val));
-    storage
-      .get(THEME_STORAGE_KEY)
-      .then((val) => setTheme(val === 'orange' ? 'orange' : 'blue'));
+    storage.get(TINT_STORAGE_KEY).then((val) => setTintDisabled(!!val));
+    storage.get(BG_STORAGE_KEY).then((val) => setBgDisabled(!!val));
+    storage.get(THEME_STORAGE_KEY).then((val) =>
+      setTheme(
+        val === 'blue' || val === 'green' || val === 'orange'
+          ? val
+          : 'orange',
+      ),
+    );
     storage.get(VIDEO_STORAGE_KEY).then((val) => {
       setVideoEnabled(val === undefined || val === null ? true : !!val);
     });
@@ -117,49 +155,170 @@ export function LobbyMenu() {
         setTimeout(() => playLoadSound(), LOAD_SOUND_DELAY_MS);
       }
     });
+  }, []);
+
+  useEffect(() => {
+    setAnimationsDisabled(false);
     const timer = setTimeout(
       () => setAnimationsDisabled(true),
       ANIMATION_DISABLE_MS,
     );
     return () => clearTimeout(timer);
-  }, []);
+  }, [bootEpoch]);
 
   useEffect(() => {
     videoRef.current?.play()?.catch(() => {});
+  }, [ss?.videoUrl, videoEnabled, ss?.transparent, bootEpoch]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !ss?.videoUrl || !videoEnabled || ss?.transparent) {
+      return;
+    }
+    const tryPlay = () => {
+      video.play()?.catch(() => {});
+    };
+    const hardRestart = () => {
+      try {
+        video.load();
+      } catch {
+        // best-effort reset
+      }
+      tryPlay();
+    };
+    let seekBroken = false;
+    let restartTimer: number | undefined;
+    const restart = () => {
+      if (seekBroken) {
+        hardRestart();
+        return;
+      }
+      try {
+        video.currentTime = 0;
+      } catch {
+        seekBroken = true;
+        hardRestart();
+        return;
+      }
+      tryPlay();
+      window.clearTimeout(restartTimer);
+      restartTimer = window.setTimeout(() => {
+        if (video.ended || (video.paused && !video.seeking)) {
+          seekBroken = true;
+          hardRestart();
+        }
+      }, 600);
+    };
+    const onEnded = () => restart();
+    const onTimeUpdate = () => {
+      if (video.ended) {
+        restart();
+      }
+    };
+    let lastTime = -1;
+    let stalls = 0;
+    const watchdog = window.setInterval(() => {
+      if (document.hidden) {
+        return;
+      }
+      if (video.ended) {
+        restart();
+        return;
+      }
+      if (
+        video.paused &&
+        !video.seeking &&
+        video.currentTime > 0 &&
+        (video.duration === 0 || !isFinite(video.duration) ||
+          video.currentTime >= video.duration - 0.1)
+      ) {
+        restart();
+        return;
+      }
+      if (video.paused || video.seeking) {
+        stalls = 0;
+      } else if (Math.abs(video.currentTime - lastTime) < 0.05) {
+        stalls += 1;
+        if (stalls >= 4) {
+          stalls = 0;
+          restart();
+        }
+      } else {
+        stalls = 0;
+      }
+      lastTime = video.currentTime;
+    }, 1000);
+    video.addEventListener('ended', onEnded);
+    video.addEventListener('timeupdate', onTimeUpdate);
+    return () => {
+      window.clearTimeout(restartTimer);
+      window.clearInterval(watchdog);
+      video.removeEventListener('ended', onEnded);
+      video.removeEventListener('timeupdate', onTimeUpdate);
+    };
   }, [ss?.videoUrl, videoEnabled, ss?.transparent]);
 
-  if (!ss || theme === undefined || filterDisabled === undefined) {
+  if (
+    !ss ||
+    theme === undefined ||
+    filterDisabled === undefined ||
+    tintDisabled === undefined ||
+    bgDisabled === undefined
+  ) {
     return null;
   }
 
+  const pickTheme = (next: LobbyTheme) => {
+    playSelectSound();
+    setTheme(next);
+    storage.set(THEME_STORAGE_KEY, next);
+    if (next !== theme) {
+      setThemeFlash(true);
+      window.setTimeout(() => setThemeFlash(false), 160);
+    }
+  };
+
   const crtFilter = !filterDisabled;
+  const bgImageUrl =
+    !ss.transparent && !bgDisabled ? ss.backgroundUrl : null;
+  const bgVideoUrl = !ss.transparent && videoEnabled
+    ? ss.videoUrl
+    : null;
   const pregame = ss.gamePhase === 'pregame' || ss.gamePhase === 'startup';
   const typingDelay = (index: number) =>
     animationsDisabled ? '0s' : `${1.5 + index * 0.2}s`;
 
+  const panelBootDelay = (index: number) =>
+    animationsDisabled ? '0s' : `${1.7 + (index - 1) * 0.25}s`;
+
+  const collapsible = classes(['menuCollapsible', hidden && 'menuHidden']);
+
   return (
     <div
+      key={bootEpoch}
       className={classes([
         'LobbyScreen',
         `LobbyScreen--${theme}`,
         crtFilter && 'filterEnabled',
+        returnBoot && 'LobbyScreen--return',
         animationsDisabled && 'noAnimation',
         fadingOut && 'lobbyFadeOut',
+        themeFlash && 'LobbyScreen--themeSwap',
         ss.transparent && 'LobbyScreen--transparent',
       ])}
     >
-      {!ss.transparent && ss.backgroundUrl && (
+      {bgImageUrl && (
         <div
           className="bgBackground bgLoad"
-          style={{ backgroundImage: `url(${ss.backgroundUrl})` }}
+          style={{ backgroundImage: `url(${bgImageUrl})` }}
         />
       )}
 
-      {!ss.transparent && videoEnabled && ss.videoUrl && (
+      {bgVideoUrl && (
         <video
           ref={videoRef}
-          className="bgVideo"
-          src={ss.videoUrl}
+          className="bgVideo bgLoad"
+          src={bgVideoUrl}
           autoPlay
           loop
           muted
@@ -167,15 +326,36 @@ export function LobbyMenu() {
         />
       )}
 
-      {crtFilter && !ss.transparent && <div className="crt" />}
+      {!tintDisabled && !ss.transparent && <div className="bgTint" />}
 
-      <Stack vertical height="100%" justify="space-around" align="center">
-        <Stack.Item>
-          <Section
-            p={3}
-            className="sectionLoad"
-            style={{ opacity: hidden ? '0' : '1' }}
-          >
+      {crtFilter && !ss.transparent && (
+        <>
+          <div className="crt" />
+          <div className="crtNoise" />
+          <div className="crtVignette" />
+        </>
+      )}
+
+      <Stack
+        vertical
+        height="100%"
+        justify="space-around"
+        align="center"
+        className="menuHolder"
+      >
+        <Stack.Item className={collapsible}>
+          <div className="brandLockup">
+            <svg
+              className="brandLockup__logo"
+              viewBox="0 0 350 350"
+              focusable="false"
+            >
+              <path d="M230.9 257.5h26.7v20.7h-68.7V71.8h68.7v20.7h-26.7c-7.1 0-12.8 5.7-12.8 12.8v139.5c0 7.1 5.7 12.8 12.8 12.8ZM92.4 71.8v20.7h26.7c7.1 0 12.8 5.7 12.8 12.8v139.5c0 7.1-5.7 12.8-12.8 12.8h-26.7v20.7h68.7V71.8H92.4ZM92.4 188.7v27.6H0v-27.6h92.4ZM257.6 188.7v27.6h92.4v-27.6h-92.4ZM0 133.4v27.9h92.4v-27.9H0ZM257.6 133.4v27.9h92.4v-27.9h-92.4Z" />
+            </svg>
+            <div className="brandLockup__name">Horizon-Dream</div>
+            <div className="brandLockup__sub">Beyond the station</div>
+          </div>
+          <Section p={3} pt={1} className="sectionLoad">
             <Stack vertical>
               <Stack.Item>
                 <Stack vertical align="center" className="welcomeHolder">
@@ -275,59 +455,62 @@ export function LobbyMenu() {
                   Polls
                 </LobbyButton>
               )}
-
-              {!!ss.isLocalhost && (
-                <LobbyButton
-                  delay={typingDelay(8)}
-                  icon="forward"
-                  onClick={() => sendAction('start_now')}
-                >
-                  Start Now
-                </LobbyButton>
-              )}
-
-              <Stack.Item>
-                <Button
-                  fluid
-                  className="hideButton"
-                  icon="eye-slash"
-                  onClick={() => {
-                    playSelectSound();
-                    setHidden(true);
-                  }}
-                >
-                  <span className="styledText">Hide Menu</span>
-                </Button>
-              </Stack.Item>
             </Stack>
           </Section>
         </Stack.Item>
       </Stack>
 
-      {hidden && (
-        <Box position="absolute" top="10px" left="10px" className="floating">
-          <Button
-            icon="check"
-            onClick={() => {
-              playSelectSound();
-              setHidden(false);
-            }}
-          />
-        </Box>
+      <div className="lobby__side-left">
+        <CharacterPreview
+          ss={ss}
+          hidden={hidden}
+          bootDelay={panelBootDelay(1)}
+        />
+
+        <PreferenceIssues
+          issues={ss.preferenceIssues}
+          hidden={hidden}
+          bootDelay={panelBootDelay(3)}
+        />
+      </div>
+
+      <StatsPanel
+        ss={ss}
+        pregame={pregame}
+        hidden={hidden}
+        bootDelay={panelBootDelay(2)}
+        onStartNow={() => sendAction('start_now')}
+      />
+
+      {hidden && !ss.transparent && (
+        <div className="brandWatermark floatingAppear">
+          <svg
+            className="brandWatermark__logo"
+            viewBox="0 0 350 350"
+            focusable="false"
+          >
+            <path d="M230.9 257.5h26.7v20.7h-68.7V71.8h68.7v20.7h-26.7c-7.1 0-12.8 5.7-12.8 12.8v139.5c0 7.1 5.7 12.8 12.8 12.8ZM92.4 71.8v20.7h26.7c7.1 0 12.8 5.7 12.8 12.8v139.5c0 7.1-5.7 12.8-12.8 12.8h-26.7v20.7h68.7V71.8H92.4ZM92.4 188.7v27.6H0v-27.6h92.4ZM257.6 188.7v27.6h92.4v-27.6h-92.4ZM0 133.4v27.9h92.4v-27.9H0ZM257.6 133.4v27.9h92.4v-27.9h-92.4Z" />
+          </svg>
+          <div className="brandWatermark__text">
+            <div className="brandWatermark__name">Horizon-Dream</div>
+            <div className="brandWatermark__sub">Beyond the station</div>
+          </div>
+        </div>
       )}
-
-      <CharacterPreview ss={ss} />
-
-      <StatsPanel ss={ss} pregame={pregame} />
-
-      <PreferenceIssues issues={ss.preferenceIssues} />
 
       <LobbySettings
         ss={ss}
+        menuHidden={hidden}
+        onShowMenu={() => setHidden(false)}
+        onHideMenu={() => setHidden(true)}
         filterDisabled={filterDisabled}
         setFilterDisabled={setFilterDisabled}
+        tintDisabled={tintDisabled}
+        setTintDisabled={setTintDisabled}
+        bgDisabled={bgDisabled}
+        setBgDisabled={setBgDisabled}
         theme={theme}
-        setTheme={setTheme}
+        pickTheme={pickTheme}
         videoEnabled={videoEnabled}
         setVideoEnabled={setVideoEnabled}
         soundsOn={soundsOn}
@@ -371,7 +554,15 @@ function LobbyButton(props: {
 }
 
 /** Character preview with client-side direction cycling */
-function CharacterPreview({ ss }: { ss: ServerState }) {
+function CharacterPreview({
+  ss,
+  hidden,
+  bootDelay,
+}: {
+  ss: ServerState;
+  hidden: boolean;
+  bootDelay: string;
+}) {
   const [dirIndex, setDirIndex] = useState(0);
   const [imgRetry, setImgRetry] = useState(0);
 
@@ -388,7 +579,15 @@ function CharacterPreview({ ss }: { ss: ServerState }) {
   }
 
   return (
-    <div className="lobby__preview">
+    <div
+      className={classes([
+        'lobby__preview',
+        'panelBoot',
+        'menuCollapsible',
+        hidden && 'menuHidden',
+      ])}
+      style={{ '--panel-boot-delay': bootDelay } as CSSProperties}
+    >
       <div className="lobby__panel-title">Character</div>
       <div className="lobby__preview-body">
         <img
@@ -450,9 +649,29 @@ function StatsRow({ label, value }: { label: string; value: string | null }) {
 }
 
 /** Round/server statistics panel on the right edge */
-function StatsPanel({ ss, pregame }: { ss: ServerState; pregame: boolean }) {
+function StatsPanel({
+  ss,
+  pregame,
+  hidden,
+  bootDelay,
+  onStartNow,
+}: {
+  ss: ServerState;
+  pregame: boolean;
+  hidden: boolean;
+  bootDelay: string;
+  onStartNow: () => void;
+}) {
   return (
-    <div className="lobby__stats-holder">
+    <div
+      className={classes([
+        'lobby__stats-holder',
+        'panelBoot',
+        'menuCollapsible',
+        hidden && 'menuHidden',
+      ])}
+      style={{ '--panel-boot-delay': bootDelay } as CSSProperties}
+    >
       <div className="lobby__stats">
         <div className="lobby__panel-title">Server</div>
         <StatsRow label="Map" value={ss.mapName} />
@@ -469,18 +688,87 @@ function StatsPanel({ ss, pregame }: { ss: ServerState; pregame: boolean }) {
           value={`${ss.adminReadyCount} / ${ss.adminCount}`}
         />
       </div>
+
+      <StartNowButton
+        visible={!!ss.canStartNow && pregame}
+        onStartNow={onStartNow}
+      />
+    </div>
+  );
+}
+
+function StartNowButton({
+  visible,
+  onStartNow,
+}: {
+  visible: boolean;
+  onStartNow: () => void;
+}) {
+  const [mounted, setMounted] = useState(visible);
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      setMounted(true);
+      setFading(false);
+      return;
+    }
+    setFading(true);
+    const timer = setTimeout(() => setMounted(false), 800);
+    return () => clearTimeout(timer);
+  }, [visible]);
+
+  if (!mounted) {
+    return null;
+  }
+
+  return (
+    <div
+      className={classes([
+        'lobby__start-now',
+        'buttonEffect',
+        fading && 'lobby__start-now--out',
+      ])}
+    >
+      <Button
+        fluid
+        className="distinctButton"
+        icon="forward"
+        onClick={() => {
+          playSelectSound();
+          onStartNow();
+        }}
+      >
+        <span className="styledText">Start Now</span>
+      </Button>
     </div>
   );
 }
 
 /** CM13-style warnings about the player's current preferences */
-function PreferenceIssues({ issues }: { issues: string[] }) {
+function PreferenceIssues({
+  issues,
+  hidden,
+  bootDelay,
+}: {
+  issues: string[];
+  hidden: boolean;
+  bootDelay: string;
+}) {
   if (!issues || issues.length === 0) {
     return null;
   }
   return (
-    <div className="messageHolder">
-      <Stack vertical justify="flex-end" fill>
+    <div
+      className={classes([
+        'messageHolder',
+        'panelBoot',
+        'menuCollapsible',
+        hidden && 'menuHidden',
+      ])}
+      style={{ '--panel-boot-delay': bootDelay } as CSSProperties}
+    >
+      <Stack vertical>
         {issues.map((issue, index) => (
           <Section key={index} className="sectionLoad issueSection">
             <Box className="issueText">{issue}</Box>
@@ -491,35 +779,43 @@ function PreferenceIssues({ issues }: { issues: string[] }) {
   );
 }
 
-/** Settings button (bottom right) and its popup */
+/** Settings corner (bottom right) and its popup */
 function LobbySettings({
   ss,
+  menuHidden,
+  onShowMenu,
+  onHideMenu,
   filterDisabled,
   setFilterDisabled,
+  tintDisabled,
+  setTintDisabled,
+  bgDisabled,
+  setBgDisabled,
   theme,
-  setTheme,
+  pickTheme,
   videoEnabled,
   setVideoEnabled,
   soundsOn,
   setSoundsOn,
 }: {
   ss: ServerState;
+  menuHidden: boolean;
+  onShowMenu: () => void;
+  onHideMenu: () => void;
   filterDisabled: boolean;
   setFilterDisabled: (value: boolean) => void;
+  tintDisabled: boolean;
+  setTintDisabled: (value: boolean) => void;
+  bgDisabled: boolean;
+  setBgDisabled: (value: boolean) => void;
   theme: LobbyTheme;
-  setTheme: (value: LobbyTheme) => void;
+  pickTheme: (value: LobbyTheme) => void;
   videoEnabled: boolean;
   setVideoEnabled: (value: boolean) => void;
   soundsOn: boolean;
   setSoundsOn: (value: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
-
-  const pickTheme = (next: LobbyTheme) => {
-    playSelectSound();
-    setTheme(next);
-    storage.set(THEME_STORAGE_KEY, next);
-  };
 
   return (
     <>
@@ -529,6 +825,25 @@ function LobbySettings({
         right="10px"
         className="settingsHolder"
       >
+        {menuHidden ? (
+          <Button
+            icon="check"
+            className="floatingAppear"
+            onClick={() => {
+              playSelectSound();
+              onShowMenu();
+            }}
+          />
+        ) : (
+          <Button
+            icon="eye-slash"
+            className="floatingAppear"
+            onClick={() => {
+              playSelectSound();
+              onHideMenu();
+            }}
+          />
+        )}
         <Button
           icon="cog"
           onClick={() => {
@@ -557,16 +872,22 @@ function LobbySettings({
             <Stack vertical>
               <SettingsRow label="Theme">
                 <Button
-                  selected={theme === 'blue'}
-                  onClick={() => pickTheme('blue')}
-                >
-                  Blue
-                </Button>
-                <Button
                   selected={theme === 'orange'}
                   onClick={() => pickTheme('orange')}
                 >
                   Orange
+                </Button>
+                <Button
+                  selected={theme === 'green'}
+                  onClick={() => pickTheme('green')}
+                >
+                  Green
+                </Button>
+                <Button
+                  selected={theme === 'blue'}
+                  onClick={() => pickTheme('blue')}
+                >
+                  Blue
                 </Button>
               </SettingsRow>
 
@@ -583,6 +904,36 @@ function LobbySettings({
                   {filterDisabled ? 'Off' : 'On'}
                 </Button>
               </SettingsRow>
+
+              <SettingsRow label="Background tint">
+                <Button
+                  selected={!tintDisabled}
+                  onClick={() => {
+                    playSelectSound();
+                    const next = !tintDisabled;
+                    setTintDisabled(next);
+                    storage.set(TINT_STORAGE_KEY, next);
+                  }}
+                >
+                  {tintDisabled ? 'Off' : 'On'}
+                </Button>
+              </SettingsRow>
+
+              {!!ss.backgroundUrl && (
+                <SettingsRow label="Background image">
+                  <Button
+                    selected={!bgDisabled}
+                    onClick={() => {
+                      playSelectSound();
+                      const next = !bgDisabled;
+                      setBgDisabled(next);
+                      storage.set(BG_STORAGE_KEY, next);
+                    }}
+                  >
+                    {bgDisabled ? 'Off' : 'On'}
+                  </Button>
+                </SettingsRow>
+              )}
 
               <SettingsRow label="Interface sounds">
                 <Button
@@ -616,17 +967,6 @@ function LobbySettings({
                 </SettingsRow>
               )}
 
-              <Stack.Item>
-                <Button
-                  fluid
-                  onClick={() => {
-                    playSelectSound();
-                    setOpen(false);
-                  }}
-                >
-                  Close
-                </Button>
-              </Stack.Item>
             </Stack>
           </Section>
         </Modal>
