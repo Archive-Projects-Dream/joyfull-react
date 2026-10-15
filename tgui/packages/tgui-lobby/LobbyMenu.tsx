@@ -57,23 +57,6 @@ const GAME_PHASE_TEXT: Record<ServerState['gamePhase'], string> = {
   postgame: 'Round ended',
 };
 
-/** Starfield colors and backdrops per theme, ported from the Horizon site */
-const STAR_COLORS: Record<LobbyTheme, [number, number, number]> = {
-  green: [166, 255, 190],
-  blue: [136, 190, 255],
-  orange: [255, 207, 142],
-};
-
-const STAR_BACKGROUNDS: Record<LobbyTheme, string> = {
-  green: '#040806',
-  blue: '#030711',
-  orange: '#090704',
-};
-
-const STAR_COUNT = 260;
-const STAR_DEPTH = 1500;
-const STAR_SPEED = 5.5;
-
 function sendAction(action: string, payload?: Record<string, unknown>) {
   Byond.sendMessage('action', { action, ...payload });
 }
@@ -195,11 +178,6 @@ export function LobbyMenu() {
         ss.transparent && 'LobbyScreen--transparent',
       ])}
     >
-      {crtFilter &&
-        !ss.transparent &&
-        !ss.backgroundUrl &&
-        !(videoEnabled && ss.videoUrl) && <Starfield theme={theme} />}
-
       {!ss.transparent && ss.backgroundUrl && (
         <div
           className="bgBackground bgLoad"
@@ -782,98 +760,4 @@ function SettingsRow({
       </Stack>
     </Stack.Item>
   );
-}
-
-/** Warp starfield canvas, ported from the Horizon-Dream site */
-function Starfield({ theme }: { theme: LobbyTheme }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return;
-    }
-    const ctx = canvas.getContext('2d', { alpha: false });
-    if (!ctx) {
-      return;
-    }
-
-    const [starR, starG, starB] = STAR_COLORS[theme];
-    const background = STAR_BACKGROUNDS[theme];
-    const reducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches;
-
-    let width = 0;
-    let height = 0;
-    let centerX = 0;
-    let centerY = 0;
-    let raf = 0;
-
-    type Star = { x: number; y: number; z: number; pz: number };
-    const stars: Star[] = [];
-
-    const resetStar = (star: Star, initial: boolean) => {
-      star.x = (Math.random() - 0.5) * width * 3.5;
-      star.y = (Math.random() - 0.5) * height * 3.5;
-      star.z = initial ? Math.random() * STAR_DEPTH : STAR_DEPTH;
-      star.pz = star.z;
-    };
-
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      centerX = width / 2;
-      centerY = height / 2;
-    };
-
-    const drawFrame = () => {
-      ctx.fillStyle = background;
-      ctx.fillRect(0, 0, width, height);
-      for (const star of stars) {
-        star.pz = star.z;
-        star.z -= STAR_SPEED;
-        if (star.z < 2) {
-          resetStar(star, false);
-        }
-        const sx = (star.x / star.z) * centerX + centerX;
-        const sy = (star.y / star.z) * centerY + centerY;
-        const px = (star.x / star.pz) * centerX + centerX;
-        const py = (star.y / star.pz) * centerY + centerY;
-        const shade = 1 - star.z / STAR_DEPTH;
-        ctx.beginPath();
-        ctx.moveTo(px, py);
-        ctx.lineTo(sx, sy);
-        ctx.strokeStyle = `rgba(${starR},${starG},${starB},${shade * 0.8})`;
-        ctx.lineWidth = Math.max(0.4, shade * 2);
-        ctx.stroke();
-      }
-      if (!reducedMotion) {
-        raf = requestAnimationFrame(drawFrame);
-      }
-    };
-
-    resize();
-    stars.length = 0;
-    for (let i = 0; i < STAR_COUNT; i++) {
-      const star: Star = { x: 0, y: 0, z: 0, pz: 0 };
-      resetStar(star, true);
-      stars.push(star);
-    }
-    drawFrame();
-
-    window.addEventListener('resize', resize);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', resize);
-    };
-  }, [theme]);
-
-  return <canvas className="crtStars" ref={canvasRef} />;
 }
