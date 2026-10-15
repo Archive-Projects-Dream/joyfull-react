@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090704">
+  <title>HORIZON-DREAM</title>
+  <link rel="stylesheet" href="/src/style.scss">
+</head>
+<body data-theme="amber">
+  <canvas id="warp" aria-hidden="true"></canvas>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+  <div class="crt" id="crt" aria-hidden="true"></div>
+
+  <header class="header">
+    <div><span class="live-dot"></span>SYS // HORIZON-DREAM / ONLINE</div>
+    <div>PROTOCOL // BYOND / SS13</div>
+    <div>STATUS // OPEN BUILD</div>
+  </header>
+
+  <div class="controls" role="group" aria-label="Display settings">
+    <span class="controls-label">PHOSPHOR</span>
+    <button type="button" data-theme="amber" aria-pressed="true">AMBER</button>
+    <button type="button" data-theme="green" aria-pressed="false">GREEN</button>
+    <button type="button" data-theme="white" aria-pressed="false">WHITE</button>
+    <button type="button" id="scan-toggle" aria-pressed="true">SCANLINES ON</button>
+  </div>
+
+  <main class="container">
+    <div class="cosmic-core" aria-label="Abstract cosmic core">
+      <div class="core-center"></div>
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="ring ring-3"></div>
+    </div>
+    <div class="project-name">Horizon-Dream</div>
+    <div class="project-sub">// Beyond the station</div>
+  </main>
+
+  <nav class="footer" aria-label="Project links">
+    <a href="https://github.com/kocmodecaht/horizon-dream" class="link-item" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <span class="separator">/</span>
+    <a href="https://discord.com/users/kocmodecaht" class="link-item" target="_blank" rel="noopener noreferrer">Discord</a>
+    <span class="separator">/</span>
+    <a href="#" class="link-item" data-placeholder>Manifesto</a>
+    <span class="separator">/</span>
+    <a href="#" class="link-item" data-placeholder>Source</a>
+    <span class="separator">/</span>
+    <a href="#" class="link-item" data-placeholder>Contact</a>
+  </nav>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

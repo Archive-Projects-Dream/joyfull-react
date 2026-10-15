@@ -1,0 +1,56 @@
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 48%, transparent 20%, rgba(0,0,0,.35) 74%, rgba(0,0,0,.85) 120%);
+}
+
+.noise {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.crt {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: var(--scan);
+  background: repeating-linear-gradient(to bottom, transparent 0 3px, rgba(0,0,0,.68) 4px 5px);
+  transition: opacity 0.18s;
+
+  &.off {
+    opacity: 0;
+  }
+}
+
+.theme-swap {
+  animation: fade-swap 0.2s ease both;
+}
+
+@keyframes fade-swap {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(0); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes screen-flicker {
+  0%, 89%, 91%, 96%, 100% { opacity: 1; transform: translate(0, 0); }
+  90% { opacity: 0.82; transform: translate(1px, 0); }
+  95% { opacity: 0.93; transform: translate(-1px, 0); }
+}
