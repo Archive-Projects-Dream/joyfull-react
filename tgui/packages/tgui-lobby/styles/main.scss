@@ -539,6 +539,7 @@ img {
   background-color: var(--lobby-panel-bg);
   border: 1px solid var(--lobby-panel-border);
   font-size: 0.8em;
+  overflow: hidden;
 }
 
 .lobby__preview-body {
@@ -561,6 +562,23 @@ img {
 
 .lobby__preview-buttons {
   margin-top: 0.4em;
+
+  // Уменьшенные кнопки, чтобы не вылезали за рамки панели превью
+  .Stack__item {
+    min-width: 0;
+  }
+
+  .Button {
+    padding: 0 0.3em;
+    font-size: 0.9em;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .Button__content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .settingsHolder {
