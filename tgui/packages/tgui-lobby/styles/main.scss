@@ -119,21 +119,21 @@ img {
   --lobby-tint-glow: rgba(91, 255, 140, 0.05);
 }
 
-// Orange palette
+// Orange palette (the Horizon-Dream site "amber" phosphor, exact site colors)
 .LobbyScreen--orange {
-  --lobby-accent: hsl(30, 65%, 60%);
-  --lobby-accent-bright: hsl(35, 85%, 76%);
+  --lobby-accent: #ffc66d;
+  --lobby-accent-bright: #ffddaa;
   --lobby-fg: #e9bd72;
-  --lobby-accent-dim: hsla(30, 65%, 60%, 0.45);
-  --lobby-accent-faint: hsla(30, 65%, 60%, 0.12);
+  --lobby-accent-dim: rgba(255, 198, 109, 0.45);
+  --lobby-accent-faint: rgba(255, 174, 58, 0.12);
   --lobby-panel-bg: hsla(25, 50%, 7%, 0.72);
-  --lobby-panel-border: hsla(30, 60%, 55%, 0.4);
-  --lobby-panel-glow: hsla(30, 75%, 58%, 0.35);
-  --lobby-scanline-tint: hsla(30, 100%, 68%, 0.05);
+  --lobby-panel-border: rgba(74, 56, 32, 0.9);
+  --lobby-panel-glow: rgba(255, 174, 58, 0.18);
+  --lobby-scanline-tint: hsla(38, 100%, 70%, 0.05);
   --lobby-vignette: hsla(25, 60%, 3%, 0.9);
   --color-base: hsl(25, 35%, 16%);
-  --color-primary: hsl(30, 45%, 42%);
-  --button-color-transparent: hsla(30, 45%, 42%, 0.75);
+  --color-primary: #967849;
+  --button-color-transparent: rgba(150, 120, 73, 0.75);
   --button-background-disabled: transparent;
   --progress-bar-background: hsla(0, 0%, 0%, 0.5);
   --secondary-lightness-adjustment: 6.33;

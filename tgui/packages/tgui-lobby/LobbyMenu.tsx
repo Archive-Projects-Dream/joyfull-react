@@ -36,7 +36,7 @@ export type ServerState = {
   previewUrls: Record<string, string> | null;
 };
 
-type LobbyTheme = 'blue' | 'green' | 'orange';
+type LobbyTheme = 'orange' | 'green' | 'blue';
 
 const FILTER_STORAGE_KEY = 'lobby-filter-disabled';
 const TINT_STORAGE_KEY = 'lobby-bg-tint-disabled';
@@ -130,7 +130,7 @@ export function LobbyMenu() {
       setTheme(
         val === 'blue' || val === 'green' || val === 'orange'
           ? val
-          : 'green',
+          : 'orange',
       ),
     );
     storage.get(VIDEO_STORAGE_KEY).then((val) => {
@@ -667,10 +667,10 @@ function LobbySettings({
             <Stack vertical>
               <SettingsRow label="Theme">
                 <Button
-                  selected={theme === 'blue'}
-                  onClick={() => pickTheme('blue')}
+                  selected={theme === 'orange'}
+                  onClick={() => pickTheme('orange')}
                 >
-                  Blue
+                  Orange
                 </Button>
                 <Button
                   selected={theme === 'green'}
@@ -679,10 +679,10 @@ function LobbySettings({
                   Green
                 </Button>
                 <Button
-                  selected={theme === 'orange'}
-                  onClick={() => pickTheme('orange')}
+                  selected={theme === 'blue'}
+                  onClick={() => pickTheme('blue')}
                 >
-                  Orange
+                  Blue
                 </Button>
               </SettingsRow>
 
