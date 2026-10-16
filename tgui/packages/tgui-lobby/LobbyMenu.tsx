@@ -401,23 +401,25 @@ export function LobbyMenu() {
         </Stack.Item>
       </Stack>
 
-      <CharacterPreview
-        ss={ss}
-        hidden={hidden}
-        bootDelay={panelBootDelay(1)}
-      />
+      <div className="lobby__side-left">
+        <CharacterPreview
+          ss={ss}
+          hidden={hidden}
+          bootDelay={panelBootDelay(1)}
+        />
+
+        <PreferenceIssues
+          issues={ss.preferenceIssues}
+          hidden={hidden}
+          bootDelay={panelBootDelay(3)}
+        />
+      </div>
 
       <StatsPanel
         ss={ss}
         pregame={pregame}
         hidden={hidden}
         bootDelay={panelBootDelay(2)}
-      />
-
-      <PreferenceIssues
-        issues={ss.preferenceIssues}
-        hidden={hidden}
-        bootDelay={panelBootDelay(3)}
       />
 
       {hidden && !ss.transparent && (
@@ -650,7 +652,7 @@ function PreferenceIssues({
       ])}
       style={{ '--panel-boot-delay': bootDelay } as CSSProperties}
     >
-      <Stack vertical justify="flex-end" fill>
+      <Stack vertical>
         {issues.map((issue, index) => (
           <Section key={index} className="sectionLoad issueSection">
             <Box className="issueText">{issue}</Box>
