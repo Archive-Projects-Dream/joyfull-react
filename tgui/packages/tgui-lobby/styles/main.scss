@@ -800,6 +800,31 @@ img {
   .settingsLabel {
     color: var(--lobby-accent);
   }
+
+  // Подчёркивание заголовка настроек перекрашивается под текущую тему:
+  // тот же градиент со свечением, что и у заголовков боковых панелей,
+  // вместо стандартного серого разделителя Section
+  .Section__title {
+    border-bottom-color: transparent;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--lobby-accent-dim) 20%,
+        var(--lobby-accent) 50%,
+        var(--lobby-accent-dim) 80%,
+        transparent
+      );
+      box-shadow: 0 0 8px var(--lobby-panel-glow);
+    }
+  }
 }
 
 .noAnimation {
