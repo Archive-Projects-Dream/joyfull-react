@@ -469,6 +469,25 @@ img {
   margin-top: 0.5em;
 }
 
+// Fluid buttons center their label; the main menu buttons pin the icon to
+// the left edge so the text sits exactly in the middle of the button,
+// matching the Horizon-Dream site menu layout
+.LobbyScreen .Button--fluid .Button__content {
+  text-align: center;
+}
+
+.LobbyScreen .distinctButton,
+.LobbyScreen .hideButton {
+  .Button--icon {
+    position: absolute;
+    left: 0.6em;
+    top: 50%;
+    transform: translateY(-50%);
+    min-width: 0;
+    margin: 0;
+  }
+}
+
 // Hide Menu / restore: fade + slight scale, no layout jump
 .menuCollapsible {
   transition:
