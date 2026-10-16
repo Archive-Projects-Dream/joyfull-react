@@ -49,11 +49,6 @@ img {
   &--transparent {
     background: transparent !important;
   }
-
-  .Button__content .Icon {
-    vertical-align: middle;
-    margin-bottom: 3px;
-  }
 }
 
 // Лёгкая покраска фона под цвет темы (основа фона как на сайте Horizon-Dream),
@@ -498,6 +493,7 @@ img {
 
 .hideButton {
   margin-top: 0.5em;
+  min-height: 2em;
 }
 
 // Fluid buttons center their label; the main menu buttons pin the icon to
@@ -517,6 +513,29 @@ img {
     min-width: 0;
     margin: 0;
   }
+}
+
+// Exact flex centering for fluid buttons: the core
+// `line-height: var(--button-height)` box sits the label slightly low
+// inside the bordered button; flex alignment centers it pixel exact
+.LobbyScreen .Button--fluid {
+  display: flex;
+  align-items: center;
+
+  .Button__content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    line-height: 1.2;
+  }
+}
+
+// The buttons used to be sized by that line-height box - keep the
+// same visual height now that the label is centered by flex
+.LobbyScreen .settingsModal .Button--fluid {
+  min-height: 1.667em;
 }
 
 // Hide Menu / restore: fade + slight scale, no layout jump
