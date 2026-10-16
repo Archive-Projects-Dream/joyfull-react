@@ -425,6 +425,50 @@ img {
   text-transform: uppercase;
 }
 
+// Persistent brand watermark in the bottom-left corner while the menu is
+// hidden - shows which project this lobby belongs to
+.brandWatermark {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+  pointer-events: none;
+
+  &__logo {
+    width: 30px;
+    aspect-ratio: 1;
+    fill: var(--lobby-accent);
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+  }
+
+  &__name {
+    color: var(--lobby-fg);
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px var(--lobby-glow);
+    line-height: 1.25;
+  }
+
+  &__sub {
+    color: var(--lobby-dim);
+    font-size: 9px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    line-height: 1.25;
+  }
+}
+
 .dividerEffect {
   height: 1px;
   border: none;
