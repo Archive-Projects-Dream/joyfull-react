@@ -269,7 +269,7 @@ export function LobbyMenu() {
             <div className="brandLockup__name">Horizon-Dream</div>
             <div className="brandLockup__sub">Beyond the station</div>
           </div>
-          <Section p={3} className="sectionLoad">
+          <Section p={3} pt={2} className="sectionLoad">
             <Stack vertical>
               <Stack.Item>
                 <Stack vertical align="center" className="welcomeHolder">
