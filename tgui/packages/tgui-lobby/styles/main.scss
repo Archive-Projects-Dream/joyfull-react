@@ -589,11 +589,34 @@ img {
 }
 
 .lobby__panel-title {
+  position: relative;
   color: var(--lobby-accent);
   font-size: 1em;
-  border-bottom: 1px solid var(--lobby-accent-dim);
   padding-bottom: 0.25em;
   margin-bottom: 0.4em;
+
+  // The underline gets the dividerEffect treatment - the same gradient,
+  // glow and soft fade-in - and boots together with its panel
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--lobby-accent-dim) 20%,
+      var(--lobby-accent) 50%,
+      var(--lobby-accent-dim) 80%,
+      transparent
+    );
+    box-shadow: 0 0 8px var(--lobby-panel-glow);
+    opacity: 0;
+    animation: divider-appear 0.6s ease forwards;
+    animation-delay: calc(var(--panel-boot-delay, 0s) + 0.25s);
+  }
 }
 
 .messageHolder {
