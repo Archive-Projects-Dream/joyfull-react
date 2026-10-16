@@ -214,7 +214,6 @@ export function LobbyMenu() {
         'LobbyScreen',
         `LobbyScreen--${theme}`,
         crtFilter && 'filterEnabled',
-        !tintDisabled && 'LobbyScreen--bgTint',
         returnBoot && 'LobbyScreen--return',
         animationsDisabled && 'noAnimation',
         fadingOut && 'lobbyFadeOut',
@@ -241,9 +240,7 @@ export function LobbyMenu() {
         />
       )}
 
-      {!tintDisabled && (!!bgImageUrl || !!bgVideoUrl) && (
-        <div className="bgTint" />
-      )}
+      {!tintDisabled && !ss.transparent && <div className="bgTint" />}
 
       {crtFilter && !ss.transparent && (
         <>
@@ -253,7 +250,13 @@ export function LobbyMenu() {
         </>
       )}
 
-      <Stack vertical height="100%" justify="space-around" align="center">
+      <Stack
+        vertical
+        height="100%"
+        justify="space-around"
+        align="center"
+        className="menuHolder"
+      >
         <Stack.Item className={collapsible}>
           <div className="brandLockup">
             <svg
