@@ -20,8 +20,8 @@ body,
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: var(--lobby-bg, #000) !important;
-  background-color: var(--lobby-bg, #000) !important;
+  background: var(--lobby-bg, transparent) !important;
+  background-color: var(--lobby-bg, transparent) !important;
 }
 
 * {
@@ -42,7 +42,7 @@ img {
   font-weight: bold;
   line-height: 100%;
   font-size: large;
-  animation: lobby-fade-in 0.5s ease-out both;
+  animation: lobby-fade-in 0.8s ease-out both;
   // Phosphor swap blink, mirroring the Horizon-Dream site theme switch
   transition: filter 0.12s ease;
 
@@ -60,6 +60,16 @@ img {
     var(--lobby-tint-glow) 0%,
     transparent 65%
   );
+}
+
+// Returning from the game: the lobby cross-fades over the map and
+// boots up again - the background image does not sit dark for five
+// seconds on top of that, it settles in right after the cross-fade
+.LobbyScreen.LobbyScreen--return {
+  .bgLoad {
+    animation-delay: 0.8s;
+    animation-duration: 4s;
+  }
 }
 
 // Blue palette

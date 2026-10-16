@@ -28,6 +28,9 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	/// Only set while the lobby is shown
 	var/datum/tgui_window/window
 	var/shown = FALSE
+	/// [HORIZON-ADD] Set once the lobby has been hidden for a game; every
+	/// later show() is a return and plays the reverse fade-in
+	var/ever_hidden = FALSE
 	var/fade_timer
 	var/assets_signals_registered = FALSE
 	var/ticker_signals_registered = FALSE
@@ -93,14 +96,26 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	if(fade_timer)
 		deltimer(fade_timer)
 		fade_timer = null
+	// [HORIZON-ADD] A returning player gets the reverse of the fade-out:
+	// the browser stays see-through so the map remains visible behind
+	// it, and the "returning" init tells the frontend to cross-fade its
+	// own backdrop in and replay the boot sequence
+	var/returning = ever_hidden
 	if(!window)
-		create_window()
-	apply_element_background()
+		create_window(returning)
+	else if(returning && !is_lobby_transparent())
+		winset(client, "lobby_menu", list(
+			"background-color" = "none",
+			"inner-background-color" = "transparent",
+		))
+	else
+		apply_element_background()
+	// [/HORIZON-ADD]
 	register_ticker_signals()
 	START_PROCESSING(SSlobby_menu, src)
 	preview_dirty = TRUE
 	issues_dirty = FALSE
-	send_init()
+	send_init(returning)
 	update_character_preview()
 
 /**
@@ -108,7 +123,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
  * the map, and is made see-through during the fade-out so the lobby
  * cross-fades into the game view behind it.
  */
-/datum/lobby_menu/proc/create_window()
+/datum/lobby_menu/proc/create_window(returning = FALSE)
 	// Remove a stale element, if any
 	winset(client, "lobby_menu", list("parent" = ""))
 	// Match the pane size up front, otherwise the window visibly stretches
@@ -123,7 +138,15 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"anchor2" = "100,100",
 		"is-visible" = "false",
 	))
-	apply_element_background()
+	if(returning && !is_lobby_transparent())
+		// [HORIZON-ADD] returning player: keep the map visible behind the
+		// fresh page - it cross-fades its own backdrop in once loaded
+		winset(client, "lobby_menu", list(
+			"background-color" = "none",
+			"inner-background-color" = "transparent",
+		))
+	else
+		apply_element_background()
 	window = new(client, "lobby_menu")
 	window.is_browser = TRUE
 	window.initialize(
@@ -160,6 +183,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	if(!shown)
 		return
 	shown = FALSE
+	ever_hidden = TRUE
 	STOP_PROCESSING(SSlobby_menu, src)
 	unregister_ticker_signals()
 	if(!window)
@@ -293,7 +317,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		return "DELAYED"
 	return "SOON"
 
-/datum/lobby_menu/proc/send_init()
+/datum/lobby_menu/proc/send_init(returning = FALSE)
 	if(!window)
 		return
 	var/mob/dead/new_player/player = client?.mob
@@ -324,6 +348,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"backgroundUrl" = get_lobby_background_url(),
 		"videoUrl" = get_lobby_video_url(),
 		"previewUrls" = preview_urls,
+		"returning" = returning,
 		// [/HORIZON-ADD]
 	))
 

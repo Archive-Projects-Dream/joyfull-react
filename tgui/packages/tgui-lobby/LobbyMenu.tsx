@@ -41,6 +41,7 @@ export type ServerState = {
   backgroundUrl: string | null;
   videoUrl: string | null;
   previewUrls: Record<string, string> | null;
+  returning?: boolean;
 };
 
 type LobbyTheme = 'orange' | 'green' | 'blue';
@@ -89,13 +90,27 @@ export function LobbyMenu() {
   const [soundsOn, setSoundsOn] = useState(true);
   const [hidden, setHidden] = useState(false);
   const [themeFlash, setThemeFlash] = useState(false);
+  const [bootEpoch, setBootEpoch] = useState(0);
+  const [returnBoot, setReturnBoot] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     Byond.subscribeTo('init', (payload: ServerState) => {
       setSs(payload);
       setFadingOut(false);
-      applyBackdrop(!!payload.transparent);
+      if (payload.returning && !payload.transparent) {
+        // Returning from the game - the reverse of the fade-out: the
+        // page stays see-through (the map shows behind it), the
+        // re-mounted lobby cross-fades its own backdrop in and the
+        // interface boots up all over again
+        applyBackdrop(true);
+        setHidden(false);
+        setReturnBoot(true);
+        setBootEpoch((epoch) => epoch + 1);
+      } else {
+        setReturnBoot(false);
+        applyBackdrop(!!payload.transparent);
+      }
       videoRef.current?.play()?.catch(() => {});
     });
 
@@ -135,16 +150,22 @@ export function LobbyMenu() {
         setTimeout(() => playLoadSound(), LOAD_SOUND_DELAY_MS);
       }
     });
+  }, []);
+
+  // The staggered boot settles after ten seconds; a returning player
+  // re-boots the whole sequence (bootEpoch bumps on every return)
+  useEffect(() => {
+    setAnimationsDisabled(false);
     const timer = setTimeout(
       () => setAnimationsDisabled(true),
       ANIMATION_DISABLE_MS,
     );
     return () => clearTimeout(timer);
-  }, []);
+  }, [bootEpoch]);
 
   useEffect(() => {
     videoRef.current?.play()?.catch(() => {});
-  }, [ss?.videoUrl, videoEnabled, ss?.transparent]);
+  }, [ss?.videoUrl, videoEnabled, ss?.transparent, bootEpoch]);
 
   if (
     !ss ||
@@ -188,11 +209,13 @@ export function LobbyMenu() {
 
   return (
     <div
+      key={bootEpoch}
       className={classes([
         'LobbyScreen',
         `LobbyScreen--${theme}`,
         crtFilter && 'filterEnabled',
         !tintDisabled && 'LobbyScreen--bgTint',
+        returnBoot && 'LobbyScreen--return',
         animationsDisabled && 'noAnimation',
         fadingOut && 'lobbyFadeOut',
         themeFlash && 'LobbyScreen--themeSwap',
