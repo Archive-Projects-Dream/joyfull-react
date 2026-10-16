@@ -203,6 +203,12 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	if(shown || !client)
 		return
 	close_window()
+	// [HORIZON-ADD] The lobby browser held keyboard focus through the
+	// fade-out, and destroying the element leaves focus dangling - the
+	// player had to click the map before the game accepted any input.
+	// Hand the focus back the same way a click on the map does.
+	winset(client, SKIN_MAPWINDOW, "focus=true")
+	winset(client, SKIN_MAPWINDOW_MAP, "focus=true")
 
 /// [HORIZON-ADD] Destroys the browser element and the tgui window, if any
 /datum/lobby_menu/proc/close_window()
