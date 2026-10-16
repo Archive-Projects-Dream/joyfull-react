@@ -91,6 +91,7 @@ img {
   --lobby-dim: #6984b0;
   --lobby-tint-bg: #030711;
   --lobby-tint-glow: rgba(54, 132, 255, 0.06);
+  --lobby-tint-wash: rgba(3, 7, 17, 0.5);
 }
 
 // Green palette (the Horizon-Dream site "green" phosphor, exact site colors)
@@ -117,6 +118,7 @@ img {
   --lobby-dim: #668773;
   --lobby-tint-bg: #040806;
   --lobby-tint-glow: rgba(91, 255, 140, 0.05);
+  --lobby-tint-wash: rgba(4, 8, 6, 0.5);
 }
 
 // Orange palette (the Horizon-Dream site "amber" phosphor, exact site colors)
@@ -143,6 +145,7 @@ img {
   --lobby-dim: #967849;
   --lobby-tint-bg: #090704;
   --lobby-tint-glow: rgba(255, 174, 58, 0.05);
+  --lobby-tint-wash: rgba(9, 7, 4, 0.5);
 }
 
 // Phosphor swap blink, ported from the Horizon-Dream site (the .theme-swap
@@ -291,6 +294,22 @@ img {
   z-index: 1;
   object-fit: cover;
   pointer-events: none;
+}
+
+// Phosphor wash laid OVER the background media: the tint used to live on
+// the root element, where the image covered it completely. Mirrors the
+// site's tinted backdrop - dark theme wash with a soft glow at the top
+.bgTint {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-color: var(--lobby-tint-wash);
+  background-image: radial-gradient(
+    ellipse at 50% 42%,
+    var(--lobby-tint-glow) 0%,
+    transparent 65%
+  );
 }
 
 .crt {

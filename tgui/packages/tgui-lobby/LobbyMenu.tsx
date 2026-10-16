@@ -162,6 +162,11 @@ export function LobbyMenu() {
   };
 
   const crtFilter = !filterDisabled;
+  const bgImageUrl =
+    !ss.transparent && !bgDisabled ? ss.backgroundUrl : null;
+  const bgVideoUrl = !ss.transparent && videoEnabled
+    ? ss.videoUrl
+    : null;
   const pregame = ss.gamePhase === 'pregame' || ss.gamePhase === 'startup';
   const typingDelay = (index: number) =>
     animationsDisabled ? '0s' : `${1.5 + index * 0.2}s`;
@@ -182,23 +187,27 @@ export function LobbyMenu() {
         ss.transparent && 'LobbyScreen--transparent',
       ])}
     >
-      {!ss.transparent && !bgDisabled && ss.backgroundUrl && (
+      {bgImageUrl && (
         <div
           className="bgBackground bgLoad"
-          style={{ backgroundImage: `url(${ss.backgroundUrl})` }}
+          style={{ backgroundImage: `url(${bgImageUrl})` }}
         />
       )}
 
-      {!ss.transparent && videoEnabled && ss.videoUrl && (
+      {bgVideoUrl && (
         <video
           ref={videoRef}
           className="bgVideo"
-          src={ss.videoUrl}
+          src={bgVideoUrl}
           autoPlay
           loop
           muted
           playsInline
         />
+      )}
+
+      {!tintDisabled && (!!bgImageUrl || !!bgVideoUrl) && (
+        <div className="bgTint" />
       )}
 
       {crtFilter && !ss.transparent && (
