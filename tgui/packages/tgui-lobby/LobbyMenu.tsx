@@ -167,6 +167,108 @@ export function LobbyMenu() {
     videoRef.current?.play()?.catch(() => {});
   }, [ss?.videoUrl, videoEnabled, ss?.transparent, bootEpoch]);
 
+  // The `loop` attribute covers well-formed videos. Webm files recorded
+  // without a duration header break BOTH looping and seeking in
+  // Chromium, freezing the video on the last frame. This effect watches
+  // for that freeze and restarts playback, escalating from a seek to a
+  // full load() reset whenever the seek won't take.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !ss?.videoUrl || !videoEnabled || ss?.transparent) {
+      return;
+    }
+    const tryPlay = () => {
+      video.play()?.catch(() => {});
+    };
+    // A hard reset re-reads the (already cached) file and restarts
+    // playback even when seeking is broken
+    const hardRestart = () => {
+      try {
+        video.load();
+      } catch {
+        // best-effort reset
+      }
+      tryPlay();
+    };
+    let seekBroken = false;
+    let restartTimer: number | undefined;
+    const restart = () => {
+      if (seekBroken) {
+        hardRestart();
+        return;
+      }
+      try {
+        video.currentTime = 0;
+      } catch {
+        seekBroken = true;
+        hardRestart();
+        return;
+      }
+      tryPlay();
+      // Seeks on duration-less webm files fail silently: playback
+      // never resumes. Give it a moment, then fall back to the reset.
+      window.clearTimeout(restartTimer);
+      restartTimer = window.setTimeout(() => {
+        if (video.ended || (video.paused && !video.seeking)) {
+          seekBroken = true;
+          hardRestart();
+        }
+      }, 600);
+    };
+    const onEnded = () => restart();
+    const onTimeUpdate = () => {
+      if (video.ended) {
+        restart();
+      }
+    };
+    // Watchdog: some embedded webviews never fire `ended`, and nothing
+    // in the lobby ever pauses the background video (no controls,
+    // pointer events off) - so a paused element or a multi-second stall
+    // means an end-of-file freeze that needs a restart
+    let lastTime = -1;
+    let stalls = 0;
+    const watchdog = window.setInterval(() => {
+      if (document.hidden) {
+        // The webview is invisible; don't fight timer throttling
+        return;
+      }
+      if (video.ended) {
+        restart();
+        return;
+      }
+      if (
+        video.paused &&
+        !video.seeking &&
+        video.currentTime > 0 &&
+        (video.duration === 0 || !isFinite(video.duration) ||
+          video.currentTime >= video.duration - 0.1)
+      ) {
+        restart();
+        return;
+      }
+      if (video.paused || video.seeking) {
+        stalls = 0;
+      } else if (Math.abs(video.currentTime - lastTime) < 0.05) {
+        stalls += 1;
+        if (stalls >= 4) {
+          stalls = 0;
+          restart();
+        }
+      } else {
+        stalls = 0;
+      }
+      lastTime = video.currentTime;
+    }, 1000);
+    video.addEventListener('ended', onEnded);
+    video.addEventListener('timeupdate', onTimeUpdate);
+    return () => {
+      window.clearTimeout(restartTimer);
+      window.clearInterval(watchdog);
+      video.removeEventListener('ended', onEnded);
+      video.removeEventListener('timeupdate', onTimeUpdate);
+    };
+  }, [ss?.videoUrl, videoEnabled, ss?.transparent]);
+
   if (
     !ss ||
     theme === undefined ||
@@ -237,15 +339,6 @@ export function LobbyMenu() {
           loop
           muted
           playsInline
-          // `loop` covers most browsers; the explicit restart below is a
-          // fallback for embedded webviews that ignore the loop attribute
-          onEnded={() => {
-            const video = videoRef.current;
-            if (video) {
-              video.currentTime = 0;
-              video.play()?.catch(() => {});
-            }
-          }}
         />
       )}
 
