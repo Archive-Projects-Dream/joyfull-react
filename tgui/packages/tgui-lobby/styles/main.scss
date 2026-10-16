@@ -526,6 +526,14 @@ img {
     visibility 0s linear 0.3s;
 }
 
+// The hint column spans the full screen height with its content pinned to
+// the bottom edge: the default centered scale flies that content far up
+// the screen, so collapse it almost in place instead
+.messageHolder.menuHidden {
+  transform: scale(0.99) translateY(-3px);
+  transform-origin: 0 100%;
+}
+
 .floatingAppear {
   animation: floating-appear 0.3s ease-out both;
 }
