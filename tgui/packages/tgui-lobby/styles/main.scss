@@ -252,6 +252,18 @@ img {
   }
 }
 
+@keyframes panel-boot {
+  from {
+    opacity: 0;
+    transform: var(--panel-boot-from, translateY(12px));
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 // Occasional CRT jolt, straight from the Horizon-Dream site
 @keyframes screen-flicker {
   0%,
@@ -536,6 +548,26 @@ img {
 
 .floatingAppear {
   animation: floating-appear 0.3s ease-out both;
+}
+
+// Side panels power on with the interface: each slides in from its own
+// edge with a staggered delay (see panelBootDelay in LobbyMenu.tsx)
+.panelBoot {
+  opacity: 0;
+  animation: panel-boot 0.7s ease-out both;
+  animation-delay: var(--panel-boot-delay, 0s);
+}
+
+.lobby__preview.panelBoot {
+  --panel-boot-from: translateX(-12px);
+}
+
+.lobby__stats-holder.panelBoot {
+  --panel-boot-from: translateX(12px);
+}
+
+.messageHolder.panelBoot {
+  --panel-boot-from: translateY(12px);
 }
 
 .lobby__panel-title {

@@ -1,4 +1,11 @@
-import { type MouseEvent, type ReactNode, useEffect, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type MouseEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { storage } from 'common/storage';
 import { Box, Button, Modal, Section, Stack } from 'tgui-core/components';
 import { classes } from 'tgui-core/react';
@@ -170,6 +177,11 @@ export function LobbyMenu() {
   const pregame = ss.gamePhase === 'pregame' || ss.gamePhase === 'startup';
   const typingDelay = (index: number) =>
     animationsDisabled ? '0s' : `${1.5 + index * 0.2}s`;
+
+  // Side panels power on after the central menu, imitating the
+  // interface booting up piece by piece
+  const panelBootDelay = (index: number) =>
+    animationsDisabled ? '0s' : `${1.7 + (index - 1) * 0.25}s`;
 
   // Всё лобби, кроме шестерёнки настроек, сворачивается вместе
   const collapsible = classes(['menuCollapsible', hidden && 'menuHidden']);
@@ -363,11 +375,24 @@ export function LobbyMenu() {
         </Stack.Item>
       </Stack>
 
-      <CharacterPreview ss={ss} hidden={hidden} />
+      <CharacterPreview
+        ss={ss}
+        hidden={hidden}
+        bootDelay={panelBootDelay(1)}
+      />
 
-      <StatsPanel ss={ss} pregame={pregame} hidden={hidden} />
+      <StatsPanel
+        ss={ss}
+        pregame={pregame}
+        hidden={hidden}
+        bootDelay={panelBootDelay(2)}
+      />
 
-      <PreferenceIssues issues={ss.preferenceIssues} hidden={hidden} />
+      <PreferenceIssues
+        issues={ss.preferenceIssues}
+        hidden={hidden}
+        bootDelay={panelBootDelay(3)}
+      />
 
       <LobbySettings
         ss={ss}
@@ -427,9 +452,11 @@ function LobbyButton(props: {
 function CharacterPreview({
   ss,
   hidden,
+  bootDelay,
 }: {
   ss: ServerState;
   hidden: boolean;
+  bootDelay: string;
 }) {
   const [dirIndex, setDirIndex] = useState(0);
   const [imgRetry, setImgRetry] = useState(0);
@@ -450,9 +477,11 @@ function CharacterPreview({
     <div
       className={classes([
         'lobby__preview',
+        'panelBoot',
         'menuCollapsible',
         hidden && 'menuHidden',
       ])}
+      style={{ '--panel-boot-delay': bootDelay } as CSSProperties}
     >
       <div className="lobby__panel-title">Character</div>
       <div className="lobby__preview-body">
@@ -519,18 +548,22 @@ function StatsPanel({
   ss,
   pregame,
   hidden,
+  bootDelay,
 }: {
   ss: ServerState;
   pregame: boolean;
   hidden: boolean;
+  bootDelay: string;
 }) {
   return (
     <div
       className={classes([
         'lobby__stats-holder',
+        'panelBoot',
         'menuCollapsible',
         hidden && 'menuHidden',
       ])}
+      style={{ '--panel-boot-delay': bootDelay } as CSSProperties}
     >
       <div className="lobby__stats">
         <div className="lobby__panel-title">Server</div>
@@ -556,9 +589,11 @@ function StatsPanel({
 function PreferenceIssues({
   issues,
   hidden,
+  bootDelay,
 }: {
   issues: string[];
   hidden: boolean;
+  bootDelay: string;
 }) {
   if (!issues || issues.length === 0) {
     return null;
@@ -567,9 +602,11 @@ function PreferenceIssues({
     <div
       className={classes([
         'messageHolder',
+        'panelBoot',
         'menuCollapsible',
         hidden && 'menuHidden',
       ])}
+      style={{ '--panel-boot-delay': bootDelay } as CSSProperties}
     >
       <Stack vertical justify="flex-end" fill>
         {issues.map((issue, index) => (
