@@ -237,6 +237,15 @@ export function LobbyMenu() {
           loop
           muted
           playsInline
+          // `loop` covers most browsers; the explicit restart below is a
+          // fallback for embedded webviews that ignore the loop attribute
+          onEnded={() => {
+            const video = videoRef.current;
+            if (video) {
+              video.currentTime = 0;
+              video.play()?.catch(() => {});
+            }
+          }}
         />
       )}
 
