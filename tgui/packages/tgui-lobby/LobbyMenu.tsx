@@ -40,6 +40,7 @@ type LobbyTheme = 'orange' | 'green' | 'blue';
 
 const FILTER_STORAGE_KEY = 'lobby-filter-disabled';
 const TINT_STORAGE_KEY = 'lobby-bg-tint-disabled';
+const BG_STORAGE_KEY = 'lobby-bg-image-disabled';
 const THEME_STORAGE_KEY = 'lobby-theme';
 const VIDEO_STORAGE_KEY = 'lobby-video-enabled';
 
@@ -76,6 +77,7 @@ export function LobbyMenu() {
   const [theme, setTheme] = useState<LobbyTheme | undefined>();
   const [filterDisabled, setFilterDisabled] = useState<boolean | undefined>();
   const [tintDisabled, setTintDisabled] = useState<boolean | undefined>();
+  const [bgDisabled, setBgDisabled] = useState<boolean | undefined>();
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [soundsOn, setSoundsOn] = useState(true);
   const [hidden, setHidden] = useState(false);
@@ -109,6 +111,7 @@ export function LobbyMenu() {
   useEffect(() => {
     storage.get(FILTER_STORAGE_KEY).then((val) => setFilterDisabled(!!val));
     storage.get(TINT_STORAGE_KEY).then((val) => setTintDisabled(!!val));
+    storage.get(BG_STORAGE_KEY).then((val) => setBgDisabled(!!val));
     storage.get(THEME_STORAGE_KEY).then((val) =>
       setTheme(
         val === 'blue' || val === 'green' || val === 'orange'
@@ -140,7 +143,8 @@ export function LobbyMenu() {
     !ss ||
     theme === undefined ||
     filterDisabled === undefined ||
-    tintDisabled === undefined
+    tintDisabled === undefined ||
+    bgDisabled === undefined
   ) {
     return null;
   }
@@ -178,7 +182,7 @@ export function LobbyMenu() {
         ss.transparent && 'LobbyScreen--transparent',
       ])}
     >
-      {!ss.transparent && ss.backgroundUrl && (
+      {!ss.transparent && !bgDisabled && ss.backgroundUrl && (
         <div
           className="bgBackground bgLoad"
           style={{ backgroundImage: `url(${ss.backgroundUrl})` }}
@@ -364,6 +368,8 @@ export function LobbyMenu() {
         setFilterDisabled={setFilterDisabled}
         tintDisabled={tintDisabled}
         setTintDisabled={setTintDisabled}
+        bgDisabled={bgDisabled}
+        setBgDisabled={setBgDisabled}
         theme={theme}
         pickTheme={pickTheme}
         videoEnabled={videoEnabled}
@@ -576,6 +582,8 @@ function LobbySettings({
   setFilterDisabled,
   tintDisabled,
   setTintDisabled,
+  bgDisabled,
+  setBgDisabled,
   theme,
   pickTheme,
   videoEnabled,
@@ -590,6 +598,8 @@ function LobbySettings({
   setFilterDisabled: (value: boolean) => void;
   tintDisabled: boolean;
   setTintDisabled: (value: boolean) => void;
+  bgDisabled: boolean;
+  setBgDisabled: (value: boolean) => void;
   theme: LobbyTheme;
   pickTheme: (value: LobbyTheme) => void;
   videoEnabled: boolean;
@@ -691,6 +701,22 @@ function LobbySettings({
                   {tintDisabled ? 'Off' : 'On'}
                 </Button>
               </SettingsRow>
+
+              {!!ss.backgroundUrl && (
+                <SettingsRow label="Background image">
+                  <Button
+                    selected={!bgDisabled}
+                    onClick={() => {
+                      playSelectSound();
+                      const next = !bgDisabled;
+                      setBgDisabled(next);
+                      storage.set(BG_STORAGE_KEY, next);
+                    }}
+                  >
+                    {bgDisabled ? 'Off' : 'On'}
+                  </Button>
+                </SettingsRow>
+              )}
 
               <SettingsRow label="Interface sounds">
                 <Button
