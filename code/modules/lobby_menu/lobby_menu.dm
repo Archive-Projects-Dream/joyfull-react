@@ -1,5 +1,7 @@
 GLOBAL_LIST_EMPTY(lobby_menus)
 GLOBAL_VAR(lobby_background_transparent)
+GLOBAL_VAR(lobby_video_asset_name)
+GLOBAL_VAR(lobby_background_asset_name)
 
 #define LOBBY_FADE_OUT_TIME 1 SECONDS
 #define LOBBY_PREVIEW_DIRS list("south" = SOUTH, "east" = EAST, "north" = NORTH, "west" = WEST)
@@ -38,11 +40,6 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	var/list/preview_asset_names
 	var/preview_dirty = TRUE
 	var/issues_dirty = FALSE
-	/// [HORIZON-ADD] Lobby art rolled randomly per player connection:
-	/// "" caches "no art found" until the next connection
-	var/video_asset_name
-	var/background_asset_name
-	var/background_asset_map
 
 /datum/lobby_menu/New(client/client)
 	src.client = client
@@ -590,12 +587,13 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	preview_urls = new_urls
 	send_update(list("previewUrls" = preview_urls))
 
-/// config/lobby_art/ (.webm or .mp4), rolled randomly per player
-/// connection; returning players keep their roll, reconnects re-roll
+/// config/lobby_art/ (.webm or .mp4), rolled randomly ONCE per server
+/// boot - one roulette spin for the whole boot; "" caches "no art
+/// found" until the next reboot
 /datum/lobby_menu/proc/get_lobby_video_url()
 	if(is_lobby_transparent())
 		return null
-	if(isnull(video_asset_name))
+	if(isnull(GLOB.lobby_video_asset_name))
 		var/list/candidates = list()
 		for(var/filename in flist("[global.config.directory]/lobby_art/"))
 			var/extension = LOWER_TEXT(copytext(filename, findlasttext(filename, ".")))
@@ -603,51 +601,40 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 				candidates += filename
 		if(!length(candidates))
 			// Negative cache so we don't rescan on every state send
-			video_asset_name = ""
+			GLOB.lobby_video_asset_name = ""
 			return null
 		var/chosen = pick(candidates)
-		video_asset_name = "lobby_video_[ckey(chosen)]"
-		SSassets.transport.register_asset(video_asset_name, fcopy_rsc("[global.config.directory]/lobby_art/[chosen]"))
-	if(!video_asset_name)
+		GLOB.lobby_video_asset_name = "lobby_video_[ckey(chosen)]"
+		SSassets.transport.register_asset(GLOB.lobby_video_asset_name, fcopy_rsc("[global.config.directory]/lobby_art/[chosen]"))
+	if(!GLOB.lobby_video_asset_name)
 		return null
-	SSassets.transport.send_assets(client, video_asset_name)
-	return SSassets.transport.get_asset_url(video_asset_name)
+	SSassets.transport.send_assets(client, GLOB.lobby_video_asset_name)
+	return SSassets.transport.get_asset_url(GLOB.lobby_video_asset_name)
 
-/// "<map name>.png" from config/lobby_art/ wins, then a random image
-/// from the folder - re-rolled per player connection, so every login
-/// can show different art without a server restart
+/// A random image from config/lobby_art/ (.png/.jpg/.jpeg), rolled
+/// randomly ONCE per server boot - every picture in the folder is a
+/// candidate; "" caches "no art found" until the next reboot
 /datum/lobby_menu/proc/get_lobby_background_url()
 	if(is_lobby_transparent())
 		return null
-	var/map_name = SSmapping.current_map?.map_name
-	if(background_asset_map != map_name)
-		background_asset_map = map_name
-		background_asset_name = null
-	if(isnull(background_asset_name))
+	if(isnull(GLOB.lobby_background_asset_name))
 		var/art_dir = "[global.config.directory]/lobby_art/"
-		var/chosen
-		if(map_name && fexists("[art_dir][map_name].png"))
-			chosen = "[map_name].png"
-		else if(map_name && fexists("[art_dir][map_name].jpg"))
-			chosen = "[map_name].jpg"
-		else
-			var/list/candidates = list()
-			for(var/filename in flist(art_dir))
-				var/extension = LOWER_TEXT(copytext(filename, findlasttext(filename, ".")))
-				if(extension in list(".png", ".jpg", ".jpeg"))
-					candidates += filename
-			if(length(candidates))
-				chosen = pick(candidates)
-		if(!chosen)
+		var/list/candidates = list()
+		for(var/filename in flist(art_dir))
+			var/extension = LOWER_TEXT(copytext(filename, findlasttext(filename, ".")))
+			if(extension in list(".png", ".jpg", ".jpeg"))
+				candidates += filename
+		if(!length(candidates))
 			// Negative cache so we don't rescan on every state send
-			background_asset_name = ""
+			GLOB.lobby_background_asset_name = ""
 			return null
-		background_asset_name = "lobby_background_[ckey(chosen)]"
-		SSassets.transport.register_asset(background_asset_name, fcopy_rsc("[art_dir][chosen]"))
-	if(!background_asset_name)
+		var/chosen = pick(candidates)
+		GLOB.lobby_background_asset_name = "lobby_background_[ckey(chosen)]"
+		SSassets.transport.register_asset(GLOB.lobby_background_asset_name, fcopy_rsc("[art_dir][chosen]"))
+	if(!GLOB.lobby_background_asset_name)
 		return null
-	SSassets.transport.send_assets(client, background_asset_name)
-	return SSassets.transport.get_asset_url(background_asset_name)
+	SSassets.transport.send_assets(client, GLOB.lobby_background_asset_name)
+	return SSassets.transport.get_asset_url(GLOB.lobby_background_asset_name)
 // [/HORIZON-ADD]
 
 #undef LOBBY_FADE_OUT_TIME
