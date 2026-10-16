@@ -840,17 +840,6 @@ function LobbySettings({
                 </SettingsRow>
               )}
 
-              <Stack.Item>
-                <Button
-                  fluid
-                  onClick={() => {
-                    playSelectSound();
-                    setOpen(false);
-                  }}
-                >
-                  Close
-                </Button>
-              </Stack.Item>
             </Stack>
           </Section>
         </Modal>
