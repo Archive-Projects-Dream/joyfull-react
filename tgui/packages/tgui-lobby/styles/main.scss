@@ -405,12 +405,11 @@ img {
 .brandLockup__name {
   position: relative;
   z-index: 1;
-  margin-bottom: 0.55em;
-  padding-bottom: 0.3em;
+  margin-bottom: 0.25em;
   color: var(--lobby-fg, #fff);
-  font-size: 19px;
-  letter-spacing: 0.42em;
-  text-indent: 0.42em;
+  font-size: 22px;
+  letter-spacing: 0.26em;
+  text-indent: 0.26em;
   text-transform: uppercase;
   border-bottom: 1px solid var(--lobby-line);
   text-shadow: 0 0 18px var(--lobby-glow);
@@ -420,9 +419,9 @@ img {
   position: relative;
   z-index: 1;
   color: var(--lobby-dim);
-  font-size: 11px;
-  letter-spacing: 0.36em;
-  text-indent: 0.36em;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
   text-transform: uppercase;
 }
 
