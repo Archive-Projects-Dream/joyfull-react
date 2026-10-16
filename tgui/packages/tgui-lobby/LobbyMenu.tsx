@@ -582,7 +582,7 @@ function PreferenceIssues({
   );
 }
 
-/** Settings corner (bottom left) and its popup */
+/** Settings corner (bottom right) and its popup */
 function LobbySettings({
   ss,
   menuHidden,
@@ -623,7 +623,7 @@ function LobbySettings({
       <Box
         position="absolute"
         bottom="10px"
-        left="10px"
+        right="10px"
         className="settingsHolder"
       >
         {menuHidden && (
