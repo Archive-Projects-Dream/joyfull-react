@@ -623,10 +623,16 @@ img {
 }
 
 // Side panels power on with the interface: each slides in from its own
-// edge with a staggered delay (see panelBootDelay in LobbyMenu.tsx)
+// edge with a staggered delay (see panelBootDelay in LobbyMenu.tsx).
+// The fill mode is `backwards` on purpose: `both`/`forwards` keeps pinning
+// opacity/transform after the boot finishes, and the still-running fill beat
+// the normal .menuHidden declarations in the cascade - so the hide/show
+// transitions never started and the panels snapped instantly instead.
+// `backwards` covers the delay period, then releases the properties back
+// to the normal styles (default opacity 1), which keeps the collapsible
+// transitions working for the whole life of the panel.
 .panelBoot {
-  opacity: 0;
-  animation: panel-boot 0.7s ease-out both;
+  animation: panel-boot 0.7s ease-out backwards;
   animation-delay: var(--panel-boot-delay, 0s);
 }
 
