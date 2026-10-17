@@ -333,7 +333,10 @@ export function LobbyMenu() {
       {bgVideoUrl && (
         <video
           ref={videoRef}
-          className="bgVideo"
+          // bgLoad: the same 5s→15s fade-in the background image gets,
+          // so the roulette video materialises smoothly instead of
+          // popping in on the first frame
+          className="bgVideo bgLoad"
           src={bgVideoUrl}
           autoPlay
           loop
