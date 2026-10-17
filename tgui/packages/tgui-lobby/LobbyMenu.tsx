@@ -474,33 +474,6 @@ export function LobbyMenu() {
                   Polls
                 </LobbyButton>
               )}
-
-              {!!ss.canStartNow && (
-                <LobbyButton
-                  delay={typingDelay(8)}
-                  icon="forward"
-                  onClick={() => sendAction('start_now')}
-                >
-                  Start Now
-                </LobbyButton>
-              )}
-
-              <Stack.Item
-                className="buttonEffect"
-                style={{ animationDelay: typingDelay(9) }}
-              >
-                <Button
-                  fluid
-                  className="hideButton"
-                  icon="eye-slash"
-                  onClick={() => {
-                    playSelectSound();
-                    setHidden(true);
-                  }}
-                >
-                  <span className="styledText">Hide Menu</span>
-                </Button>
-              </Stack.Item>
             </Stack>
           </Section>
         </Stack.Item>
@@ -525,6 +498,7 @@ export function LobbyMenu() {
         pregame={pregame}
         hidden={hidden}
         bootDelay={panelBootDelay(2)}
+        onStartNow={() => sendAction('start_now')}
       />
 
       {hidden && !ss.transparent && (
@@ -547,6 +521,7 @@ export function LobbyMenu() {
         ss={ss}
         menuHidden={hidden}
         onShowMenu={() => setHidden(false)}
+        onHideMenu={() => setHidden(true)}
         filterDisabled={filterDisabled}
         setFilterDisabled={setFilterDisabled}
         tintDisabled={tintDisabled}
@@ -698,11 +673,13 @@ function StatsPanel({
   pregame,
   hidden,
   bootDelay,
+  onStartNow,
 }: {
   ss: ServerState;
   pregame: boolean;
   hidden: boolean;
   bootDelay: string;
+  onStartNow: () => void;
 }) {
   return (
     <div
@@ -730,6 +707,25 @@ function StatsPanel({
           value={`${ss.adminReadyCount} / ${ss.adminCount}`}
         />
       </div>
+
+      {/* Admin shortcut under the stats window (outside it): skips the
+          pre-game countdown. Unmounts once the round is underway -
+          there is nothing left to start anymore */}
+      {ss.canStartNow && pregame && (
+        <div className="lobby__start-now buttonEffect">
+          <Button
+            fluid
+            className="distinctButton"
+            icon="forward"
+            onClick={() => {
+              playSelectSound();
+              onStartNow();
+            }}
+          >
+            <span className="styledText">Start Now</span>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -773,6 +769,7 @@ function LobbySettings({
   ss,
   menuHidden,
   onShowMenu,
+  onHideMenu,
   filterDisabled,
   setFilterDisabled,
   tintDisabled,
@@ -789,6 +786,7 @@ function LobbySettings({
   ss: ServerState;
   menuHidden: boolean;
   onShowMenu: () => void;
+  onHideMenu: () => void;
   filterDisabled: boolean;
   setFilterDisabled: (value: boolean) => void;
   tintDisabled: boolean;
@@ -812,13 +810,25 @@ function LobbySettings({
         right="10px"
         className="settingsHolder"
       >
-        {menuHidden && (
+        {/* Hide/show and the cog form the corner cluster; the two menu
+            toggles are mutually exclusive - eye-slash while the menu is
+            up, check while it is hidden */}
+        {menuHidden ? (
           <Button
             icon="check"
             className="floatingAppear"
             onClick={() => {
               playSelectSound();
               onShowMenu();
+            }}
+          />
+        ) : (
+          <Button
+            icon="eye-slash"
+            className="floatingAppear"
+            onClick={() => {
+              playSelectSound();
+              onHideMenu();
             }}
           />
         )}

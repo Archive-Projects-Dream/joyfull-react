@@ -535,11 +535,6 @@ img {
   color: var(--lobby-accent-dim);
 }
 
-.hideButton {
-  margin-top: 0.5em;
-  min-height: 2em;
-}
-
 // Fluid buttons center their label; the main menu buttons pin the icon to
 // the left edge so the text sits exactly in the middle of the button,
 // matching the Horizon-Dream site menu layout
@@ -547,8 +542,7 @@ img {
   text-align: center;
 }
 
-.LobbyScreen .distinctButton,
-.LobbyScreen .hideButton {
+.LobbyScreen .distinctButton {
   .Button--icon {
     position: absolute;
     left: 0.6em;
@@ -685,8 +679,11 @@ img {
   right: 12px;
   top: 0;
   bottom: 0;
+  // Column, not row: the stats window stacks with the admin Start Now
+  // shortcut below it, both centered as one group
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
   z-index: 5;
   pointer-events: none;
 }
@@ -707,6 +704,21 @@ img {
   justify-content: space-between;
   gap: 0.5em;
   line-height: 1.6;
+}
+
+// Admin Start Now sits under the stats window, outside it - a separate
+// control, not part of the panel chrome. Stretches to the stats width
+// via the column holder and unmounts once the round is underway
+.lobby__start-now {
+  margin-top: 0.6em;
+  width: 100%;
+  pointer-events: auto;
+
+  .Button {
+    background-color: var(--lobby-panel-bg);
+    border-color: var(--lobby-accent-dim);
+    min-height: 2em;
+  }
 }
 
 .lobby__stats-label {
