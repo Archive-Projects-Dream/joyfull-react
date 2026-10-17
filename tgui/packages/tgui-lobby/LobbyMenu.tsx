@@ -32,7 +32,7 @@ export type ServerState = {
   mapName: string;
   shiftTime: string;
   isAdmin: boolean;
-  isLocalhost: boolean;
+  canStartNow: boolean;
   hasNewPoll: boolean;
   canPoll: boolean;
   transparent: boolean;
@@ -475,7 +475,7 @@ export function LobbyMenu() {
                 </LobbyButton>
               )}
 
-              {!!ss.isLocalhost && (
+              {!!ss.canStartNow && (
                 <LobbyButton
                   delay={typingDelay(8)}
                   icon="forward"

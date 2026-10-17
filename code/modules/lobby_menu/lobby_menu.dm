@@ -343,7 +343,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"mapName" = SSmapping.current_map?.map_name || "Loading...",
 		"shiftTime" = (SSticker.round_start_time == 0) ? "Pre-Game" : round_timestamp(),
 		"isAdmin" = !isnull(client?.holder),
-		"isLocalhost" = client?.is_localhost(),
+		"canStartNow" = check_rights_for(client, R_SERVER),
 		"hasNewPoll" = FALSE,
 		"canPoll" = !is_guest_key(client?.key) && SSdbcore.Connect(),
 		"transparent" = is_lobby_transparent(),
@@ -496,7 +496,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		if("poll")
 			player.handle_player_polling()
 		if("start_now")
-			if(!client.is_localhost() || !check_rights_for(client, R_SERVER))
+			if(!check_rights_for(client, R_SERVER))
 				return TRUE
 			SSticker.start_immediately = TRUE
 			if(SSticker.current_state == GAME_STATE_STARTUP)
