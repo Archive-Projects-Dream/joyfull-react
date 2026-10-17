@@ -401,6 +401,9 @@ img {
   fill: var(--lobby-accent);
   opacity: 0.19;
   pointer-events: none;
+  // Slight shadow so the emblem keeps separating from very light
+  // backgrounds instead of melting into them
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
 }
 
 .brandLockup__name {
@@ -413,7 +416,11 @@ img {
   text-indent: 0.26em;
   text-transform: uppercase;
   border-bottom: 1px solid var(--lobby-line);
-  text-shadow: 0 0 18px var(--lobby-glow);
+  // Dark offset shadow first (separation on light backgrounds),
+  // then the original phosphor glow
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.4),
+    0 0 18px var(--lobby-glow);
 }
 
 .brandLockup__sub {
@@ -444,6 +451,8 @@ img {
     fill: var(--lobby-accent);
     opacity: 0.6;
     flex-shrink: 0;
+    // Same separation shadow as the main brandLockup emblem
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
   }
 
   &__text {
