@@ -170,6 +170,10 @@ img {
     animation: bg-load 10s forwards;
     animation-delay: 5s;
   }
+
+  .bgSwap {
+    animation: bg-load 0.8s ease-out forwards;
+  }
 }
 
 @keyframes bg-load {

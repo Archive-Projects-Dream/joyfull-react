@@ -95,6 +95,7 @@ export function LobbyMenu() {
   const [bootEpoch, setBootEpoch] = useState(0);
   const [returnBoot, setReturnBoot] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [userSwapped, setUserSwapped] = useState(false);
 
   useLayoutEffect(() => {
     updateScaling();
@@ -112,6 +113,7 @@ export function LobbyMenu() {
         setHidden(false);
         setReturnBoot(true);
         setBootEpoch((epoch) => epoch + 1);
+        setUserSwapped(false);
       } else {
         setReturnBoot(false);
         applyBackdrop(!!payload.transparent);
@@ -278,12 +280,24 @@ export function LobbyMenu() {
     }
   };
 
+  const toggleBgSetting = (next: boolean) => {
+    setUserSwapped(true);
+    setBgDisabled(next);
+  };
+
+  const toggleVideoSetting = (next: boolean) => {
+    setUserSwapped(true);
+    setVideoEnabled(next);
+  };
+
   const crtFilter = !filterDisabled;
+  const videoOn = !ss.transparent && videoEnabled;
+  const bgVideoUrl = videoOn && ss.videoUrl ? ss.videoUrl : null;
   const bgImageUrl =
-    !ss.transparent && !bgDisabled ? ss.backgroundUrl : null;
-  const bgVideoUrl = !ss.transparent && videoEnabled
-    ? ss.videoUrl
-    : null;
+    !ss.transparent && !bgDisabled && !bgVideoUrl
+      ? ss.backgroundUrl
+      : null;
+  const bgReveal = userSwapped ? 'bgSwap' : 'bgLoad';
   const pregame = ss.gamePhase === 'pregame' || ss.gamePhase === 'startup';
   const typingDelay = (index: number) =>
     animationsDisabled ? '0s' : `${1.5 + index * 0.2}s`;
@@ -307,23 +321,10 @@ export function LobbyMenu() {
         ss.transparent && 'LobbyScreen--transparent',
       ])}
     >
-      {bgImageUrl && (
-        <div
-          className="bgBackground bgLoad"
-          style={{ backgroundImage: `url(${bgImageUrl})` }}
-        />
-      )}
+      {bgImageUrl && <BgImage url={bgImageUrl} reveal={bgReveal} />}
 
       {bgVideoUrl && (
-        <video
-          ref={videoRef}
-          className="bgVideo bgLoad"
-          src={bgVideoUrl}
-          autoPlay
-          loop
-          muted
-          playsInline
-        />
+        <BgVideo url={bgVideoUrl} reveal={bgReveal} videoRef={videoRef} />
       )}
 
       {!tintDisabled && !ss.transparent && <div className="bgTint" />}
@@ -392,7 +393,7 @@ export function LobbyMenu() {
                 disabled={!ss.assetsReady}
                 onClick={() => sendAction('settings')}
               >
-                Game Preferences
+                Settings
               </LobbyButton>
 
               <LobbyButton
@@ -508,15 +509,48 @@ export function LobbyMenu() {
         tintDisabled={tintDisabled}
         setTintDisabled={setTintDisabled}
         bgDisabled={bgDisabled}
-        setBgDisabled={setBgDisabled}
+        setBgDisabled={toggleBgSetting}
         theme={theme}
         pickTheme={pickTheme}
         videoEnabled={videoEnabled}
-        setVideoEnabled={setVideoEnabled}
+        setVideoEnabled={toggleVideoSetting}
         soundsOn={soundsOn}
         setSoundsOn={setSoundsOn}
       />
     </div>
+  );
+}
+
+function BgImage({ url, reveal }: { url: string; reveal: string }) {
+  const [mountedReveal] = useState(reveal);
+  return (
+    <div
+      className={`bgBackground ${mountedReveal}`}
+      style={{ backgroundImage: `url(${url})` }}
+    />
+  );
+}
+
+function BgVideo({
+  url,
+  reveal,
+  videoRef,
+}: {
+  url: string;
+  reveal: string;
+  videoRef: { current: HTMLVideoElement | null };
+}) {
+  const [mountedReveal] = useState(reveal);
+  return (
+    <video
+      ref={videoRef}
+      className={`bgVideo ${mountedReveal}`}
+      src={url}
+      autoPlay
+      loop
+      muted
+      playsInline
+    />
   );
 }
 
