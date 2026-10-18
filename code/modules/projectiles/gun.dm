@@ -315,8 +315,6 @@
 		QDEL_IN(gun_smoke, 0.6 SECONDS)
 	// [/HORIZON-ADD]
 
-	if(chambered?.integrity_damage)
-		take_damage(chambered.integrity_damage, sound_effect = FALSE)
 	return TRUE
 
 /obj/item/gun/atom_destruction(damage_flag)
