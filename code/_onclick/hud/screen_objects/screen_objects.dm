@@ -258,7 +258,9 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 		item_overlay.color = "#00ff00"
 
 	var/datum/inventory_slot/inv_slot = hud.inventory_slots[slot_id]
-	item_overlay.pixel_x = holding.base_pixel_x + (inv_slot?.get_centering_pixel_x(holding) || 0)
+	item_overlay.pixel_x = inv_slot?.get_centering_pixel_x(holding)
+	if(isnull(item_overlay.pixel_x))
+		item_overlay.pixel_x = holding.base_pixel_x
 	item_overlay.pixel_y = holding.base_pixel_y
 
 	cut_overlay(object_overlay)

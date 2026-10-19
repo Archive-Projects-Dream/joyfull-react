@@ -62,7 +62,7 @@ GLOBAL_LIST_INIT(inventory_slot_datums, initialize_inventory_slots())
 		slot.vis_contents.Cut()
 		return
 
-	slot_item.pixel_x = slot_item.base_pixel_x + get_centering_pixel_x(slot_item)
+	slot_item.pixel_x = get_centering_pixel_x(slot_item)
 	slot_item.pixel_y = slot_item.base_pixel_y
 
 	if (slot_item in slot.vis_contents)
@@ -71,7 +71,7 @@ GLOBAL_LIST_INIT(inventory_slot_datums, initialize_inventory_slots())
 
 /datum/inventory_slot/proc/get_centering_pixel_x(obj/item/slot_item)
 	if (!uses_wide_icon)
-		return 0
+		return slot_item.base_pixel_x
 	var/list/dims = get_icon_dimensions(slot_item.icon)
 	var/item_width = dims?["width"]
 	if (!item_width)

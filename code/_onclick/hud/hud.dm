@@ -30,6 +30,12 @@ GLOBAL_LIST_INIT(available_progbar_icons, list(
 /proc/ui_style2progbar_icon(ui_style)
 	return GLOB.available_progbar_icons[ui_style] || GLOB.available_progbar_icons[GLOB.available_progbar_icons[1]]
 
+/proc/ui_icon2style_name(ui_icon)
+	for(var/style_name in GLOB.available_ui_styles)
+		if (GLOB.available_ui_styles[style_name] == ui_icon)
+			return style_name
+	return null
+
 /datum/hud
 	var/mob/mymob
 	/// Used for the HUD toggle (F12)
@@ -445,8 +451,9 @@ GLOBAL_LIST_INIT(available_progbar_icons, list(
 	if (initial(ui_style) || ui_style == new_ui_style)
 		return
 
-	wide_icon = ui_style2wide_icon(new_ui_style)
-	progbar_icon = ui_style2progbar_icon(new_ui_style)
+	var/new_style_name = ui_icon2style_name(new_ui_style)
+	wide_icon = ui_style2wide_icon(new_style_name)
+	progbar_icon = ui_style2progbar_icon(new_style_name)
 
 	for(var/hud_key in screen_objects)
 		var/atom/item = screen_objects[hud_key]
@@ -454,7 +461,8 @@ GLOBAL_LIST_INIT(available_progbar_icons, list(
 		var/atom/movable/screen/inventory/inv_item = item
 		if (istype(inv_item) && inv_item.slot_id)
 			inv_slot = inventory_slots[inv_item.slot_id]
-		if (inv_slot?.uses_wide_icon)
+		var/is_hand_slot = istype(inv_item, /atom/movable/screen/inventory/hand)
+		if (inv_slot?.uses_wide_icon || is_hand_slot)
 			item.icon = wide_icon
 		else if (item?.icon == ui_style)
 			item.icon = new_ui_style
