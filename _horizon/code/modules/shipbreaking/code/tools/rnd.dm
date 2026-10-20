@@ -1,6 +1,5 @@
 /datum/design/demo_remote
 	name = "Demolition Vac-Charge Clacker"
-	id = "demo_remote"
 	build_type = PROTOLATHE | AWAY_LATHE
 	materials = list(
 		/datum/material/iron = SHEET_MATERIAL_AMOUNT * 4.75,
@@ -15,7 +14,6 @@
 
 /datum/design/demo_charge
 	name = "Low-Pyrotechnic Shaped Demolition Vac-Charge"
-	id = "demo_charge"
 	build_type = PROTOLATHE | AWAY_LATHE
 	materials = list(
 		/datum/material/titanium = HALF_SHEET_MATERIAL_AMOUNT,
@@ -29,8 +27,9 @@
 	departmental_flags = DEPARTMENT_BITFLAG_ENGINEERING | DEPARTMENT_BITFLAG_CARGO
 
 /datum/techweb_node/plasma_mining/New()
-	design_ids |= list(
-		"demo_remote",
-		"demo_charge",
+	. = ..()
+	unlocked_designs += list(
+		/datum/design/demo_remote,
+		/datum/design/demo_charge,
 	)
-	return ..()
+	return .

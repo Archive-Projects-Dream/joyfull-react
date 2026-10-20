@@ -11,7 +11,6 @@
 /datum/design/board/salvage_docking_clamp
 	name = "Salvage Clamp"
 	desc = "A large clamp for holding shuttles in place without using their own power."
-	id = "salvage_docking_clamp"
 	build_path = /obj/item/circuitboard/machine/docking_clamp
 	category = list(
 		RND_CATEGORY_COMPUTER + RND_SUBCATEGORY_COMPUTER_ENGINEERING
@@ -19,10 +18,11 @@
 	departmental_flags = DEPARTMENT_BITFLAG_ENGINEERING
 
 /datum/techweb_node/mining/New()
-	design_ids += list(
-		"salvage_docking_clamp",
+	. = ..()
+	unlocked_designs += list(
+		/datum/design/board/salvage_docking_clamp,
 	)
-	return ..()
+	return .
 
 // Everything else
 

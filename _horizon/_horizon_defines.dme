@@ -20,4 +20,5 @@
 #include "code\__DEFINES\shipbreaking.dm"
 #include "code\__DEFINES\shipbreaking_traits.dm"
 #include "code\__DEFINES\shuttle_defines.dm"
+#include "code\__DEFINES\soulcatcher.dm"
 // END_INCLUDE

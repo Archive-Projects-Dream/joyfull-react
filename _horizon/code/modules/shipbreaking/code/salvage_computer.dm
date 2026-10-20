@@ -24,7 +24,6 @@ GLOBAL_LIST_EMPTY(shipbreaking_templates)
 	desc = "A bulky and old looking terminal that looks like it was dug straight out of the bottom of the ship's \
 		databanks. Likely to be from the very early concept stages of the Dark Locations type ships, where resources \
 		would be obtained through recycling the many old pioneer vessels scattered through the system."
-	id = "salvage_computer"
 	build_path = /obj/machinery/computer/salvage_bay_controller
 	category = list(
 		RND_CATEGORY_COMPUTER + RND_SUBCATEGORY_COMPUTER_ENGINEERING
@@ -32,10 +31,11 @@ GLOBAL_LIST_EMPTY(shipbreaking_templates)
 	departmental_flags = DEPARTMENT_BITFLAG_ENGINEERING
 
 /datum/techweb_node/mining/New()
-	design_ids += list(
-		"salvage_computer",
+	. = ..()
+	unlocked_designs += list(
+		/datum/design/board/salvage_computer,
 	)
-	return ..()
+	return .
 
 // Everything else
 
