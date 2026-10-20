@@ -381,7 +381,7 @@ GLOBAL_LIST_INIT(available_progbar_icons, list(
 				screenmob.client.screen += group_info
 
 			// Hands are apart of the static group but still should be presetn in the reduced mode
-			for (var/i in 1 to length(mymob.held_items))
+			for (var/i in 1 to mymob.get_num_hand_slots())
 				var/atom/movable/screen/hand = screen_objects[HUD_KEY_HAND_SLOT(i)]
 				if (hand)
 					screenmob.client.screen += hand

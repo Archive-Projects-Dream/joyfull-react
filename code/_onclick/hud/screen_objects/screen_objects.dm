@@ -126,7 +126,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 
 	if(ismob(usr))
 		var/mob/M = usr
-		M.swap_hand()
+		M.cycle_hand()
 	return 1
 
 /atom/movable/screen/navigate
@@ -1062,7 +1062,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 	var/client/holder
 
 
-/atom/movable/screen/splash/Initialize(mapload, datum/hud/hud_owner, client/C, visible, use_previous_title)
+/atom/movable/screen/splash/Initialize(mapload, datum/hud/hud_owner, client/C, visible) // [HORIZON-EDIT] LOBBY
 	. = ..()
 	if(!istype(C))
 		return
@@ -1071,14 +1071,6 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 
 	if(!visible)
 		alpha = 0
-
-	if(!use_previous_title)
-		if(SStitle.icon)
-			icon = SStitle.icon
-	else
-		if(!SStitle.previous_icon)
-			return INITIALIZE_HINT_QDEL
-		icon = SStitle.previous_icon
 
 	holder.screen += src
 

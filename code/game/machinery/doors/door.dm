@@ -108,6 +108,7 @@
 
 /obj/machinery/door/Initialize(mapload)
 	AddElement(/datum/element/blocks_explosives)
+	AddElement(/datum/element/cutting_tool_target) // [HORIZON-ADD] SALVAGE_TOOL
 	. = ..()
 	set_init_door_layer()
 	if(multi_tile)
@@ -342,7 +343,7 @@
 	// note: if the ID wire is cut no ID cards are checked at all! (This is intentional!)
 	if(access_bypass || (requiresID() && user_can_activate_door(user)))
 		if(density)
-			open()
+			open(opener = user)
 		else
 			close()
 		return TRUE
@@ -515,6 +516,26 @@
 	if(prob(20/severity) && (istype(src, /obj/machinery/door/airlock) || istype(src, /obj/machinery/door/window)) )
 		INVOKE_ASYNC(src, PROC_REF(open))
 
+// [HORIZON-ADD] SALVAGE_TOOL
+/obj/machinery/door/deconstruct_act(mob/living/user, obj/item/I)
+	if(operating)
+		to_chat(user, span_warning("[src] is moving — wait for it to stop."))
+		return ITEM_INTERACT_BLOCKING
+	. = ..() // INDESTRUCTIBLE check
+	if(.)
+		return
+	if(!I.tool_start_check(user, amount = 1))
+		return ITEM_INTERACT_BLOCKING
+	user.visible_message(span_notice("[user] starts slicing through [src] with [I]."),
+		span_notice("You start slicing through [src]..."))
+	if(!I.use_tool(src, user, 8 SECONDS, volume = 50, amount = 1))
+		return ITEM_INTERACT_BLOCKING
+	user.visible_message(span_notice("[user] slices through [src], cutting it apart!"),
+		span_notice("You slice through [src], and it falls apart."))
+	deconstruct(FALSE)
+	return ITEM_INTERACT_SUCCESS
+// [/HORIZON-ADD]
+
 /obj/machinery/door/update_icon_state()
 	. = ..()
 	switch(animation)
@@ -581,11 +602,15 @@
 
 /// Public proc that simply handles opening the door. Returns TRUE if the door was opened, FALSE otherwise.
 /// Use argument "forced" in conjunction with try_to_force_door_open if you want/need additional checks depending on how sorely you need the door opened.
-/obj/machinery/door/proc/open(forced = DEFAULT_DOOR_CHECKS)
+/obj/machinery/door/proc/open(forced = DEFAULT_DOOR_CHECKS, mob/living/opener)
 	if(!density)
 		return TRUE
 	if(operating)
 		return FALSE
+
+	if (opener)
+		SEND_SIGNAL(opener, COMSIG_MOB_OPENED_DOOR, forced)
+
 	operating = TRUE
 	use_energy(active_power_usage)
 	run_animation(DOOR_OPENING_ANIMATION)
@@ -671,12 +696,12 @@
 				future_pancake.apply_damage(DOOR_CRUSH_DAMAGE * 1.5, BRUTE, BODY_ZONE_CHEST, wound_bonus = door_wounding, attacking_item = src) //Xenos go into crit after aproximately the same amount of crushes as humans.
 				future_pancake.emote("roar")
 			else if(ishuman(future_pancake)) //For humans
-				future_pancake.emote(HAS_TRAIT(future_pancake, TRAIT_SIMIAN) ? "screch" : "scream")
+				future_pancake.emote(HAS_TRAIT(future_pancake, TRAIT_SIMIAN) ? "screech" : "scream")
 				future_pancake.apply_damage(DOOR_CRUSH_DAMAGE, BRUTE, BODY_ZONE_CHEST, wound_bonus = door_wounding, attacking_item = src)
 				future_pancake.Paralyze(10 SECONDS)
 			else //for simple_animals & borgs
 				future_pancake.apply_damage(DOOR_CRUSH_DAMAGE, BRUTE, BODY_ZONE_CHEST, wound_bonus = door_wounding, attacking_item = src)
-		for(var/obj/vehicle/sealed/mecha/mech in get_turf(src)) // Your fancy metal won't save you here!
+		for(var/obj/vehicle/sealed/mecha/mech in checked_turf) // Your fancy metal won't save you here!
 			mech.take_damage(DOOR_CRUSH_DAMAGE)
 			log_combat(src, mech, "crushed")
 
