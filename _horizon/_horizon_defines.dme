@@ -17,4 +17,7 @@
 #include "code\__DEFINES\keybinding.dm"
 #include "code\__DEFINES\particles.dm"
 #include "code\__DEFINES\physics.dm"
+#include "code\__DEFINES\shipbreaking.dm"
+#include "code\__DEFINES\shipbreaking_traits.dm"
+#include "code\__DEFINES\shuttle_defines.dm"
 // END_INCLUDE
