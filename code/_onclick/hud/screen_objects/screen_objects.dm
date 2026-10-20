@@ -1137,6 +1137,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 	return ..()
 
 /atom/movable/screen/stamina
+	icon = '_horizon/icons/ui/screen_gen.dmi'
 	name = "stamina"
 	icon_state = "stamina0"
 	screen_loc = ui_stamina

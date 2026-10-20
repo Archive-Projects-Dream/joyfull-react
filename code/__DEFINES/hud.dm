@@ -262,7 +262,7 @@
 #define ui_mood "EAST-1:28,CENTER:21"
 #define ui_hunger "EAST-1:2,CENTER:21"
 #define ui_spacesuit "EAST-1:28,CENTER-4:14"
-#define ui_stamina "EAST-1:28,CENTER-3:14"
+#define ui_stamina "EAST-1:28,CENTER-2:2"
 
 //Pop-up inventory
 #define ui_shoes "WEST+1:8,SOUTH:5"
