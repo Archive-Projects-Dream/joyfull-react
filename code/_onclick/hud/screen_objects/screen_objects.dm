@@ -465,6 +465,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 	vertical = TRUE
 
 /atom/movable/screen/spacesuit
+	icon = '_horizon/icons/ui/screen_gen.dmi'
 	name = "Space suit cell status"
 	icon_state = "spacesuit_0"
 	screen_loc = ui_spacesuit
