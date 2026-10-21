@@ -1140,7 +1140,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 /atom/movable/screen/stamina
 	icon = '_horizon/icons/ui/screen_gen.dmi'
 	name = "stamina"
-	icon_state = "stamina0"
+	icon_state = "stamina_full"
 	screen_loc = ui_stamina
 
 #define HUNGER_STATE_FAT 5
