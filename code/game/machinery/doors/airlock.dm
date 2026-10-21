@@ -549,7 +549,6 @@
 /obj/machinery/door/airlock/update_icon(updates = ALL)
 	if(!airlock_state)
 		airlock_state = icon_state
-
 	return ..()
 
 /obj/machinery/door/airlock/update_icon_state()

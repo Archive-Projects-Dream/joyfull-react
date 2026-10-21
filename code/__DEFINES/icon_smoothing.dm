@@ -18,8 +18,13 @@
 #define SMOOTH_BORDER_OBJECT (1<<6)
 /// Atom overrides smoothing_allowed() to on a more granular level filter out connections
 #define SMOOTH_PROC_FILTER (1<<7)
+/// Atom overrides smooth_icon() to run its own connection algorithm instead of the
+/// standard bitmask (e.g. _horizon connector walls, shadows, grilles). The bit only
+/// buys entry into the SSicon_smooth queue and the UPDATE_SMOOTHING re-queue hooks;
+/// types carrying it MUST override smooth_icon() or the base proc will CRASH on them.
+#define SMOOTH_CONNECTOR (1<<8)
 
-#define USES_SMOOTHING (SMOOTH_BITMASK|SMOOTH_BITMASK_CARDINALS)
+#define USES_SMOOTHING (SMOOTH_BITMASK|SMOOTH_BITMASK_CARDINALS|SMOOTH_CONNECTOR)
 
 DEFINE_BITFIELD(smoothing_flags, list(
 	"SMOOTH_BITMASK" = SMOOTH_BITMASK,
@@ -29,6 +34,7 @@ DEFINE_BITFIELD(smoothing_flags, list(
 	"SMOOTH_QUEUED" = SMOOTH_QUEUED,
 	"SMOOTH_OBJ" = SMOOTH_OBJ,
 	"SMOOTH_BORDER_OBJECT" = SMOOTH_BORDER_OBJECT,
+	"SMOOTH_CONNECTOR" = SMOOTH_CONNECTOR,
 ))
 
 /// Components of a smoothing junction
@@ -146,7 +152,6 @@ DEFINE_BITFIELD(smoothing_junction, list(
 #define SMOOTH_GROUP_TURF_OPEN_CLIFF S_TURF(67) ///turf/open/cliff
 #define SMOOTH_GROUP_HIEROPHANT S_TURF(68) ///turf/closed/indestructible/riveted/hierophant
 #define SMOOTH_GROUP_PLASTINUM_WALLS S_TURF(69) ///turf/closed/indestructible/riveted/plastinum
-
 
 #define MAX_S_TURF 69 //Always match this value with the one above it.
 

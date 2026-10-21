@@ -407,6 +407,9 @@
 	if(shiftclick_flags & COMSIG_MOB_CANCEL_CLICKON)
 		return
 	if(user.client)
+		if(!isobserver(user) && !can_see(user, src, 7))
+			src.balloon_alert(user, "сan't see, get closer")
+			return
 		user.examinate(src)
 
 /mob/proc/TurfAdjacent(turf/tile)

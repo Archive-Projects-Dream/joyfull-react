@@ -62,7 +62,6 @@ GLOBAL_LIST_EMPTY(buildmode_appearance_cache) // [HORIZON-ADD]
 	mode.exit_mode(src)
 	holder.screen -= buttons
 	holder.click_intercept = null
-	holder.show_popup_menus = TRUE
 	// [HORIZON-ADD]
 	clear_preview()
 	if(item_browser)

@@ -2,15 +2,10 @@
 	name = "nanocarbon hull"
 	desc = "A durable nanocarbon-metal alloy hull used commonly in high endurance ships."
 	icon = '_horizon/code/modules/shipbreaking/icons/turfs/nanocarbon_wall.dmi'
-	icon_state = "nanocarbon_wall-0"
-	base_icon_state = "nanocarbon_wall"
 	explosive_resistance = 3
 	flags_ricochet = RICOCHET_SHINY | RICOCHET_HARD
 	sheet_type = /obj/item/stack/sheet/nanocarbon
 	hardness = 20
-	smoothing_flags = SMOOTH_BITMASK | SMOOTH_DIAGONAL_CORNERS | SMOOTH_OBJ
-	smoothing_groups = SMOOTH_GROUP_PLASTITANIUM_WALLS + SMOOTH_GROUP_WALLS + SMOOTH_GROUP_CLOSED_TURFS
-	canSmoothWith = SMOOTH_GROUP_SHUTTLE_PARTS + SMOOTH_GROUP_AIRLOCK + SMOOTH_GROUP_PLASTITANIUM_WALLS
 	custom_materials = list(
 		/datum/material/nanocarbon = SHEET_MATERIAL_AMOUNT * 3,
 	)
@@ -19,6 +14,7 @@
 	girder_type = /obj/structure/titanium_structure
 	/// How many shards of nanocarbon the wall will make when exploded, maximum
 	var/number_of_shards = 6
+	fixed_underlay = list("space" = TRUE)
 
 /turf/closed/wall/mineral/nanocarbon/break_wall()
 	var/obj/new_plating = new /obj/structure/hull_plating/nanocarbon(src)
@@ -39,9 +35,7 @@
 		new girder_type(src)
 
 /turf/closed/wall/mineral/nanocarbon/nodiagonal
-	icon = MAP_SWITCH('_horizon/code/modules/shipbreaking/icons/turfs/nanocarbon_wall.dmi', '_horizon/code/modules/shipbreaking/icons/turfs/walls_misc.dmi')
-	icon_state = MAP_SWITCH("nanocarbon_wall-0", "nanocarbon_nd")
-	smoothing_flags = SMOOTH_BITMASK
+	icon = '_horizon/code/modules/shipbreaking/icons/turfs/nanocarbon_wall_nodiag.dmi'
 
 /turf/closed/wall/mineral/nanocarbon/primary_colour
 	color = COLOR_SILVER
@@ -119,14 +113,9 @@
 	name = "aluminum wall"
 	desc = "A thin aluminum wall, commonly used to plate the interior of ships."
 	icon = '_horizon/code/modules/shipbreaking/icons/turfs/aluminum_wall.dmi'
-	icon_state = "aluminum_wall-0"
-	base_icon_state = "aluminum_wall"
 	sheet_type = /obj/item/stack/sheet/aluminum
 	hardness = 50
 	explosive_resistance = 0
-	smoothing_flags = SMOOTH_BITMASK | SMOOTH_OBJ
-	smoothing_groups = SMOOTH_GROUP_TITANIUM_WALLS + SMOOTH_GROUP_WALLS + SMOOTH_GROUP_CLOSED_TURFS
-	canSmoothWith = SMOOTH_GROUP_AIRLOCK + SMOOTH_GROUP_PLASTITANIUM_WALLS + SMOOTH_GROUP_TITANIUM_WALLS
 	custom_materials = list(
 		/datum/material/aluminum = SHEET_MATERIAL_AMOUNT * 2,
 	)
