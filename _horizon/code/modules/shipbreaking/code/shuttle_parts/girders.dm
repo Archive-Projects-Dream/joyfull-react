@@ -2,18 +2,26 @@
 	name = "titanium framing"
 	desc = "A large skeleton made of titanium steel that makes up the outer structure of most ships"
 	icon = '_horizon/code/modules/shipbreaking/icons/smooth/girder_titan.dmi'
-	icon_state = "girder_titan-0"
-	base_icon_state = "girder_titan"
+	icon_state = "wall"
 	anchored = TRUE
 	density = TRUE
-	max_integrity = 200
 	rad_insulation = RAD_VERY_LIGHT_INSULATION
-	smoothing_flags = SMOOTH_BITMASK
-	smoothing_groups = SMOOTH_GROUP_GIRDER
-	canSmoothWith = SMOOTH_GROUP_GIRDER + SMOOTH_GROUP_WALLS
+	max_integrity = 300
+
+	icon_state = "wall"
+	var/list/wall_connections = list("0", "0", "0", "0")
+	var/list/blend_turfs = list(/turf/closed)
+	var/list/noblend_turfs = list(/turf/closed/mineral, /turf/closed/wall/mineral/titanium)
+	var/list/blend_objects = list(/obj/structure/titanium_structure, /obj/machinery/door)
+	var/list/noblend_objects = list()
+	var/special_icon = TRUE
+	smoothing_flags = SMOOTH_CONNECTOR
+	smoothing_groups = null
+	canSmoothWith = null
+
 	custom_materials = list(
-		/datum/material/iron = SHEET_MATERIAL_AMOUNT * 2,
-		/datum/material/titanium = SHEET_MATERIAL_AMOUNT * 1,
+		/datum/material/iron = SHEET_MATERIAL_AMOUNT * 7,
+		/datum/material/titanium = SHEET_MATERIAL_AMOUNT * 7,
 	)
 
 /obj/structure/titanium_structure/Initialize(mapload)
@@ -41,3 +49,18 @@
 		return ITEM_INTERACT_BLOCKING
 	set_anchored(!anchored)
 	return ITEM_INTERACT_SUCCESS
+
+/obj/structure/titanium_structure/smooth_icon()
+	if(!special_icon)
+		return ..()
+	smoothing_flags &= ~SMOOTH_QUEUED
+	update_connections()
+	update_icon(~UPDATE_SMOOTHING)
+
+/obj/structure/titanium_structure/update_icon()
+	if(!special_icon)
+		return ..()
+	render_corner_frames(src, wall_connections, WALL_PLANE)
+
+/obj/structure/titanium_structure/proc/update_connections()
+	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects))

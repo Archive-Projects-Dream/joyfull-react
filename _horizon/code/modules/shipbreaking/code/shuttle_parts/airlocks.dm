@@ -2,7 +2,7 @@
 	name = "manual exterior airlock"
 	desc = "A manually operated airlock for the exteriors of ships, sized just enough to crawl through in zero gravity."
 	icon = '_horizon/code/modules/shipbreaking/icons/doors.dmi'
-	icon_state = "exterior"
+	icon_state = "closed"
 	pass_flags_self = PASSDOORS
 	smoothing_groups = SMOOTH_GROUP_AIRLOCK
 	armor_type = /datum/armor/machinery_door
