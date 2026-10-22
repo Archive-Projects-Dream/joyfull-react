@@ -1,2 +1,0 @@
-output_name = "girder_titan"
-template = "bitmask/diagonal_32x32.toml"
