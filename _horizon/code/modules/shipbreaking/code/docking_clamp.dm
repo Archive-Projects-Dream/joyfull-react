@@ -29,14 +29,16 @@
 /obj/machinery/docking_clamp
 	name = "salvage clamp"
 	desc = "A large clamp for holding shuttles in place without using their own power."
-	icon = 'icons/obj/machines/floor.dmi'
-	icon_state = "mass_driver"
+	icon = '_horizon/code/modules/shipbreaking/icons/clamp.dmi'
+	icon_state = "clamp"
+	base_icon_state = "clamp"
 	use_power = NO_POWER_USE
 	circuit = /obj/item/circuitboard/machine/docking_clamp
 	/// The docking port we use to connect ships with
 	var/obj/docking_port/stationary/salvage_dock/docking_port
 	/// The computer the clamp is linked to
 	var/datum/weakref/controller_ref
+	density = TRUE
 
 /obj/machinery/docking_clamp/Initialize(mapload)
 	. = ..()
@@ -138,6 +140,10 @@
 			return
 		new /obj/effect/temp_visual/medical_holosign(checked_turf)
 	docking_port = temp_docking_port
+
+/obj/machinery/docking_clamp/update_icon_state()
+	. = ..()
+	icon_state = panel_open ? "[base_icon_state]_t" : base_icon_state
 
 /// Scans the docking port area for if living mobs are present inside, TRUE means a mob is in the way (or we have no port?)
 /obj/machinery/docking_clamp/proc/check_for_clear_bay()
