@@ -16,16 +16,19 @@
 	icon = '_horizon/code/modules/shipbreaking/icons/refiner.dmi'
 	icon_state = "refiner"
 	base_icon_state = "refiner"
-	amount_produced = 100
+	amount_produced = 80
 	crush_damage = 10000
 	light_range = 2
 	light_power = 4
 
-/obj/machinery/recycler/RefreshParts()
+/obj/machinery/recycler/refiner/RefreshParts()
 	. = ..()
-	amount_produced = 100
+	var/amt_made = 0
+	for(var/datum/stock_part/micro_laser/micro_laser in component_parts)
+		amt_made = 10 * micro_laser.tier //% of materials salvaged
+	amount_produced = min(50, amt_made) + 80
 
-/obj/machinery/recycler/crush_living(mob/living/living_mob)
+/obj/machinery/recycler/refiner/crush_living(mob/living/living_mob)
 	if(issilicon(living_mob))
 		playsound(src, 'sound/items/tools/welder.ogg', 50, TRUE)
 	else
