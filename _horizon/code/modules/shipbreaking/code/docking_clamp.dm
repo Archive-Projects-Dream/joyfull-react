@@ -164,3 +164,14 @@
 /obj/docking_port/stationary/salvage_dock/Initialize(mapload, dock_direction)
 	setDir(dock_direction)
 	. = ..()
+
+/obj/machinery/docking_clamp/indestructible
+	resistance_flags = INDESTRUCTIBLE
+	var/gpstag = "Salvage Bay"
+
+/obj/machinery/docking_clamp/indestructible/proc/add_gps_component()
+	AddComponent(/datum/component/gps, gpstag)
+
+/obj/machinery/docking_clamp/indestructible/Initialize(mapload)
+	. = ..()
+	add_gps_component()

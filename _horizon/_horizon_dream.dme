@@ -63,6 +63,7 @@
 #include "code\modules\shipbreaking\code\docking_clamp.dm"
 #include "code\modules\shipbreaking\code\manual_colony_door.dm"
 #include "code\modules\shipbreaking\code\prior_owners_base.dm"
+#include "code\modules\shipbreaking\code\refining.dm"
 #include "code\modules\shipbreaking\code\salvage_bay_decoration.dm"
 #include "code\modules\shipbreaking\code\salvage_computer.dm"
 #include "code\modules\shipbreaking\code\salvage_shuttle_base.dm"

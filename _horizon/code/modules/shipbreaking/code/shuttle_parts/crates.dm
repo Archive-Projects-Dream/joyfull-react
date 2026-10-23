@@ -24,10 +24,10 @@
 		/datum/material/alloy/plasteel = SHEET_MATERIAL_AMOUNT * 5,
 	)
 	/// The chance that this container spawns welded shut
-	var/welded_chance = 15
+	var/welded_chance = 10
+	anchored = TRUE
 
 /obj/structure/closet/shipping_container/secured
-	anchored = TRUE
 
 /obj/structure/closet/shipping_container/Initialize(mapload)
 	. = ..()
@@ -74,7 +74,6 @@
 	contents_thermal_insulation = 0.1
 
 /obj/structure/closet/crate/shuttle/secured
-	anchored = TRUE
 
 /obj/structure/closet/crate/shuttle/small
 	name = "small shipping crate"
@@ -89,7 +88,6 @@
 	)
 
 /obj/structure/closet/crate/shuttle/small/secured
-	anchored = TRUE
 
 /obj/structure/closet/crate/shuttle_hard
 	name = "hard shipping crate"
@@ -115,4 +113,3 @@
 	contents_thermal_insulation = 0.75
 
 /obj/structure/closet/crate/shuttle_hard/secured
-	anchored = TRUE

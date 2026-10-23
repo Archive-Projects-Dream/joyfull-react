@@ -39,8 +39,8 @@ GLOBAL_LIST_EMPTY(demolition_charges)
 	righthand_file = 'icons/mob/inhands/weapons/bombs_righthand.dmi'
 	directional = TRUE
 	directional_arc = 90
-	boom_sizes = list(0, 3, 5)
-	full_damage_on_mobs = FALSE
+	boom_sizes = list(1, 3, 0)
+	full_damage_on_mobs = TRUE
 	custom_materials = list(/datum/material/titanium = HALF_SHEET_MATERIAL_AMOUNT, /datum/material/aluminum = SMALL_MATERIAL_AMOUNT * 2.5, /datum/material/plasma = SMALL_MATERIAL_AMOUNT)
 	/// How many times the detonator has pulsed on this demo charge
 	var/clacks = 0

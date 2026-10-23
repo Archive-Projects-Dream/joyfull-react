@@ -3,6 +3,7 @@
 	desc = "Creates an artificial pull in the direction it moves, typically towards a nearby salvage collector inlet."
 	icon = '_horizon/code/modules/shipbreaking/icons/inlet.dmi'
 	icon_state = "inlet"
+	strength = 100
 	invisibility = 0
 	color = "#4699a6"
 	light_range = 1
@@ -19,4 +20,10 @@
 	. += emissive_appearance(icon, icon_state, src)
 
 /obj/effect/wind/shipbreaking_collector/scrap
+	color = "#d99f3a"
+
+/obj/effect/wind/shipbreaking_collector/weak
+	strength = 50
+
+/obj/effect/wind/shipbreaking_collector/weak/scrap
 	color = "#d99f3a"
