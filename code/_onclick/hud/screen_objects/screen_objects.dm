@@ -269,7 +269,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 
 /atom/movable/screen/inventory/hand
 	var/mutable_appearance/handcuff_overlay
-	var/static/mutable_appearance/blocked_overlay = mutable_appearance('icons/hud/screen_gen.dmi', "blocked")
+	var/static/mutable_appearance/blocked_overlay = mutable_appearance('_horizon/icons/ui/screen_gen_wide.dmi', "blocked")
 	var/held_index = 0
 	interaction_flags_atom = NONE //so dragging objects into hands icon don't skip adjacency & other checks
 
@@ -278,7 +278,8 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 
 	if(!handcuff_overlay)
 		var/state = IS_RIGHT_INDEX(held_index) ? "markus" : "gabrielle"
-		handcuff_overlay = mutable_appearance('icons/hud/screen_gen.dmi', state)
+		handcuff_overlay = mutable_appearance('_horizon/icons/ui/screen_gen_wide.dmi', state)
+		handcuff_overlay.layer += 0.1
 
 	if(!hud?.mymob)
 		return
@@ -290,6 +291,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 
 		if(held_index)
 			if(!C.has_hand_for_held_index(held_index))
+				blocked_overlay.layer += 0.1
 				. += blocked_overlay
 
 	if(held_index == hud.mymob.active_hand_index)
