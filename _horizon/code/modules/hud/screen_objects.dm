@@ -50,13 +50,13 @@
 /atom/movable/screen/alert/highpressure
 	icon = '_horizon/icons/ui/screen_alert.dmi'
 
-//Gas alerts
-// Gas alerts are continuously thrown/cleared by:
-// * /obj/item/organ/lungs/proc/check_breath()
-// * /mob/living/carbon/check_breath()
-// * /mob/living/carbon/human/check_breath()
-// * /datum/element/atmos_requirements/proc/on_non_stasis_life()
-// * /mob/living/simple_animal/handle_environment()
+/* Gas alerts are continuously thrown/cleared by:
+ * /obj/item/organ/lungs/proc/check_breath()
+ * /mob/living/carbon/check_breath()
+ * /mob/living/carbon/human/check_breath()
+ * /datum/element/atmos_requirements/proc/on_non_stasis_life()
+ * /mob/living/simple_animal/handle_environment()
+ */
 
 /atom/movable/screen/alert/status_effect/hypernob_protection
 	icon = '_horizon/icons/ui/screen_alert.dmi'
