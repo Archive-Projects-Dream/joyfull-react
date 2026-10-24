@@ -104,12 +104,9 @@
 	else
 		window.send_message("ping")
 	send_assets()
-// [HORIZON-ADD] LOBBY
-	var/list/payload = get_payload(
+	window.send_message("update", get_payload(
 		with_data = TRUE,
-		with_static_data = TRUE)
-	if(payload)
-		window.send_message("update", payload)
+		with_static_data = TRUE))
 	SStgui.on_open(src)
 
 	return TRUE
