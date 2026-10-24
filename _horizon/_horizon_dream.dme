@@ -109,6 +109,7 @@
 #include "code\modules\shipbreaking\code\shuttle_parts\water_cycler.dm"
 #include "code\modules\shipbreaking\code\shuttle_parts\windows.dm"
 #include "code\modules\shipbreaking\code\tools\collector_vacuum.dm"
+#include "code\modules\shipbreaking\code\tools\crafting.dm"
 #include "code\modules\shipbreaking\code\tools\demo_charge.dm"
 #include "code\modules\shipbreaking\code\tools\rnd.dm"
 #include "code\modules\shipbreaking\epic_loot\code\_basetype.dm"

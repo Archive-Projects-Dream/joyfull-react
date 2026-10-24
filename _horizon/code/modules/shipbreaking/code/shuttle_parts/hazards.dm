@@ -141,7 +141,7 @@
 		/datum/material/plastic = SHEET_MATERIAL_AMOUNT * 3,
 		/datum/material/plasma = SHEET_MATERIAL_AMOUNT * 5,
 	)
-	rupture_range = 4
+	rupture_range = 2
 
 /obj/structure/shuttle_decoration/liquid_tank/explosive/industrial
 	name = "industrial tank of fuming acid"
@@ -153,13 +153,16 @@
 		/datum/material/plasma = SHEET_MATERIAL_AMOUNT * 7,
 		/datum/material/iron = SHEET_MATERIAL_AMOUNT * 7.5,
 	)
-	rupture_range = 7
+	rupture_range = 4
 
 /obj/structure/shuttle_decoration/liquid_tank/explosive/rupture_tank()
 	playsound(src, 'sound/effects/bamf.ogg', 75, TRUE)
 	var/datum/reagents/foam_reagents = new /datum/reagents/(100)
-	foam_reagents.add_reagent(/datum/reagent/toxin/acid/nitracid, 30)
-	foam_reagents.add_reagent(/datum/reagent/toxin/acid, 70)
+	foam_reagents.add_reagent(/datum/reagent/toxin/acid/fluacid, 25)
+	foam_reagents.add_reagent(/datum/reagent/toxin/acid/nitracid, 25)
+	foam_reagents.add_reagent(/datum/reagent/uranium, 15)
+	foam_reagents.add_reagent(/datum/reagent/uranium/radium, 15)
+	foam_reagents.add_reagent(/datum/reagent/toxin/acid, 20)
 	var/datum/effect_system/fluid_spread/foam/foam = new(loc, 4, holder = src, location = get_turf(src), carry = foam_reagents)
 	foam.start()
 	qdel(src)
@@ -194,13 +197,14 @@
 	name = "industrial tank of lithium"
 	icon = '_horizon/code/modules/shipbreaking/icons/closet.dmi'
 	icon_state = "lithium_big"
-	rupture_range = 5
+	rupture_range = 4
 
 /obj/structure/shuttle_decoration/liquid_tank/explosive/lithium/rupture_tank()
 	playsound(src, 'sound/effects/bamf.ogg', 75, TRUE)
 	var/datum/reagents/foam_reagents = new /datum/reagents/(100)
-	foam_reagents.add_reagent(/datum/reagent/clf3, 50)
-	foam_reagents.add_reagent(/datum/reagent/napalm, 50)
+	foam_reagents.add_reagent(/datum/reagent/clf3, 10)
+	foam_reagents.add_reagent(/datum/reagent/napalm, 60)
+	foam_reagents.add_reagent(/datum/reagent/phlogiston, 30)
 	var/datum/effect_system/fluid_spread/foam/foam = new(loc, 6, holder = src, location = get_turf(src), carry = foam_reagents)
 	foam.start()
 	explosion(src, heavy_impact_range = 0, light_impact_range = 0, flame_range = rupture_range, flash_range = rupture_range * 3, smoke = TRUE)

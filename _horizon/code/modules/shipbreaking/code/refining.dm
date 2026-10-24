@@ -17,7 +17,7 @@
 	icon_state = "refiner"
 	base_icon_state = "refiner"
 	amount_produced = 80
-	crush_damage = 10000
+	crush_damage = 1000
 	light_range = 2
 	light_power = 4
 
@@ -39,10 +39,18 @@
 
 	living_mob.Unconscious(100)
 	living_mob.adjust_fire_loss(crush_damage)
+	living_mob.adjust_fire_stacks(10)
+	living_mob.ignite_mob()
 
 /obj/machinery/recycler/refiner/mapper
 	use_power = NO_POWER_USE
-	resistance_flags = INDESTRUCTIBLE
+	resistance_flags = INDESTRUCTIBLE | FIRE_PROOF | ACID_PROOF | LAVA_PROOF
+
+/obj/machinery/recycler/refiner/mapper/Initialize(mapload)
+	. = ..()
+	AddElement(/datum/element/tool_blocker, TOOL_SCREWDRIVER, TOOL_ACT_PRIMARY)
+	AddElement(/datum/element/tool_blocker, TOOL_CROWBAR, TOOL_ACT_PRIMARY)
+	AddElement(/datum/element/tool_blocker, TOOL_WRENCH, TOOL_ACT_PRIMARY)
 
 /obj/machinery/recycler/refiner/mapper/r
 	icon_state = "refiner_r"

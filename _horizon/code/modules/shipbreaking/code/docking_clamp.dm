@@ -166,7 +166,7 @@
 	. = ..()
 
 /obj/machinery/docking_clamp/indestructible
-	resistance_flags = INDESTRUCTIBLE
+	resistance_flags = INDESTRUCTIBLE | FIRE_PROOF | ACID_PROOF | LAVA_PROOF
 	var/gpstag = "Salvage Bay"
 
 /obj/machinery/docking_clamp/indestructible/proc/add_gps_component()
@@ -174,4 +174,5 @@
 
 /obj/machinery/docking_clamp/indestructible/Initialize(mapload)
 	. = ..()
+	AddElement(/datum/element/tool_blocker, TOOL_CROWBAR, TOOL_ACT_PRIMARY)
 	add_gps_component()

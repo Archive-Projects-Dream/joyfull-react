@@ -7,6 +7,7 @@
 	pass_flags_self = LETPASSTHROW|PASSSTRUCTURE
 	armor_type = /datum/armor/structure_railing
 	max_integrity = 300
+	resistance_flags = ACID_PROOF
 	layer = LOW_ITEM_LAYER
 	/// How long to either unwrench or unweld
 	var/unfasten_time = 1 SECONDS
