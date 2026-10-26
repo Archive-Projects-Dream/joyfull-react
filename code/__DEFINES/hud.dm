@@ -318,11 +318,11 @@
 #define ui_alien_health "EAST,CENTER-1:15"
 #define ui_alienplasmadisplay "EAST,CENTER-2:15"
 #define ui_alien_queen_finder "EAST,CENTER-3:15"
-#define ui_alien_storage_r "CENTER+1:18,SOUTH:5"
-#define ui_alien_language_menu "EAST-4:22,SOUTH:5"
+#define ui_alien_storage_r "CENTER+2,SOUTH:5"
+#define ui_alien_language_menu "EAST-3:24,SOUTH:6"
 #define ui_alien_navigate_menu "EAST-4:6,SOUTH:5"
-#define ui_alien_memories_menu "EAST-4:22,SOUTH:1:20"
-#define ui_alien_floor_change "EAST-3:24,SOUTH:20"
+#define ui_alien_memories_menu "EAST-3:9,SOUTH:6"
+#define ui_alien_floor_change "EAST-3:25,SOUTH:5"
 #define ui_alienplasmadisplay_human "EAST,CENTER-5:8"
 
 //AI
