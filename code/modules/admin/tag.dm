@@ -43,8 +43,8 @@
 		to_chat(owner, span_warning("[target_datum] was not already tagged."))
 
 /// Quick define for readability
-#define TAG_DEL(X) "<b>(<A href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];del_tag=[REF(X)]'>UNTAG</a>)</b>"
-#define TAG_MARK(X) "<b>(<A href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];mark_datum=[REF(X)]'>MARK</a>)</b>"
+#define TAG_DEL(X) "<b><a class='button' href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];del_tag=[REF(X)]'>UNTAG</a></b>"
+#define TAG_MARK(X) "<b><a class='button' href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];mark_datum=[REF(X)]'>MARK</a></b>"
 #define TAG_SIMPLE_HEALTH(X) "<font color='#ff0000'><b>Health: [X.health]</b></font>"
 #define TAG_CARBON_HEALTH(X) "<font color='#ff0000'><b>Health: [X.health]</b></font> (\
 					<font color='#ff3333'>[X.get_brute_loss()]</font> \

@@ -455,7 +455,7 @@ SUBSYSTEM_DEF(dynamic)
 	for(var/datum/dynamic_ruleset/latejoin/queued in queued_rulesets)
 		// NOTE: !! THIS CAN SLEEP !!
 		if(!queued.prepare_execution(get_active_player_count(afk_check = TRUE), list(latejoiner)))
-			message_admins("Latejoin (forced): Queued ruleset [queued.config_tag] failed to prepare! It remains queued for next latejoin. (<a href='byond://?src=[REF(src)];admin_dequeue=[REF(queued)]'>REMOVE FROM QUEUE</a>)")
+			message_admins("Latejoin (forced): Queued ruleset [queued.config_tag] failed to prepare! It remains queued for next latejoin. <a class='button' href='byond://?src=[REF(src)];admin_dequeue=[REF(queued)]'>REMOVE FROM QUEUE</a>")
 			log_dynamic("Latejoin (forced): Queued ruleset [queued.config_tag] failed to prepare! It remains queued for next latejoin.")
 			continue
 		message_admins("Latejoin (forced): [ADMIN_LOOKUPFLW(latejoiner)] has been selected for [queued.config_tag].")

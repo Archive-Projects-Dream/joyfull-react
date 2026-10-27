@@ -48,10 +48,10 @@
 #define RULESET_VARIATION (1<<3)
 
 /// Href for cancelling midround rulesets before execution
-#define MIDROUND_CANCEL_HREF(...) "(<a href='byond://?src=[REF(src)];admin_cancel_midround=[REF(picked_ruleset)]'>CANCEL</a>)"
+#define MIDROUND_CANCEL_HREF(...) "<a class='button' href='byond://?src=[REF(src)];admin_cancel_midround=[REF(picked_ruleset)]'>CANCEL</a>"
 /// Href for rerolling midround rulesets before execution
 #define MIDROUND_REROLL_HREF(rulesets) "[length(rulesets) \
-	? "(<a href='byond://?src=[REF(src)];admin_reroll=[REF(picked_ruleset)]'>SOMETHING ELSE</a>)" \
+	? "<a class='button' href='byond://?src=[REF(src)];admin_reroll=[REF(picked_ruleset)]'>SOMETHING ELSE</a>" \
 	: "([span_tooltip("There are no more rulesets to pick from!", "NOTHING ELSE")])"\
 ]"
 
