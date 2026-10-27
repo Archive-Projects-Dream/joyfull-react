@@ -1,19 +1,34 @@
+/atom/movable/screen/human_hud_background
+	icon = '_horizon/icons/ui/screen_background.dmi'
+	icon_state = "background"
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	screen_loc = ui_stamina
+
+/// Decorations so the frame
+/atom/movable/screen/human_hud_edge
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	layer = 3.05 // Magic number, but it's fucking simple. Define/undef here is just overkill.
+
+/atom/movable/screen/human_hud_edge/top
+	icon_state = "status_up"
+	screen_loc = ui_healthdoll_edge
+
+/atom/movable/screen/human_hud_edge/bottom
+	icon_state = "status_down"
+	screen_loc = ui_stamina
+
 /atom/movable/screen/healthdoll/human
-	icon = '_horizon/icons/ui/screen_gen.dmi'
-	icon_state = "template"
-
-/atom/movable/screen/healths/carbon
-	icon = '_horizon/icons/ui/screen_gen.dmi'
-
-/atom/movable/screen/healths/human
 	icon = '_horizon/icons/ui/screen_gen.dmi'
 
 /atom/movable/screen/healthdoll_limb
-	icon = '_horizon/icons/ui/screen_gen.dmi'
+	icon = '_horizon/icons/ui/screen_limb.dmi'
+
+/atom/movable/screen/healths/human
+	icon = '_horizon/icons/ui/screen_health_human.dmi'
+
 
 //End gas alerts
 /*
-// Смайлы
 /atom/movable/screen/alert/gross
 	name = "Grossed out."
 	desc = "That was kind of gross..."

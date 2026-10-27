@@ -1,7 +1,7 @@
 /datum/hud/dextrous/voidwalker
 	ui_style = 'icons/hud/screen_voidwalker.dmi'
-	wide_icon = '_horizon/icons/ui/themed/screen_wide_voidwalker.dmi'
-	progbar_icon = '_horizon/icons/ui/themed/progessbar_voidwalker.dmi'
+	wide_icon = '_horizon/icons/ui/themed/screen_wide_voidwalker.dmi' // [HORIZON-ADD] WIDE-HUD
+	progbar_icon = '_horizon/icons/ui/themed/progessbar_voidwalker.dmi' // [/HORIZON-ADD]
 	give_generic_combat = FALSE //we give our own version below, here.
 
 /datum/hud/dextrous/voidwalker/initialize_screen_objects()

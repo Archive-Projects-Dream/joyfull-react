@@ -51,7 +51,6 @@
 #include "code\modules\visual_changes\debris_additions.dm"
 #include "code\modules\visual_changes\gun_smoke.dm"
 #include "code\modules\visual_changes\shockwave.dm"
-#include "code\progress_bar\hud.dm"
 #include "code\progress_bar\screen_objects.dm"
 #include "code\progress_bar\world_progressbar.dm"
 // END_INCLUDE
