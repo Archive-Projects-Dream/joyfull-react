@@ -143,6 +143,9 @@
 	///these persist between logins/logouts during the same round.
 	var/datum/persistent_client/persistent_client
 
+	///Set once /client/New hands the connection the link dropped mid-handshake (flaky internet) // [HORIZON-ADD] LOBBY
+	var/connection_handed_off = FALSE
+
 	///Should only be a key-value list of north/south/east/west = atom/movable/screen.
 	var/list/char_render_holders
 
