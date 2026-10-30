@@ -515,7 +515,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 	// Sync the decorative battery frame's visibility with the spacesuit icon
 	var/atom/movable/screen/human_hud_edge/status_battery/battery = hud?.screen_objects[HUD_HUMAN_EDGE_BATTERY]
 	if (battery)
-		battery.alpha = (cell_state == SPACESUIT_NO_ICON) ? 0 : 255
+		battery.icon_state = (cell_state == SPACESUIT_NO_ICON) ? null : "status_battery"
 	if(cell_state)
 		switch(cell_state)
 			if(SPACESUIT_NO_ICON)
