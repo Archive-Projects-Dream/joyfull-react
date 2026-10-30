@@ -1,7 +1,6 @@
 #define PROGRESSBAR_HEIGHT 6
 #define PROGRESSBAR_ANIMATION_TIME 5
 
-
 /atom/movable/screen/progbar_container/Initialize(mapload, datum/hud/hud_owner)
 	if(hud_owner)
 		RegisterSignal(hud_owner.mymob, COMSIG_LIVING_CHANGENEXT_MOVE, PROC_REF(on_changenext))
@@ -31,7 +30,6 @@
 
 	owner = _owner
 	goal = _goal
-
 	bar = new()
 
 	if(underlay)
@@ -48,16 +46,13 @@
 		bar.underlays += underlay
 
 	owner.add_viscontents(bar)
-
 	animate(bar, alpha = 255, time = PROGRESSBAR_ANIMATION_TIME, easing = SINE_EASING)
-
 	RegisterSignal(owner, COMSIG_QDELETING, PROC_REF(owner_delete))
 
 /datum/world_progressbar/Destroy()
 	owner = null
 	QDEL_NULL(bar)
 	return ..()
-
 
 /datum/world_progressbar/proc/owner_delete()
 	qdel(src)
@@ -92,7 +87,6 @@
 	alpha = 0
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	vis_flags = NONE //We don't want VIS_INHERIT_PLANE
-
 
 /mob/living/changeNext_move(num)
 	. = ..()
