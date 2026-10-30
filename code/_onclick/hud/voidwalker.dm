@@ -14,4 +14,4 @@
 	add_screen_object(/atom/movable/screen/combattoggle/flashy/voidwalker, HUD_MOB_INTENTS, HUD_GROUP_INFO, ui_style)
 	add_screen_object(/atom/movable/screen/space_camo, HUD_VOIDWALKER_SPACE_CAMO)
 	add_screen_object(/atom/movable/screen/vomit_jump, HUD_VOIDWALKER_VOID_JUMP)
-	add_screen_object(/atom/movable/screen/progbar_container, HUDKEY_MOB_USE_TIMER, HUD_GROUP_STATIC, progbar_icon)
+	add_screen_object(/atom/movable/screen/progbar_container, HUDKEY_MOB_USE_TIMER, HUD_GROUP_STATIC, progbar_icon) // [HORIZON-ADD] WIDE-HUD

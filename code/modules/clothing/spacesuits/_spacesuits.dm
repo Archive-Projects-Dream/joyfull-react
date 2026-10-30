@@ -359,6 +359,7 @@
 	if(cell.charge < THERMAL_REGULATOR_COST)
 		spacesuit_hud.update_spacesuit_hud_icon(SPACESUIT_CELL_EMPTY, cell_percent, thermal_on)
 		return
+	// [HORIZON-ADD] WIDE_HUD
 	switch(cell_percent)
 		if(0 to 24)
 			spacesuit_hud.update_spacesuit_hud_icon(SPACESUIT_CELL_VERY_LOW, cell_percent, thermal_on)
@@ -368,6 +369,7 @@
 			spacesuit_hud.update_spacesuit_hud_icon(SPACESUIT_CELL_MID, cell_percent, thermal_on)
 		if(76 to 100)
 			spacesuit_hud.update_spacesuit_hud_icon(SPACESUIT_CELL_HIGH, cell_percent, thermal_on)
+	// [/HORIZON-ADD]
 
 // zap the cell if we get hit with an emp
 /obj/item/clothing/suit/space/emp_act(severity)

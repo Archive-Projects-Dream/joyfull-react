@@ -3,7 +3,7 @@
 
 /datum/hud/human/initialize_screen_objects()
 	. = ..()
-	// [HORIZON-ADD] WIDE_UI
+	// [HORIZON-ADD] WIDE_HUD
 	add_screen_object(/atom/movable/screen/human_hud_background, HUD_HUMAN_BACKGROUND, HUD_GROUP_SCREEN_OVERLAYS)
 	add_screen_object(/atom/movable/screen/human_hud_edge/top, HUD_HUMAN_EDGE_TOP, HUD_GROUP_SCREEN_OVERLAYS, ui_style)
 	add_screen_object(/atom/movable/screen/human_hud_edge/bottom, HUD_HUMAN_EDGE_BOTTOM, HUD_GROUP_SCREEN_OVERLAYS, ui_style)
@@ -23,7 +23,7 @@
 	add_screen_object(/atom/movable/screen/memories, HUD_MOB_MEMORIES, HUD_GROUP_STATIC, ui_style, ui_human_memories_menu)
 	build_hand_slots()
 
-	add_screen_object(/atom/movable/screen/swap_hand, HUD_MOB_SWAPHAND_2, HUD_GROUP_STATIC, ui_style, ui_swaphand_position(mymob, 2)) // [HORIZON-EDIT] WIDE_UI
+	add_screen_object(/atom/movable/screen/swap_hand, HUD_MOB_SWAPHAND_2, HUD_GROUP_STATIC, ui_style, ui_swaphand_position(mymob, 2)) // [HORIZON-EDIT] WIDE_HUD
 	add_screen_object(/atom/movable/screen/progbar_container, HUDKEY_MOB_USE_TIMER, HUD_GROUP_STATIC) // [/HORIZON-EDIT]
 
 	// Hotkey buttons
@@ -34,7 +34,7 @@
 	add_screen_object(/atom/movable/screen/spacesuit, HUD_MOB_SPACESUIT, HUD_GROUP_INFO)
 	add_screen_object(/atom/movable/screen/healthdoll/human, HUD_MOB_HEALTHDOLL, HUD_GROUP_INFO)
 	add_screen_object(/atom/movable/screen/stamina, HUD_MOB_STAMINA, HUD_GROUP_INFO)
-	add_screen_object(/atom/movable/screen/healths/human, HUD_MOB_HEALTH, HUD_GROUP_INFO) // [HORIZON-EDIT] WIDE_UI
+	add_screen_object(/atom/movable/screen/healths/human, HUD_MOB_HEALTH, HUD_GROUP_INFO) // [HORIZON-EDIT] WIDE_HUD
 	add_screen_object(/atom/movable/screen/hunger, HUD_MOB_HUNGER, HUD_GROUP_INFO)
 
 /datum/hud/human/update_locked_slots()
