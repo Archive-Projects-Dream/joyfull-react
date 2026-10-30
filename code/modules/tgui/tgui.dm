@@ -234,10 +234,12 @@
 		return
 	refreshing = FALSE
 	var/should_update_data = force || status >= UI_UPDATE
-	window.send_message("update", get_payload(
+	var/list/payload = get_payload(
 		custom_data,
 		with_data = should_update_data,
-		with_static_data = TRUE))
+		with_static_data = TRUE)
+	if(payload)
+		window.send_message("update", payload)
 	if(!always_instant)
 		COOLDOWN_START(src, refresh_cooldown, TGUI_REFRESH_FULL_UPDATE_COOLDOWN)
 
@@ -253,9 +255,11 @@
 	if(!user.client || !initialized || closing)
 		return
 	var/should_update_data = force || status >= UI_UPDATE
-	window.send_message("update", get_payload(
+	var/list/payload = get_payload(
 		custom_data,
-		with_data = should_update_data))
+		with_data = should_update_data)
+	if(payload)
+		window.send_message("update", payload)
 
 /**
  * private
@@ -265,25 +269,28 @@
  * return list
  */
 /datum/tgui/proc/get_payload(custom_data, with_data, with_static_data)
+	var/client/user_client = user?.client
+	if(isnull(user_client?.prefs))
+		return null
 	var/list/json_data = list()
 	json_data["config"] = list(
 		"title" = title,
 		"status" = status,
 		"interface" = list(
 			"name" = interface,
-			"layout" = user.client.prefs.read_preference(src_object.layout_prefs_used),
+			"layout" = user_client.prefs.read_preference(src_object.layout_prefs_used),
 		),
 		"refreshing" = refreshing,
 		"window" = list(
 			"key" = window_key,
 			"size" = window_size,
-			"locked" = user.client.prefs.read_preference(/datum/preference/toggle/tgui_lock),
-			"scale" = user.client.prefs.read_preference(/datum/preference/toggle/ui_scale),
+			"locked" = user_client.prefs.read_preference(/datum/preference/toggle/tgui_lock),
+			"scale" = user_client.prefs.read_preference(/datum/preference/toggle/ui_scale),
 		),
 		"client" = list(
-			"ckey" = user.client.ckey,
-			"address" = user.client.address,
-			"computer_id" = user.client.computer_id,
+			"ckey" = user_client.ckey,
+			"address" = user_client.address,
+			"computer_id" = user_client.computer_id,
 		),
 		"user" = list(
 			"name" = "[user]",
@@ -332,7 +339,10 @@
 		close()
 		return
 	if(needs_update)
-		window.send_message("update", get_payload())
+		var/list/payload = get_payload()
+		if(payload)
+			window.send_message("update", payload)
+// [/HORIZON-EDIT]
 
 /**
  * private

@@ -46,6 +46,7 @@
 
 /obj/structure/window/Initialize(mapload, direct)
 	AddElement(/datum/element/blocks_explosives)
+	AddElement(/datum/element/cutting_tool_target) // [HORIZON-ADD] SALVAGE_TOOL
 	. = ..()
 	if(direct)
 		setDir(direct)
@@ -224,6 +225,23 @@
 		repair_damage(max_integrity)
 		to_chat(user, span_notice("You repair [src]."))
 	return ITEM_INTERACT_SUCCESS
+
+// [HORIZON-ADD] SALVAGE_TOOL
+/obj/structure/window/deconstruct_act(mob/living/user, obj/item/I)
+	. = ..() // INDESTRUCTIBLE check
+	if(.)
+		return
+	if(!I.tool_start_check(user, amount = 1))
+		return ITEM_INTERACT_BLOCKING
+	user.visible_message(span_notice("[user] starts slicing through [src] with [I]."),
+		span_notice("You start slicing through [src]..."))
+	if(!I.use_tool(src, user, 4 SECONDS, volume = 50, amount = 1))
+		return ITEM_INTERACT_BLOCKING
+	user.visible_message(span_notice("[user] slices through [src], shattering it!"),
+		span_notice("You slice through [src], and it shatters into pieces."))
+	deconstruct(FALSE)
+	return ITEM_INTERACT_SUCCESS
+// [/HORIZON-ADD]
 
 /obj/structure/window/screwdriver_act(mob/living/user, obj/item/tool)
 

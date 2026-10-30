@@ -697,15 +697,19 @@
 	glass_colour_type = /datum/client_colour/glass_colour/red
 	flags_cover = GLASSESCOVERSEYES
 
-/obj/item/clothing/glasses/debug
+// [HORIZON-EDIT] Debug_tools
+/obj/item/clothing/glasses/hud/debug
 	name = "debug glasses"
 	desc = "Medical, security and diagnostic hud."
 	desc_controls = "Alt click to toggle xray."
+	icon = '_horizon/icons/obj/items/glasses.dmi'
+	lefthand_file = '_horizon/icons/obj/in_hands/glasses_lefthand.dmi'
+	righthand_file = '_horizon/icons/obj/in_hands/glasses_righthand.dmi'
+	worn_icon = '_horizon/icons/obj/in_mob/eyes.dmi'
 	icon_state = "nvgmeson"
 	inhand_icon_state = "nvgmeson"
 	flags_cover = GLASSESCOVERSEYES
 	flash_protect = FLASH_PROTECTION_WELDER
-	lighting_cutoff = LIGHTING_CUTOFF_HIGH
 	glass_colour_type = FALSE
 	clothing_traits = list(
 		TRAIT_REAGENT_SCANNER,
@@ -717,15 +721,26 @@
 		TRAIT_MESON_VISION,
 	)
 	var/xray = FALSE
+	color_cutoffs = list(15, 25, 40)
+	actions_types = list(/datum/action/item_action/toggle_wearable_hud, /datum/action/item_action/toggle_nv)
 	pickup_sound = /datum/sound_effect/goggles_pickup
 	drop_sound = /datum/sound_effect/goggles_drop
 	equip_sound = /datum/sound_effect/goggles_equip
+// [/HORIZON-EDIT]
 
-/obj/item/clothing/glasses/debug/Initialize(mapload)
+/obj/item/clothing/glasses/hud/debug/Initialize(mapload)
 	. = ..()
 	AddElement(/datum/element/adjust_fishing_difficulty, -15)
 
-/obj/item/clothing/glasses/debug/click_alt(mob/user)
+// [HORIZON-ADD] Debug_tools
+/obj/item/clothing/glasses/hud/debug/update_icon_state()
+	. = ..()
+	icon_state = length(color_cutoffs) ? initial(icon_state) : "nvgmeson_off"
+// [/HORIZON-ADD]
+
+/obj/item/clothing/glasses/hud/debug/click_alt(mob/user) // [HORIZON-EDIT]
+	if(!ishuman(user))
+		return CLICK_ACTION_BLOCKING
 	if(xray)
 		detach_clothing_traits(TRAIT_XRAY_VISION)
 	else
