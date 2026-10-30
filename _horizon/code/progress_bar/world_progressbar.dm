@@ -84,8 +84,7 @@
 #undef PROGRESSBAR_HEIGHT
 
 /obj/effect/abstract/progbar
-	// icon is set dynamically by /atom/movable/screen/progbar_container/Initialize
-	// based on the player's UI style (Atomic / Expanse / ...).
+	icon = '_horizon/icons/ui/themed/progessbar_atomic.dmi'
 	icon_state = "16"
 	plane = GAME_PLANE
 	layer = FLY_LAYER
