@@ -7,6 +7,7 @@
 	add_screen_object(/atom/movable/screen/human_hud_background, HUD_HUMAN_BACKGROUND, HUD_GROUP_SCREEN_OVERLAYS)
 	add_screen_object(/atom/movable/screen/human_hud_edge/top, HUD_HUMAN_EDGE_TOP, HUD_GROUP_SCREEN_OVERLAYS, ui_style)
 	add_screen_object(/atom/movable/screen/human_hud_edge/bottom, HUD_HUMAN_EDGE_BOTTOM, HUD_GROUP_SCREEN_OVERLAYS, ui_style)
+	add_screen_object(/atom/movable/screen/human_hud_edge/status_battery, HUD_HUMAN_EDGE_BATTERY, HUD_GROUP_SCREEN_OVERLAYS, ui_style)
 	// [/HORIZON-ADD]
 	// Static elements
 	add_screen_object(/atom/movable/screen/language_menu, HUD_MOB_LANGUAGE_MENU, HUD_GROUP_STATIC, ui_style, ui_human_language)

@@ -21,6 +21,7 @@
 	icon_state = "status_battery"
 	screen_loc = ui_spacesuit
 	layer = 3
+	alpha = 0 // hidden until a space suit is equipped; toggled by /atom/movable/screen/spacesuit/update_spacesuit_hud_icon
 
 /atom/movable/screen/healthdoll/human
 	icon = '_horizon/icons/ui/screen_gen.dmi'
