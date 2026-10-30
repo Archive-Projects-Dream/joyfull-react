@@ -24,7 +24,7 @@
 	build_hand_slots()
 
 	add_screen_object(/atom/movable/screen/swap_hand, HUD_MOB_SWAPHAND_2, HUD_GROUP_STATIC, ui_style, ui_swaphand_position(mymob, 2)) // [HORIZON-EDIT] WIDE_HUD
-	add_screen_object(/atom/movable/screen/progbar_container, HUDKEY_MOB_USE_TIMER, HUD_GROUP_STATIC) // [/HORIZON-EDIT]
+	add_screen_object(/atom/movable/screen/progbar_container, HUDKEY_MOB_USE_TIMER, HUD_GROUP_STATIC, progbar_icon, ui_progbar_position(mymob)) // [/HORIZON-EDIT]
 
 	// Hotkey buttons
 	add_screen_object(/atom/movable/screen/resist, HUD_MOB_RESIST, HUD_GROUP_HOTKEYS, ui_style)

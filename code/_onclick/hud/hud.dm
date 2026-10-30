@@ -504,7 +504,7 @@ GLOBAL_LIST_INIT(available_progbar_icons, list(
 		hand_box.icon_state = "hand_[mymob.held_index_to_dir(i)]"
 		hand_box.held_index = i
 		hand_box.update_appearance()
-/*
+
 	var/num_of_swaps = 0
 	for(var/atom/movable/screen/swap_hand/swap_hands in screen_groups[HUD_GROUP_STATIC])
 		num_of_swaps += 1
@@ -525,7 +525,11 @@ GLOBAL_LIST_INIT(available_progbar_icons, list(
 			hand_ind = IS_LEFT_INDEX(hand_num) ? LEFT_HANDS : RIGHT_HANDS
 		swap_hands.screen_loc = ui_swaphand_position(mymob, hand_ind)
 		hand_num += 1
-*/
+
+	var/atom/movable/screen/progbar_container/progbar = screen_objects[HUDKEY_MOB_USE_TIMER]
+	if(progbar)
+		progbar.screen_loc = ui_progbar_position(mymob)
+
 	if(update_hud && mymob?.hud_used == src)
 		show_hud(hud_version)
 

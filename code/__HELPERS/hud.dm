@@ -8,6 +8,10 @@
 	var/y_off = round((M.get_num_hand_slots()-1) / 2)
 	return "CENTER+[x_off]:16,SOUTH+[y_off+1]:5"
 
+/proc/ui_progbar_position(mob/M) //values based on the old hardcoded progbar position (CENTER-1,SOUTH+1); pushed above the topmost hand row like ui_swaphand_position
+	var/y_off = round((M.get_num_hand_slots()-1) / 2)
+	return "CENTER-1:0,SOUTH+[y_off+1]:5"
+
 /proc/ui_perk_position(perk_count)
 	var/y_off = perk_count < 1 ? 0 : perk_count/2
 	return "WEST+0.5:12,NORTH-2-[y_off]:20"

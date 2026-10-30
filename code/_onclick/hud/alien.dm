@@ -26,7 +26,7 @@
 	add_screen_object(/atom/movable/screen/healths/alien, HUD_MOB_HEALTH, HUD_GROUP_INFO)
 	add_screen_object(/atom/movable/screen/alien/plasma_display, HUD_ALIEN_PLASMA_DISPLAY, HUD_GROUP_INFO)
 	add_screen_object(/atom/movable/screen/memories, HUD_MOB_MEMORIES, HUD_GROUP_STATIC, ui_style, ui_alien_memories_menu)
-	add_screen_object(/atom/movable/screen/progbar_container, HUDKEY_MOB_USE_TIMER, HUD_GROUP_STATIC, progbar_icon)
+	add_screen_object(/atom/movable/screen/progbar_container, HUDKEY_MOB_USE_TIMER, HUD_GROUP_STATIC, progbar_icon, ui_progbar_position(mymob))
 
 	if(isalienhunter(mymob))
 		add_screen_object(/atom/movable/screen/alien/leap, HUD_ALIEN_HUNTER_LEAP, HUD_GROUP_STATIC, ui_style)
