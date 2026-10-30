@@ -110,10 +110,10 @@ GLOBAL_LIST_INIT(available_progbar_icons, list(
 
 	// will fall back to the default if any of these are null
 	ui_style ||= ui_style2icon(owner.client?.prefs?.read_preference(/datum/preference/choiced/ui_style))
-	// Set wide HUD icon based on UI style
-	wide_icon ||= ui_style2wide_icon(owner.client?.prefs?.read_preference(/datum/preference/choiced/ui_style))
-	// Set swing-cooldown progress bar icon based on UI style
-	progbar_icon ||= ui_style2progbar_icon(owner.client?.prefs?.read_preference(/datum/preference/choiced/ui_style))
+	// Wide (48x32) HUD atlas and progress bar icons follow the effective UI style
+	var/effective_style_name = ui_icon2style_name(ui_style)
+	wide_icon ||= ui_style2wide_icon(effective_style_name)
+	progbar_icon ||= ui_style2progbar_icon(effective_style_name)
 
 	add_screen_object(/atom/movable/screen/button_palette, HUD_MOB_TOGGLE_PALETTE)
 	add_screen_object(/atom/movable/screen/palette_scroll/down, HUD_MOB_PALETTE_DOWN)

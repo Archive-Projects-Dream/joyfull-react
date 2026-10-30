@@ -270,8 +270,8 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 
 /atom/movable/screen/inventory/hand
 	var/mutable_appearance/handcuff_overlay
-	var/static/mutable_appearance/blocked_overlay = mutable_appearance('icons/hud/screen_gen.dmi', "blocked")
-	var/static/mutable_appearance/shield_overlay = mutable_appearance('icons/hud/screen_gen.dmi', "shielding")
+	var/static/mutable_appearance/blocked_overlay = mutable_appearance('_horizon/icons/ui/screen_gen_wide.dmi', "blocked")
+	var/static/mutable_appearance/shield_overlay = mutable_appearance('_horizon/icons/ui/screen_gen_wide.dmi', "shielding")
 	var/held_index = 0
 	interaction_flags_atom = NONE //so dragging objects into hands icon don't skip adjacency & other checks
 
