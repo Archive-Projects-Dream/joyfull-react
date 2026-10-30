@@ -84,7 +84,7 @@
 #undef PROGRESSBAR_HEIGHT
 
 /obj/effect/abstract/progbar
-	icon = '_horizon/icons/ui/themed/progessbar_atomic.dmi'
+	icon = null
 	icon_state = "16"
 	plane = GAME_PLANE
 	layer = FLY_LAYER
