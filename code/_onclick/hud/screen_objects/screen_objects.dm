@@ -483,6 +483,13 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 	mouse_over_pointer = MOUSE_HAND_POINTER
 	///The overlay added on top of the HUD when the thermal regulator is off.
 	var/static/mutable_appearance/off_overlay = mutable_appearance('icons/hud/screen_gen.dmi', "off")
+	///Cached decorative frame around the cell-status icon. Rebuilt when the
+	///UI style changes so it follows Atomic/Expanse/Belter like the rest
+	///of the human_hud_edge family.
+	var/mutable_appearance/battery_overlay
+	///Icon file used to build battery_overlay; tracked so we can detect
+	///a style switch and rebuild the overlay.
+	var/icon/battery_overlay_icon
 	///Boolean on whether a mouse is being hovered over us right now.
 	var/hovering = FALSE
 	///Boolean on whether or not the space suit's thermal mode is on. Start at TRUE so we auto-update when we are first equipped.
@@ -512,10 +519,6 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 	astype(wearer.wear_suit, /obj/item/clothing/suit/space)?.update_hud_icon(usr)
 
 /atom/movable/screen/spacesuit/proc/update_spacesuit_hud_icon(cell_state, cell_percent, thermal_on = TRUE)
-	// Sync the decorative battery frame's visibility with the spacesuit icon
-	var/atom/movable/screen/human_hud_edge/status_battery/battery = hud?.screen_objects[HUD_HUMAN_EDGE_BATTERY]
-	if (battery)
-		battery.icon_state = (cell_state == SPACESUIT_NO_ICON) ? null : "status_battery"
 	if(cell_state)
 		switch(cell_state)
 			if(SPACESUIT_NO_ICON)
@@ -539,7 +542,15 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 
 /atom/movable/screen/spacesuit/update_overlays()
 	. = ..()
-	if(!cached_thermal_on && icon_state)
+	if(!icon_state)
+		return
+	// Rebuild the battery frame if it is missing or the UI style changed
+	// (update_ui_style swaps .icon on this screen object; we follow suit).
+	if(isnull(battery_overlay) || battery_overlay_icon != icon)
+		battery_overlay_icon = icon
+		battery_overlay = mutable_appearance(icon, "status_battery")
+	. |= battery_overlay
+	if(!cached_thermal_on)
 		. |= off_overlay
 
 /atom/movable/screen/mov_intent
