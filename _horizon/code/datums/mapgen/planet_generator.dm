@@ -139,6 +139,7 @@
 					override_turf_atmospheres(turfs_to_generate)
 					populate_terrain(turfs_to_generate, null)
 					smooth_generated_turfs(turfs_to_generate, vlevel.z_value)
+					SSlighting.update_turfs_now(turfs_to_generate)
 
 	log_world("MAPGEN: Filling 5th level with openspace...")
 	created_levels[5].fill_in(/turf/open/openspace)
@@ -195,6 +196,9 @@
 	)
 	smooth_generated_turfs(turfs_to_smooth, load_turf.z)
 	override_turf_atmospheres(turfs_to_smooth)
+
+	log_world("MAPGEN_DMM: Flushing lighting state for [length(turfs_to_smooth)] turfs...")
+	SSlighting.update_turfs_now(turfs_to_smooth)
 
 	log_world("MAPGEN_DMM: Success for [planet_name]")
 	return TRUE

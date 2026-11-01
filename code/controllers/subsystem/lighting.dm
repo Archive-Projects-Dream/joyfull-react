@@ -143,3 +143,40 @@ SUBSYSTEM_DEF(lighting)
 		var/area/loc_area = unlit.loc
 		if(loc_area.static_lighting)
 			unlit.lighting_build_overlay()
+
+/// Immediately flushes the lighting state of a batch of turfs that was just
+/// loaded or swapped at runtime (planet generation, template loads).
+/// Collects every light source held by the turfs and their contents, updates
+/// their corners, then drains corners and lighting objects still flagged for
+/// an update, so the whole batch settles in one pass instead of trickling
+/// through queue ticks while half-initialized.
+/// Ported from SS220 Paradise's cosmos update.
+/datum/controller/subsystem/lighting/proc/update_turfs_now(list/turfs)
+	var/list/sources = list()
+	for(var/turf/lit_turf in turfs)
+		var/list/turf_sources = lit_turf.light_sources
+		if(length(turf_sources))
+			sources |= turf_sources
+		for(var/atom/movable/thing as anything in lit_turf)
+			var/list/thing_sources = thing.light_sources
+			if(length(thing_sources))
+				sources |= thing_sources
+	for(var/datum/light_source/source as anything in sources)
+		if(!source.needs_update)
+			continue
+		source.update_corners()
+		if(!QDELETED(source))
+			source.needs_update = LIGHTING_NO_UPDATE
+		CHECK_TICK
+	for(var/turf/lit_turf in turfs)
+		for(var/datum/lighting_corner/corner as anything in list(lit_turf.lighting_corner_NE, lit_turf.lighting_corner_SE, lit_turf.lighting_corner_SW, lit_turf.lighting_corner_NW))
+			if(corner?.needs_update)
+				corner.needs_update = FALSE
+				corner.update_objects()
+		CHECK_TICK
+	for(var/turf/lit_turf in turfs)
+		var/atom/movable/lighting_object/object = lit_turf.lighting_object
+		if(object?.needs_update)
+			object.needs_update = FALSE
+			object.update()
+		CHECK_TICK
