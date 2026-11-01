@@ -1040,6 +1040,10 @@ ADMIN_VERB(load_away_mission, R_FUN, "Load Away Mission", "Load a specific away 
 			// Don't allow virtual level allocation on protected z-levels (CentCom, Station, Away missions)
 			if(iterated_level.traits[ZTRAIT_CENTCOM] || iterated_level.traits[ZTRAIT_STATION] || iterated_level.traits[ZTRAIT_AWAY])
 				continue
+			// Never co-locate on an active planet stack: its multiz traits would
+			// silently enroll the newcomer into the planet's z-stack.
+			if(iterated_level.traits[ZTRAIT_PLANET])
+				continue
 			allocation_list = find_allocation_in_level(iterated_level, size_x, size_y, allocation_jump)
 			if(allocation_list)
 				return allocation_list
@@ -1111,10 +1115,14 @@ ADMIN_VERB(load_away_mission, R_FUN, "Load Away Mission", "Load a specific away 
 /// Returns a /datum/virtual_level on the new Z-level, or null on failure.
 /// The virtual level will have the given name, traits, and size.
 /datum/controller/subsystem/mapping/proc/create_planet_vlevel(new_name, list/traits, datum/map_zone/mapzone, width, height)
+	// Tag the stack so allocation searches never co-locate anything on an
+	// active planet level (its UP/DOWN traits would drag newcomers in).
+	var/list/planet_traits = traits ? traits.Copy() : list()
+	planet_traits[ZTRAIT_PLANET] = TRUE
 	// Create a new Z-level for this planet
 	var/datum/space_level/new_z = add_new_zlevel(
 		new_name,
-		traits,
+		planet_traits,
 		/datum/space_level,
 		contain_turfs = TRUE,
 		allocation_type = ALLOCATION_FREE
@@ -1131,7 +1139,7 @@ ADMIN_VERB(load_away_mission, R_FUN, "Load Away Mission", "Load a specific away 
 	// We create a virtual level covering the requested area
 	var/datum/virtual_level/vlevel = new(
 		new_name,
-		traits,
+		planet_traits,
 		mapzone,
 		1,                    // low_x
 		1,                    // low_y
@@ -1163,6 +1171,8 @@ ADMIN_VERB(load_away_mission, R_FUN, "Load Away Mission", "Load a specific away 
 
 	// Strip the multiz linkage traits so plane tracking and multiz stepping
 	// stop treating this level as part of a stack, then rebuild the linkages.
+	// ZTRAIT_PLANET is stripped here too, handing the level back to the
+	// allocation pool.
 	planet_z.traits = list(ZTRAIT_RESERVED = TRUE)
 	generate_linkages_for_z_level(z_value)
 	calculate_z_level_gravity(z_value)
