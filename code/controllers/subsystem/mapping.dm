@@ -752,6 +752,31 @@ ADMIN_VERB(load_away_mission, R_FUN, "Load Away Mission", "Load a specific away 
 		initialize_reserved_level(isolated_ruins_z.z_value)
 	return isolated_ruins_z.z_value
 
+/// Ensures every positional (index == z) lookup list in SSmapping is sized to
+/// cover z_value, seeding neutral defaults for the fresh entries.
+/// Idempotent: z levels that are already tracked are left untouched.
+/// Runtime map loading (planet generation, template z expansion) grows
+/// world.maxz without going through manage_z_level, which used to leave these
+/// lists unsized and crash with "list index out of bounds" across lighting
+/// and mapping when the new levels were touched.
+/// Ported from SS220 Paradise's cosmos update.
+/datum/controller/subsystem/mapping/proc/ensure_z_level_bookkeeping(z_value)
+	if(z_value > length(z_level_to_plane_offset))
+		z_level_to_plane_offset.len = z_value
+		z_level_to_lowest_plane_offset.len = z_value
+		z_level_to_stack.len = z_value
+		gravity_by_z_level.len = z_value
+		// Bare minimum a level has is itself
+		z_level_to_stack[z_value] = list(z_value)
+		// 0's are the default values, updated later if the level joins a stack
+		z_level_to_plane_offset[z_value] = 0
+		z_level_to_lowest_plane_offset[z_value] = 0
+		gravity_by_z_level[z_value] = 0
+	if(z_value > length(multiz_levels))
+		multiz_levels.len = z_value
+	if(!multiz_levels[z_value])
+		multiz_levels[z_value] = new /list(LARGEST_Z_LEVEL_INDEX)
+
 /// Takes a z level datum, and tells the mapping subsystem to manage it
 /// Also handles things like plane offset generation, and other things that happen on a z level to z level basis
 /datum/controller/subsystem/mapping/proc/manage_z_level(datum/space_level/new_z, filled_with_space, contain_turfs = TRUE)
@@ -762,15 +787,7 @@ ADMIN_VERB(load_away_mission, R_FUN, "Load Away Mission", "Load a specific away 
 	var/z_value = new_z.z_value
 	// We are guarenteed that we'll always grow bottom up
 	// Suck it jannies
-	z_level_to_plane_offset.len += 1
-	z_level_to_lowest_plane_offset.len += 1
-	gravity_by_z_level.len += 1
-	z_level_to_stack.len += 1
-	// Bare minimum we have ourselves
-	z_level_to_stack[z_value] = list(z_value)
-	// 0's the default value, we'll update it later if required
-	z_level_to_plane_offset[z_value] = 0
-	z_level_to_lowest_plane_offset[z_value] = 0
+	ensure_z_level_bookkeeping(z_value)
 
 	// Now we check if this plane is offset or not
 	var/below_offset = new_z.traits[ZTRAIT_DOWN]

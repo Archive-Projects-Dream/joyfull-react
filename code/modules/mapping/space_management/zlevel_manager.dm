@@ -26,6 +26,9 @@
 	adding_new_zlevel = TRUE
 	var/new_z = z_list.len + 1
 	if (world.maxz < new_z)
+		// Pre-size SSmapping's positional lists so anything reacting to the
+		// new z (mob maxz hooks, subsystems, readers) sees fully bookkept lists
+		ensure_z_level_bookkeeping(new_z)
 		world.incrementMaxZ()
 		CHECK_TICK
 	// TODO: sleep here if the Z level needs to be cleared

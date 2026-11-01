@@ -490,6 +490,9 @@ GLOBAL_VAR_INIT(last_maptick_time, 0)
 
 /world/proc/incrementMaxZ()
 	maxz++
+	// Direct z expansion (map readers bypassing add_new_zlevel) must still keep
+	// SSmapping's positional lookup lists sized, or later access runs out of bounds
+	SSmapping?.ensure_z_level_bookkeeping(maxz)
 	SSmobs.MaxZChanged()
 	SSai_controllers.on_max_z_changed()
 
