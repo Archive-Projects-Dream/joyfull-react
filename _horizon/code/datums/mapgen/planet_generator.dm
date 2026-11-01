@@ -141,8 +141,8 @@
 					smooth_generated_turfs(turfs_to_generate, vlevel.z_value)
 					SSlighting.update_turfs_now(turfs_to_generate)
 
-	log_world("MAPGEN: Filling 5th level with openspace...")
-	created_levels[5].fill_in(/turf/open/openspace)
+	log_world("MAPGEN: Filling sky level...")
+	created_levels[5].fill_in(/turf/open/openspace/planet_sky, /area/planet/sky)
 
 	log_world("MAPGEN: Planet [planet_name] generation complete!")
 	generating = FALSE

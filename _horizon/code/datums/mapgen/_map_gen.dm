@@ -1,6 +1,7 @@
 #include "planet_dmm_loader.dm"
 #include "planet_generator.dm"
 #include "mapArea.dm"
+#include "planet_turfs.dm"
 
 #include "biomes/_biomes.dm"
 #include "planetary/_PlanetGenerator.dm"

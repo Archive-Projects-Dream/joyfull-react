@@ -45,6 +45,17 @@
 	name = "Wasteland Planet Surface"
 	icon_state = "orange"
 
+/// Sky layer above generated planet surfaces. Full base lighting keeps it
+/// consistent with the always-lit planet surface, while the sky turfs
+/// themselves (/turf/open/openspace/planet_sky) carry space_lit so the ghost
+/// level never spawns per-turf lighting objects. See planet_turfs.dm.
+/area/planet/sky
+	name = "Planet Sky"
+	icon_state = "yellow"
+	default_gravity = STANDARD_GRAVITY
+	base_lighting_alpha = 255
+	base_lighting_color = COLOR_WHITE
+
 // ============================================================================
 // CAVE AREAS (darker lighting, underground feel)
 // ============================================================================
