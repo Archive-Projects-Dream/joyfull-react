@@ -13,8 +13,8 @@
 ADMIN_VERB(player_panel, R_ADMIN, "Player Panel", "Updated Player Panel with TGUI. Currently in testing.", ADMIN_CATEGORY_GAME)
 	var/datum/player_panel/tgui = new(user.mob)
 	tgui.ui_interact(user.mob)
-	message_admins("[key_name_admin(user)] has opened VUAP!")
-	BLACKBOX_LOG_ADMIN_VERB("VUAP")
+	message_admins("[key_name_admin(user)] has opened Player Panel!")
+	BLACKBOX_LOG_ADMIN_VERB("player_panel")
 
 ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_VERB_NO_DESCRIPTION, ADMIN_CATEGORY_HIDDEN, /mob)
 	VERB_ARG_TYPED(target, VERB_ARG_TYPE_MOB, VERB_ARG_SOURCE_WORLD, /mob)
@@ -26,13 +26,13 @@ ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_
 		var/datum/mind/player_mind = get_mind(player, include_last = TRUE)
 		var/player_mind_ckey = ckey(player_mind?.key)
 		user.selectedPlayerCkey = player_mind_ckey
-		user.VUAP_selected_mob = target
+		user.player_panel_selected_mob = target
 		var/datum/options_panel/tgui = new(user.mob)
 		tgui.ui_interact(user.mob)
 		tgui_alert(user, "WARNING! This mob has no associated Mind! Most actions will not work. Last ckey to control this mob is [player_mind_ckey].", "No Mind!")
 	else
 		user.selectedPlayerCkey = target.ckey
-		user.VUAP_selected_mob = target
+		user.player_panel_selected_mob = target
 		var/datum/options_panel/tgui = new(user.mob)
 		tgui.ui_interact(user.mob)
 	BLACKBOX_LOG_ADMIN_VERB("OptionsPanel")
@@ -194,7 +194,7 @@ ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_
 	switch(action)
 		if("sendPrivateMessage")
 			user_client.cmd_admin_pm(target_ckey, null)
-			SSblackbox.record_feedback("tally", "VUAP", 1, "PM")
+			SSblackbox.record_feedback("tally", "player_panel", 1, "PM")
 			return
 		if("subtleMessage")
 			SSadmin_verbs.dynamic_invoke_verb(usr, /datum/admin_verb/cmd_admin_subtle_message, target_mob)
@@ -211,7 +211,7 @@ ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_
 			return
 		if("openViewVariables") //logs/rightscheck inside the proc
 			user_client.debug_variables(target_mob)
-			SSblackbox.record_feedback("tally", "VUAP", 1, "VV")
+			SSblackbox.record_feedback("tally", "player_panel", 1, "VV")
 			return
 		if("openLanguagePanel")
 			target_mob.get_language_holder().open_language_menu(usr)
@@ -311,11 +311,10 @@ ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_
 /datum/player_panel/ui_state(mob/user)
 	return ADMIN_STATE(R_ADMIN)
 
-/client //this is needed to hold the selected player ckey for moving to and from pp/vuap
-	///This is used to hold the ckey of the selected player for moving to and from the player panel and vuap
+/client
 	var/selectedPlayerCkey = ""
 	///this is used to hold the mob of the selected player in case the ckey can't be found (this enables pp'ing soulless mobs)
-	var/VUAP_selected_mob = null
+	var/player_panel_selected_mob = null
 	///Reusable  player panel datum, so reopening the verb updates the existing window instead of spawning a new one
 	var/datum/player_panel/player_panel
 
@@ -359,7 +358,7 @@ ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_
 		)
 	)
 	if(!length(ckey) || ckey[1] == "@")
-		var/mob/player = usr.client.VUAP_selected_mob
+		var/mob/player = usr.client.player_panel_selected_mob
 		player_data["characterName"] = player.name || "No Character"
 		player_data["gameState"] = get_player_state(player)
 		player_data["mobType"] = "[initial(player.type)]" || "null"
@@ -416,9 +415,7 @@ ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_
 	if(!selected_mob)
 		tgui_alert(usr, "Selected player not found!")
 		return
-	//pretty much all of these actions use the Topic() admin call. This admin call is secure, checks rights, and does stuff the way the old player panel did.
-	//see code/modules/admin/topic.dm for more info on how it works.
-	//essentially you have to pass a list of parameters to Topic(). It needs to be provided with an admin token to do any of its functions.
+
 	switch(action)
 		if("refresh")
 			ui.send_update()
@@ -478,7 +475,7 @@ ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_
 		// Message Section
 		if("pm")
 			usr.client.cmd_admin_pm(selected_mob.ckey)
-			SSblackbox.record_feedback("tally", "VUAP", 1, "PM")
+			SSblackbox.record_feedback("tally", "player_panel", 1, "PM")
 			return
 		if("sm")
 			usr.client.holder.Topic(null, list(
@@ -562,7 +559,7 @@ ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_
 		// Info Section
 		if("vv") //checks rights inside the proc
 			usr.client.debug_variables(selected_mob)
-			SSblackbox.record_feedback("tally", "VUAP", 1, "VV")
+			SSblackbox.record_feedback("tally", "player_panel", 1, "VV")
 			return
 		if("tp")
 			usr.client.holder.Topic(null, list(
@@ -628,10 +625,10 @@ ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_
 		//health section
 		if("healthscan")
 			healthscan(usr, selected_mob, scanpower = SCANPOWER_ADVANCED, tochat = TRUE)
-			SSblackbox.record_feedback("tally", "VUAP", 1, "HealthScan")
+			SSblackbox.record_feedback("tally", "player_panel", 1, "HealthScan")
 		if("chemscan")
 			chemscan(usr, selected_mob)
-			SSblackbox.record_feedback("tally", "VUAP", 1, "ChemScan")
+			SSblackbox.record_feedback("tally", "player_panel", 1, "ChemScan")
 		if("aheal")
 			usr.client.holder.Topic(null, list(
 				"revive" = REF(selected_mob),
@@ -641,18 +638,18 @@ ADMIN_VERB_AND_CONTEXT_MENU(options_panel, R_ADMIN, "Open Options Panel", ADMIN_
 			return
 		if("giveDisease")
 			SSadmin_verbs.dynamic_invoke_verb(usr, /datum/admin_verb/give_disease, selected_mob)
-			SSblackbox.record_feedback("tally", "VUAP", 1, "GiveDisease")
+			SSblackbox.record_feedback("tally", "player_panel", 1, "GiveDisease")
 			return
 		if("cureAllDiseases")
 			if(istype(selected_mob, /mob/living))
 				var/mob/living/L = selected_mob
 				L.fully_heal(HEAL_NEGATIVE_DISEASES)
 			to_chat(usr, "Cured all negative diseases on [selected_mob.ckey].", confidential = TRUE)
-			SSblackbox.record_feedback("tally", "VUAP", 1, "CureAllDiseases")
+			SSblackbox.record_feedback("tally", "player_panel", 1, "CureAllDiseases")
 			return
 		if("modifytraits")
 			usr.client.holder.modify_traits(selected_mob)
-			SSblackbox.record_feedback("tally", "VUAP", 1, "ModifyTraits")
+			SSblackbox.record_feedback("tally", "player_panel", 1, "ModifyTraits")
 			return
 		// Misc Section
 		if("language")

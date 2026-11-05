@@ -99,7 +99,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 /*
  * Helpers
  */
-
 /// Get the role string for a mob, adapted for /tg/
 /proc/get_mob_role(mob/M)
 	if(!M)
@@ -383,7 +382,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 /*
  * Marking
  */
-
 /datum/mentorhelp/proc/mark(client/thread_mentor)
 	if(!check_author())
 		return
@@ -452,7 +450,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 /*
  * Misc.
  */
-
 /datum/mentorhelp/proc/reopen()
 	if(!check_author())
 		return
@@ -626,7 +623,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 /*
  * Autoresponse
  */
-
 /datum/mentorhelp/proc/autoresponse(client/responder)
 	if(!check_author())
 		return
@@ -669,7 +665,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 
 	message_handlers(msg, responder, author)
 
-
 /proc/message_mentors(message)
 	for(var/client/mentor in GLOB.clients)
 		if(is_mentor(mentor))
@@ -680,7 +675,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	if(!id)
 		return null
 	return GLOB.mentorhelp_manager.get_ticket_by_id(id)
-
 
 /datum/mentorhelp/proc/set_subject(new_subject, client/responder)
 	if(!is_mentor(responder))

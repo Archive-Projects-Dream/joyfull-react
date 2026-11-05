@@ -171,8 +171,6 @@
 				SSadmin_verbs.dynamic_invoke_verb(usr, /datum/admin_verb/options_panel, target_mob)
 			return TRUE
 
-/// Build the ckey dropdown. Cached for 5 seconds (50 ticks) so opening
-/// the dropdown doesn't iterate every persistent_client on every render.
 /datum/log_viewer/proc/get_all_logged_ckeys()
 	if(cached_ckeys && last_ckey_cache + 50 > world.time)
 		return cached_ckeys

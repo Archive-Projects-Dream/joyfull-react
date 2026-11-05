@@ -10,7 +10,7 @@
 	logger.Log(LOG_CATEGORY_SILICON, text, data)
 
 
-/// Logs a message in a mob's individual log, and in the global logs as well if log_globally is true. target — optional atom stored for LogViewer filtering.
+/// Logs a message in a mob's individual log, and in the global logs as well if log_globally is true
 /mob/log_message(message, message_type, color = null, log_globally = TRUE, list/data, atom/target = null) // [HORIZON-EDIT] ADMIN-TICKETS
 	if(!LAZYLEN(message))
 		stack_trace("Empty message")
@@ -88,4 +88,4 @@
 		persistent_client.logging[smessage_type] += list(entry)
 
 	..(message, message_type, color, log_globally, data)
-// [HORIZON-EDIT] ADMIN-TICKETS
+// [/HORIZON-EDIT]

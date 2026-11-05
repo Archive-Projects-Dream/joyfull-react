@@ -242,9 +242,6 @@
 
 				MH.close(C)
 			else
-				// [HORIZON-EDIT] ADMIN-TICKETS: the initiator can
-				// close their own admin ticket too, mirroring
-				// mentor ticket behaviour
 				var/datum/admin_help/AH = get_own_ticket(C, ticket_id)
 				if(!istype(AH) || AH.state != AHELP_ACTIVE)
 					return FALSE

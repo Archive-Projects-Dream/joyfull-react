@@ -413,7 +413,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		player_interactions += "[server_timestamp()]: [formatted_message]"
 	if(plain_text)
 		latest_message = plain_text
-	defer_ticket_panel_update() // [HORIZON-ADD] ADMIN-TICKETS
+	defer_ticket_panel_update()
 
 //Removes the ahelp verb and returns it after 2 minutes
 /datum/admin_help/proc/TimeoutVerb()

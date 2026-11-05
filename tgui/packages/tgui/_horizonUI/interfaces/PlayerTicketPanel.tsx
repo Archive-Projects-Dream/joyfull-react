@@ -41,9 +41,9 @@ const TicketTypeLabelColors: Record<string, string> = {
 };
 
 const StatusColors: Record<string, string> = {
-  open: 'bad',
-  claimed: 'good',
-  resolved: 'good',
+  open: 'good',
+  claimed: 'average',
+  resolved: 'bad',
   closed: 'label',
 };
 
@@ -119,7 +119,7 @@ export const PlayerTicketPanel = (props) => {
 
   return (
     <Window
-      title="Ticket Panel"
+      title="Player Ticket Panel"
       theme="horizon"
       width={720}
       height={780}
