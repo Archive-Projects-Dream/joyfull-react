@@ -230,7 +230,7 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 			if(!is_staff(receiver))
 				if(author_key)
 					msg_to_send = replacetext(msg_to_send, author_key, get_author_ic_name())
-			var/displaymsg = "[span_mentorhelp("<span class='prefix'>MENTOR LOG:</span> <span class='message'>[msg_to_send]</span>")]"
+			var/displaymsg = "[span_admin("<span class='prefix'>MENTOR LOG:</span> <span class='message'>[msg_to_send]</span>")]"
 			to_chat(receiver, displaymsg, type = MESSAGE_TYPE_MENTORPM, confidential = TRUE)
 
 	if(!to_mentors)

@@ -276,7 +276,7 @@
 			var/datum/mentorhelp/MH = GLOB.mentorhelp_manager.create_ticket(target, msg)
 			if(!MH)
 				return FALSE
-			MH.notify(span_mentorhelp("[MH.get_display_name(null, current_client)] started a mentor conversation with [MH.get_display_name(current_client, target)]"),
+			MH.notify("[span_green(MH.get_display_name(null, current_client))] started a mentor conversation with [span_red(MH.get_display_name(current_client, target))]",
 				unformatted_text = "[MH.get_display_name(null, parent_client)] started a mentor conversation with [MH.get_display_name(current_client, target)]")
 			MH.initial_message = msg
 			MH.mark(parent_client)
