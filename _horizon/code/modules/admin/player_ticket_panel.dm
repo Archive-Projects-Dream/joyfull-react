@@ -1,19 +1,3 @@
-/**
- * # Player Ticket Panel
- *
- * Player-facing TGUI chat with staff about the viewing player's own ticket.
- * Simplified single-conversation view of the staff Ticket Panel design:
- *
- * - No ticket list sidebar: the panel always shows the single most relevant
- *   ticket of the selected type (the open one, else the newest archived
- *   one); a header toggle switches to the player's other ticket type.
- * - Ticket ids are never displayed to the player (they would leak the
- *   round-wide ticket count); ids only flow through act params for routing.
- * - Only the viewing player's own tickets are ever formatted or reachable
- *   through ui_act, so other players' tickets stay invisible.
- * - The player can close their own open ticket (admin or mentor) from the
- *   panel, mirroring the mentorhelp close behaviour.
- */
 /datum/player_ticket_panel
 	var/selected_tab = "admin"
 	var/selected_ticket = null
@@ -28,8 +12,6 @@
 /datum/player_ticket_panel/ui_state(mob/user)
 	return GLOB.always_state
 
-/// Author display name for the player's view of a ticket log entry.
-/// The player's own messages show as "You" instead of their ckey.
 /datum/player_ticket_panel/proc/format_response_author(client/viewer, author)
 	if(!istext(author) || author == "System")
 		return "System"
@@ -37,7 +19,6 @@
 		return "You"
 	return author
 
-/// Formats one of the player's own adminhelp tickets for them.
 /datum/player_ticket_panel/proc/format_player_adminhelp_ticket(datum/admin_help/AH, client/viewer)
 	var/status = AH.state == AHELP_ACTIVE ? "open" : AH.state == AHELP_RESOLVED ? "resolved" : "closed"
 
@@ -60,7 +41,6 @@
 		"is_archived" = (AH.state != AHELP_ACTIVE),
 	)
 
-/// Formats one of the player's own mentorhelp tickets for them.
 /datum/player_ticket_panel/proc/format_player_mentorhelp_ticket(datum/mentorhelp/MH, client/viewer)
 	if(!viewer)
 		viewer = usr.client
@@ -72,14 +52,7 @@
 		var/list/interaction = MH.ticket_interactions[key]
 		var/list/stripped = interaction.Copy()
 		stripped["message"] = strip_pm_prefix(stripped["message"])
-
-		var/author_name = stripped["author"]
-		if(!istext(author_name) || author_name == "System")
-			stripped["author"] = "System"
-		else if(ckey(author_name) == ckey(MH.author_key))
-			stripped["author"] = "You"
-		else
-			stripped["author"] = MH.get_display_name(viewer, author_name)
+		stripped["author"] = format_response_author(viewer, stripped["author"])
 		formatted_responses += list(stripped)
 
 	return list(
@@ -88,12 +61,11 @@
 		"status" = status,
 		"timestamp" = MH.time_activity["opened_at"],
 		"closed_at" = MH.time_activity["closed_at"],
-		"claimed_by" = MH.mentor ? MH.get_display_name(viewer, MH.mentor) : null,
+		"claimed_by" = MH.mentor ? MH.mentor.ckey : null,
 		"all_responses" = formatted_responses,
 		"is_archived" = !MH.open,
 	)
 
-/// Whether the player has any own tickets of the given type, open or archived.
 /datum/player_ticket_panel/proc/has_own_tickets(client/C, tab)
 	if(!C)
 		return FALSE
@@ -106,8 +78,6 @@
 				return TRUE
 	return FALSE
 
-/// Selects the most relevant own ticket for the current selected_tab: the
-/// open one first, then the newest archived one, or null if there is none.
 /datum/player_ticket_panel/proc/pick_best_ticket(client/C)
 	if(!C)
 		return
@@ -133,13 +103,31 @@
 			last_mentor = MH
 	selected_ticket = last_mentor?.id
 
+/datum/player_ticket_panel/proc/get_own_ticket_history(client/C)
+	var/list/history = list()
+	if(!C)
+		return history
+
+	for(var/datum/admin_help/AH in GLOB.ahelp_tickets.TicketsByCKey(C.ckey))
+		history += list(list("tab" = "admin", "id" = AH.id, "opened_at" = AH.opened_at))
+
+	for(var/list/mhelp_list in list(GLOB.mentorhelp_manager.active_tickets, GLOB.mentorhelp_manager.archived_tickets))
+		for(var/id in mhelp_list)
+			var/datum/mentorhelp/MH = mhelp_list[id]
+			if(istype(MH) && ckey(MH.author_key) == C.ckey)
+				history += list(list("tab" = "mentor", "id" = MH.id, "opened_at" = MH.opened_at))
+
+	sortTim(history, GLOBAL_PROC_REF(cmp_player_ticket_history_asc))
+	return history
+
+/proc/cmp_player_ticket_history_asc(list/a, list/b)
+	return a["opened_at"] - b["opened_at"]
+
 /datum/player_ticket_panel/ui_data(mob/user)
 	var/client/C = user?.client
 	if(!C)
 		return
 
-	// Keep the selection valid: if the selected ticket vanished (round end,
-	// cleanup), fall back to the most relevant ticket for this tab.
 	if(isnull(selected_ticket) || !get_own_ticket(C, selected_ticket))
 		pick_best_ticket(C)
 
@@ -161,10 +149,18 @@
 			if(MH)
 				data["selected_ticket"] = format_player_mentorhelp_ticket(MH, C)
 
+	var/list/ticket_history = get_own_ticket_history(C)
+	var/history_index = 0
+	for(var/i in 1 to length(ticket_history))
+		var/list/entry = ticket_history[i]
+		if(entry["tab"] == selected_tab && entry["id"] == selected_ticket)
+			history_index = i
+			break
+	data["ticket_history_count"] = length(ticket_history)
+	data["ticket_history_index"] = history_index
+
 	return data
 
-/// Resolves one of the player's own tickets by id (scoped to the selected
-/// tab), or null. Never trust ticket ids coming from ui_act params.
 /datum/player_ticket_panel/proc/get_own_ticket(client/C, ticket_id)
 	if(!C || !ticket_id)
 		return null
@@ -193,10 +189,31 @@
 			if(tab != "admin" && tab != "mentor")
 				return FALSE
 			selected_tab = tab
-			// Simplified window with no ticket list: switching the type
-			// jumps straight to that type's most relevant own ticket.
 			selected_ticket = null
 			pick_best_ticket(C)
+			return TRUE
+
+		if("cycle_ticket")
+			var/direction = text2num(params["direction"])
+			if(!direction)
+				return FALSE
+			var/list/history = get_own_ticket_history(C)
+			if(length(history) < 2)
+				return FALSE
+			var/current_index = 0
+			for(var/i in 1 to length(history))
+				var/list/entry = history[i]
+				if(entry["tab"] == selected_tab && entry["id"] == selected_ticket)
+					current_index = i
+					break
+			if(!current_index)
+				return FALSE
+			var/new_index = clamp(current_index + (direction > 0 ? 1 : -1), 1, length(history))
+			if(new_index == current_index)
+				return FALSE
+			var/list/new_entry = history[new_index]
+			selected_tab = new_entry["tab"]
+			selected_ticket = new_entry["id"]
 			return TRUE
 
 		if("new_ticket")
@@ -258,10 +275,6 @@
 		ui.set_autoupdate(TRUE)
 		ui.open()
 
-/// Opens the panel for a client, showing their most relevant ticket: the
-/// open admin ticket, then the open mentorhelp thread, then the newest
-/// archived ticket (admin first). Mirrors the legacy view_latest_ticket
-/// fallback chain and the F1 redirect behavior.
 /datum/player_ticket_panel/proc/open_for(client/C)
 	if(!C)
 		return
@@ -293,4 +306,3 @@
 
 	if(C.mob)
 		ui_interact(C.mob)
-// [/HORIZON-ADD]

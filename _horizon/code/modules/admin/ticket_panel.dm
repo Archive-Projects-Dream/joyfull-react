@@ -101,7 +101,7 @@
 		var/list/interaction = MH.ticket_interactions[key]
 		var/list/filtered_interaction = interaction.Copy()
 
-		filtered_interaction["author"] = MH.get_display_name(viewer, interaction["author"])
+		filtered_interaction["author"] = interaction["author"]
 
 		if(viewer && !is_staff(viewer))
 			if(MH.author_key && filtered_interaction["message"])

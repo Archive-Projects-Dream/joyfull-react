@@ -199,7 +199,7 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 		var/html_message = "[server_timestamp()]: [html_msg]"
 		var/list/structured_data = list(
 			"timestamp" = round_timestamp(),
-			"author" = from_key || "System",
+			"author" = from_key ? ckey(from_key) : "System",
 			"message" = html_encode(plain_text),
 			"html_message" = html_msg,
 			"type" = message_type,
