@@ -101,7 +101,8 @@
 		var/list/interaction = MH.ticket_interactions[key]
 		var/list/filtered_interaction = interaction.Copy()
 
-		filtered_interaction["author"] = MH.get_display_name(viewer, interaction["author"])
+		// [HORIZON-EDIT] ADMIN-TICKETS: raw stored author (ckey), same as admin tickets
+		filtered_interaction["author"] = interaction["author"]
 
 		if(viewer && !is_staff(viewer))
 			if(MH.author_key && filtered_interaction["message"])

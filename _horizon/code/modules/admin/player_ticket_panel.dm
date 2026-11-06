@@ -73,13 +73,9 @@
 		var/list/stripped = interaction.Copy()
 		stripped["message"] = strip_pm_prefix(stripped["message"])
 
-		var/author_name = stripped["author"]
-		if(!istext(author_name) || author_name == "System")
-			stripped["author"] = "System"
-		else if(ckey(author_name) == ckey(MH.author_key))
-			stripped["author"] = "You"
-		else
-			stripped["author"] = MH.get_display_name(viewer, author_name)
+		// [HORIZON-EDIT] ADMIN-TICKETS: same author formatting as admin tickets
+		// ("System", "You" for the player's own messages, else raw ckey)
+		stripped["author"] = format_response_author(viewer, stripped["author"])
 		formatted_responses += list(stripped)
 
 	return list(
@@ -88,7 +84,7 @@
 		"status" = status,
 		"timestamp" = MH.time_activity["opened_at"],
 		"closed_at" = MH.time_activity["closed_at"],
-		"claimed_by" = MH.mentor ? MH.get_display_name(viewer, MH.mentor) : null,
+		"claimed_by" = MH.mentor ? MH.mentor.ckey : null,
 		"all_responses" = formatted_responses,
 		"is_archived" = !MH.open,
 	)
@@ -133,6 +129,28 @@
 			last_mentor = MH
 	selected_ticket = last_mentor?.id
 
+/// The player's own tickets this round (admin and mentor together), ordered
+/// oldest-first by creation time so the panel arrows can walk the history.
+/datum/player_ticket_panel/proc/get_own_ticket_history(client/C)
+	var/list/history = list()
+	if(!C)
+		return history
+
+	for(var/datum/admin_help/AH in GLOB.ahelp_tickets.TicketsByCKey(C.ckey))
+		history += list(list("tab" = "admin", "id" = AH.id, "opened_at" = AH.opened_at))
+
+	for(var/list/mhelp_list in list(GLOB.mentorhelp_manager.active_tickets, GLOB.mentorhelp_manager.archived_tickets))
+		for(var/id in mhelp_list)
+			var/datum/mentorhelp/MH = mhelp_list[id]
+			if(istype(MH) && ckey(MH.author_key) == C.ckey)
+				history += list(list("tab" = "mentor", "id" = MH.id, "opened_at" = MH.opened_at))
+
+	sortTim(history, GLOBAL_PROC_REF(cmp_player_ticket_history_asc))
+	return history
+
+/proc/cmp_player_ticket_history_asc(list/a, list/b)
+	return a["opened_at"] - b["opened_at"]
+
 /datum/player_ticket_panel/ui_data(mob/user)
 	var/client/C = user?.client
 	if(!C)
@@ -160,6 +178,17 @@
 			var/datum/mentorhelp/MH = own_ticket
 			if(MH)
 				data["selected_ticket"] = format_player_mentorhelp_ticket(MH, C)
+
+	// Own-ticket history for this round, used by the navigation arrows
+	var/list/ticket_history = get_own_ticket_history(C)
+	var/history_index = 0
+	for(var/i in 1 to length(ticket_history))
+		var/list/entry = ticket_history[i]
+		if(entry["tab"] == selected_tab && entry["id"] == selected_ticket)
+			history_index = i
+			break
+	data["ticket_history_count"] = length(ticket_history)
+	data["ticket_history_index"] = history_index
 
 	return data
 
@@ -197,6 +226,29 @@
 			// jumps straight to that type's most relevant own ticket.
 			selected_ticket = null
 			pick_best_ticket(C)
+			return TRUE
+
+		if("cycle_ticket")
+			var/direction = text2num(params["direction"])
+			if(!direction)
+				return FALSE
+			var/list/history = get_own_ticket_history(C)
+			if(length(history) < 2)
+				return FALSE
+			var/current_index = 0
+			for(var/i in 1 to length(history))
+				var/list/entry = history[i]
+				if(entry["tab"] == selected_tab && entry["id"] == selected_ticket)
+					current_index = i
+					break
+			if(!current_index)
+				return FALSE
+			var/new_index = clamp(current_index + (direction > 0 ? 1 : -1), 1, length(history))
+			if(new_index == current_index)
+				return FALSE
+			var/list/new_entry = history[new_index]
+			selected_tab = new_entry["tab"]
+			selected_ticket = new_entry["id"]
 			return TRUE
 
 		if("new_ticket")

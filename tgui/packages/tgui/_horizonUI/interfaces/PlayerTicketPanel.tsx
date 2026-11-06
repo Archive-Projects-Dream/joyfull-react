@@ -29,6 +29,8 @@ type Data = {
   has_admin_tickets: BooleanLike;
   has_mentor_tickets: BooleanLike;
   selected_ticket: PlayerTicket | null;
+  ticket_history_count?: number;
+  ticket_history_index?: number;
 };
 
 const TicketTypeBorders: Record<string, string> = {
@@ -104,6 +106,9 @@ export const PlayerTicketPanel = (props) => {
     ? hasMentorTickets
     : hasAdminTickets;
 
+  const historyCount = data.ticket_history_count ?? 0;
+  const historyIndex = data.ticket_history_index ?? 0;
+
   const responses = selected_ticket?.all_responses ?? [];
   const isArchived = !!selected_ticket?.is_archived;
 
@@ -131,6 +136,22 @@ export const PlayerTicketPanel = (props) => {
       height={780}
       buttons={
         <>
+          {historyCount > 1 && (
+            <>
+              <Button
+                icon="chevron-left"
+                tooltip={`Previous ticket this round (${historyIndex} of ${historyCount})`}
+                disabled={historyIndex <= 1}
+                onClick={() => act('cycle_ticket', { direction: -1 })}
+              />
+              <Button
+                icon="chevron-right"
+                tooltip={`Next ticket this round (${historyIndex} of ${historyCount})`}
+                disabled={historyIndex === 0 || historyIndex >= historyCount}
+                onClick={() => act('cycle_ticket', { direction: 1 })}
+              />
+            </>
+          )}
           <Button
             icon="comment"
             color="good"
