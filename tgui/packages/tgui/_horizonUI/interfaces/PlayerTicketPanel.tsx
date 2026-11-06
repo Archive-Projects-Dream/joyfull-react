@@ -4,6 +4,7 @@ import { useBackend } from '../../backend';
 import { Window } from '../../layouts';
 import { Box, Button, Section, Stack, TextArea } from 'tgui-core/components';
 import type { BooleanLike } from 'tgui-core/react';
+import { useStickToBottom } from '../hooks/useStickToBottom';
 
 type TicketResponse = {
   timestamp: string;
@@ -105,6 +106,11 @@ export const PlayerTicketPanel = (props) => {
 
   const responses = selected_ticket?.all_responses ?? [];
   const isArchived = !!selected_ticket?.is_archived;
+
+  const {
+    ref: conversationRef,
+    onScroll: onConversationScroll,
+  } = useStickToBottom(selectedTicketId, responses.length);
 
   const sendReply = () => {
     if (!replyText.trim() || !selected_ticket) {
@@ -209,6 +215,8 @@ export const PlayerTicketPanel = (props) => {
                 fill
                 scrollable
                 title="Conversation"
+                ref={conversationRef}
+                onScroll={onConversationScroll}
                 buttons={
                   <Stack>
                     <Stack.Item>

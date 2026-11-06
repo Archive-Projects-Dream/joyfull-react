@@ -11,6 +11,7 @@ import {
   Stack,
   Tabs,
 } from 'tgui-core/components';
+import { useStickToBottom } from '../hooks/useStickToBottom';
 
 type TicketResponse = {
   timestamp: string;
@@ -106,6 +107,15 @@ export const TicketPanel = (props) => {
   const tickets = [...openTickets, ...archivedTickets];
   const selectedTicketData = tickets.find(
     (ticket) => ticket.id === data.selected_ticket,
+  );
+
+  const conversationResponses = selectedTicketData?.all_responses ?? [];
+  const {
+    ref: conversationRef,
+    onScroll: onConversationScroll,
+  } = useStickToBottom(
+    selectedTicketData?.id ?? null,
+    conversationResponses.length,
   );
 
   return (
@@ -708,7 +718,8 @@ export const TicketPanel = (props) => {
                                 fill
                                 scrollable
                                 title="Conversation Log"
-                                key={`ticket-${selectedTicketData.id}-${selectedTicketData.all_responses?.length ?? 0}`}
+                                ref={conversationRef}
+                                onScroll={onConversationScroll}
                               >
                                 <Box
                                   mt={2}
