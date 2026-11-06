@@ -176,41 +176,49 @@ const RecipientSelectionModal = (props: {
   const { onSelect } = props;
 
   return (
-    <Modal>
+    <Modal style={{border: '0.5em solid hsl(0, 0%, 20%)'}}>
       <Stack vertical width={32} textAlign="center">
         <Stack.Item>
           <Box bold color="label" fontSize="1.2em">
             Who do you need help from?
           </Box>
         </Stack.Item>
-        <Stack.Item color="label">
-          Admins handle rule violations and other out-of-character problems.
-        </Stack.Item>
-        <Stack.Item color="label">
-          Mentors answer questions about game mechanics and the round.
-        </Stack.Item>
         <Stack.Item>
           <Stack mt={1}>
             <Stack.Item grow>
-              <Button
-                fluid
-                icon="gavel"
-                color="bad"
-                style={{ border: RecipientBorders.admin }}
-                onClick={() => onSelect('admin')}
-              >
-                Admin Help
-              </Button>
+              <Stack vertical>
+                <Stack.Item color="label">
+                  Admins handle rule violations and other out-of-character problems.
+                </Stack.Item>
+                <Stack.Item>
+                  <Button
+                    fluid
+                    icon="gavel"
+                    color="bad"
+                    style={{ border: RecipientBorders.admin }}
+                    onClick={() => onSelect('admin')}
+                  >
+                    Admin Help
+                  </Button>
+                </Stack.Item>
+              </Stack>
             </Stack.Item>
             <Stack.Item grow>
-              <Button
-                fluid
-                icon="user-graduate"
-                style={{ border: RecipientBorders.mentor }}
-                onClick={() => onSelect('mentor')}
-              >
-                Mentor Help
-              </Button>
+              <Stack vertical>
+                <Stack.Item color="label">
+                  Mentors answer questions about game mechanics and the round.
+                </Stack.Item>
+                <Stack.Item>
+                  <Button
+                    fluid
+                    icon="user-graduate"
+                    style={{ border: RecipientBorders.mentor }}
+                    onClick={() => onSelect('mentor')}
+                  >
+                    Mentor Help
+                  </Button>
+                </Stack.Item>
+              </Stack>
             </Stack.Item>
           </Stack>
         </Stack.Item>
