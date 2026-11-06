@@ -24,13 +24,20 @@ type PlayerTicket = {
   is_archived: BooleanLike;
 };
 
+// One of the player's own tickets this round, oldest-first. The server
+// always sends the full list; the current position is derived from it.
+type TicketHistoryEntry = {
+  tab: 'admin' | 'mentor';
+  id: number;
+  opened_at: number;
+};
+
 type Data = {
   selected_tab: string;
   has_admin_tickets: BooleanLike;
   has_mentor_tickets: BooleanLike;
   selected_ticket: PlayerTicket | null;
-  ticket_history_count?: number;
-  ticket_history_index?: number;
+  ticket_history: TicketHistoryEntry[];
 };
 
 const TicketTypeBorders: Record<string, string> = {
@@ -106,8 +113,10 @@ export const PlayerTicketPanel = (props) => {
     ? hasMentorTickets
     : hasAdminTickets;
 
-  const historyCount = data.ticket_history_count ?? 0;
-  const historyIndex = data.ticket_history_index ?? 0;
+  const historyCount = data.ticket_history.length;
+  const historyIndex = data.ticket_history.findIndex(
+    (entry) => entry.tab === selected_tab && entry.id === selectedTicketId,
+  );
 
   const responses = selected_ticket?.all_responses ?? [];
   const isArchived = !!selected_ticket?.is_archived;
@@ -140,14 +149,14 @@ export const PlayerTicketPanel = (props) => {
             <>
               <Button
                 icon="chevron-left"
-                tooltip={`Previous ticket this round (${historyIndex} of ${historyCount})`}
-                disabled={historyIndex <= 1}
+                tooltip={`Previous ticket this round (${historyIndex + 1} of ${historyCount})`}
+                disabled={historyIndex <= 0}
                 onClick={() => act('cycle_ticket', { direction: -1 })}
               />
               <Button
                 icon="chevron-right"
-                tooltip={`Next ticket this round (${historyIndex} of ${historyCount})`}
-                disabled={historyIndex === 0 || historyIndex >= historyCount}
+                tooltip={`Next ticket this round (${historyIndex + 1} of ${historyCount})`}
+                disabled={historyIndex < 0 || historyIndex >= historyCount - 1}
                 onClick={() => act('cycle_ticket', { direction: 1 })}
               />
             </>
