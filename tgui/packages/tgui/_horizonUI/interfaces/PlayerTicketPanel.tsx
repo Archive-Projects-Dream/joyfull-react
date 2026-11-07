@@ -1,5 +1,5 @@
 import { decodeHtmlEntities } from 'tgui-core/string';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useBackend } from '../../backend';
 import { Window } from '../../layouts';
 import { Box, Button, Section, Stack, TextArea } from 'tgui-core/components';
@@ -24,13 +24,18 @@ type PlayerTicket = {
   is_archived: BooleanLike;
 };
 
+type TicketHistoryEntry = {
+  tab: 'admin' | 'mentor';
+  id: number;
+  opened_at: number;
+};
+
 type Data = {
   selected_tab: string;
   has_admin_tickets: BooleanLike;
   has_mentor_tickets: BooleanLike;
   selected_ticket: PlayerTicket | null;
-  ticket_history_count?: number;
-  ticket_history_index?: number;
+  ticket_history: TicketHistoryEntry[];
 };
 
 const TicketTypeBorders: Record<string, string> = {
@@ -49,6 +54,11 @@ const StatusColors: Record<string, string> = {
   resolved: 'bad',
   closed: 'label',
 };
+
+// The reply box starts as a single compact line and only grows a little
+// when the text no longer fits, up to a modest cap.
+const REPLY_MIN_HEIGHT = 32;
+const REPLY_MAX_HEIGHT = 76;
 
 const responseTypeColor = (type: string) => {
   if (type === 'admin') {
@@ -96,6 +106,25 @@ export const PlayerTicketPanel = (props) => {
   const [replyText, setReplyText] = useState('');
   const selectedTicketId = selected_ticket?.id;
 
+  // Keeps the reply box minimal: it only grows while the text overflows
+  // and never beyond a few lines.
+  const replyRef = useRef<HTMLTextAreaElement | null>(null);
+  const fitReplyHeight = () => {
+    const el = replyRef.current;
+    if (!el) {
+      return;
+    }
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(
+      Math.max(el.scrollHeight + 2, REPLY_MIN_HEIGHT),
+      REPLY_MAX_HEIGHT,
+    )}px`;
+  };
+
+  useEffect(() => {
+    fitReplyHeight();
+  }, [replyText, fontSize]);
+
   useEffect(() => {
     setReplyText('');
   }, [selectedTicketId]);
@@ -106,8 +135,10 @@ export const PlayerTicketPanel = (props) => {
     ? hasMentorTickets
     : hasAdminTickets;
 
-  const historyCount = data.ticket_history_count ?? 0;
-  const historyIndex = data.ticket_history_index ?? 0;
+  const historyCount = data.ticket_history.length;
+  const historyIndex = data.ticket_history.findIndex(
+    (entry) => entry.tab === selected_tab && entry.id === selectedTicketId,
+  );
 
   const responses = selected_ticket?.all_responses ?? [];
   const isArchived = !!selected_ticket?.is_archived;
@@ -140,14 +171,14 @@ export const PlayerTicketPanel = (props) => {
             <>
               <Button
                 icon="chevron-left"
-                tooltip={`Previous ticket this round (${historyIndex} of ${historyCount})`}
-                disabled={historyIndex <= 1}
+                tooltip={`Previous ticket this round (${historyIndex + 1} of ${historyCount})`}
+                disabled={historyIndex <= 0}
                 onClick={() => act('cycle_ticket', { direction: -1 })}
               />
               <Button
                 icon="chevron-right"
-                tooltip={`Next ticket this round (${historyIndex} of ${historyCount})`}
-                disabled={historyIndex === 0 || historyIndex >= historyCount}
+                tooltip={`Next ticket this round (${historyIndex + 1} of ${historyCount})`}
+                disabled={historyIndex < 0 || historyIndex >= historyCount - 1}
                 onClick={() => act('cycle_ticket', { direction: 1 })}
               />
             </>
@@ -315,8 +346,8 @@ export const PlayerTicketPanel = (props) => {
                 <Stack vertical>
                   <Stack.Item>
                     <TextArea
+                      ref={replyRef}
                       backgroundColor="black"
-                      height="72px"
                       fluid
                       value={replyText}
                       placeholder={
@@ -325,7 +356,10 @@ export const PlayerTicketPanel = (props) => {
                           : 'Reply to the mentors handling this ticket...'
                       }
                       onChange={setReplyText}
-                      style={{ border: TicketTypeBorders[selected_tab] }}
+                      style={{
+                        height: REPLY_MIN_HEIGHT,
+                        border: TicketTypeBorders[selected_tab],
+                      }}
                     />
                   </Stack.Item>
                   <Stack.Item>

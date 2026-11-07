@@ -252,11 +252,9 @@ GAME_VERB_HIDDEN(/client, reset_held_keys_verb, "Reset Held Keys")
 			client?.prefs.update_static_data(client?.mob)
 			client?.prefs.ui_interact(client?.mob)
 		if("create_ticket")
-			if(!(/client/verb/adminhelp in client?.verbs))
-				return TRUE
 			client?.adminhelp()
 		if("view_ticket")
-			client?.view_latest_ticket()
+			client?.open_player_ticket_panel()
 		// [HORIZON-ADD] ADMIN-TICKETS
 		if("open_ticket_panel")
 			if(!is_mentor(client) && !is_staff(client))

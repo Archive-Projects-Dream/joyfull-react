@@ -14,7 +14,7 @@
 	. = ..()
 	if(.)
 		return
-	user.adminhelp()
+	user.adminhelp_entry()
 	return TRUE
 
 

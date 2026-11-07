@@ -1,5 +1,3 @@
-/// Client var used for returning the ahelp verb
-/client/var/adminhelptimerid = 0
 /// Client var used for tracking the ticket the (usually) not-admin client is dealing with
 /client/var/datum/admin_help/current_ticket
 
@@ -249,8 +247,6 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		initiator.current_ticket.Close()
 	initiator.current_ticket = src
 
-	TimeoutVerb()
-
 	statclick = new(null, src)
 	ticket_interactions = list()
 	player_interactions = list()
@@ -414,11 +410,6 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	if(plain_text)
 		latest_message = plain_text
 	defer_ticket_panel_update()
-
-//Removes the ahelp verb and returns it after 2 minutes
-/datum/admin_help/proc/TimeoutVerb()
-	remove_verb(initiator, /client/verb/adminhelp)
-	initiator.adminhelptimerid = addtimer(CALLBACK(initiator, TYPE_PROC_REF(/client, giveadminhelpverb)), 1200, TIMER_STOPPABLE) //2 minute cooldown of admin helps
 
 //private
 /datum/admin_help/proc/FullMonty(ref_src)
@@ -613,11 +604,9 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	state = AHELP_RESOLVED
 	GLOB.ahelp_tickets.ListInsert(src)
 
-	addtimer(CALLBACK(initiator, TYPE_PROC_REF(/client, giveadminhelpverb)), 5 SECONDS)
-
 	AddInteraction(span_green("Resolved by [key_name]."),
 	plain_message = "Resolved by [usr.key]", message_type = "system")
-	to_chat(initiator, span_adminhelp("Your ticket has been resolved by an admin. The Adminhelp verb will be returned to you shortly."), confidential = TRUE)
+	to_chat(initiator, span_adminhelp("Your ticket has been resolved by an admin. You may open a new one at any time."), confidential = TRUE)
 	if(!silent)
 		SSblackbox.record_feedback("tally", "ahelp_stats", 1, "resolved")
 		var/msg = "Ticket [TicketHref("#[id]")] resolved by [key_name]"
@@ -636,12 +625,10 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		return
 
 	if(initiator)
-		initiator.giveadminhelpverb()
-
 		SEND_SOUND(initiator, sound('_horizon/sound/adminhelp-error.ogg')) // [HORIZON-EDIT] ADMIN-TICKETS
 
 		to_chat(initiator, span_boldwarning("- AdminHelp Rejected! -"), confidential = TRUE)
-		to_chat(initiator, span_warning("<b>Your admin help was rejected.</b> The adminhelp verb has been returned to you so that you may try again."), confidential = TRUE)
+		to_chat(initiator, span_warning("<b>Your admin help was rejected.</b> You may try again right away."), confidential = TRUE)
 		to_chat(initiator, "Please try to be calm, clear, and descriptive in admin helps, do not assume the admin has seen any related events, and clearly state the names of anybody you are reporting.", confidential = TRUE)
 
 	SSblackbox.record_feedback("tally", "ahelp_stats", 1, "rejected")
@@ -977,11 +964,6 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 // CLIENT PROCS
 //
 
-/client/proc/giveadminhelpverb()
-	add_verb(src, /client/verb/adminhelp)
-	deltimer(adminhelptimerid)
-	adminhelptimerid = 0
-
 GLOBAL_DATUM_INIT(admin_help_ui_handler, /datum/admin_help_ui_handler, new)
 
 /datum/admin_help_ui_handler
@@ -1029,9 +1011,6 @@ GLOBAL_DATUM_INIT(admin_help_ui_handler, /datum/admin_help_ui_handler, new)
 	if(length(admins["present"]) != 0 || is_banned_from(user_client.ckey, "Urgent Adminhelp"))
 		urgent = FALSE
 
-	if(user_client.adminhelptimerid)
-		return
-
 	perform_adminhelp(user_client, message, urgent)
 	ui.close()
 
@@ -1059,7 +1038,6 @@ GLOBAL_DATUM_INIT(admin_help_ui_handler, /datum/admin_help_ui_handler, new)
 			COOLDOWN_START(src, ahelp_cooldowns[user_client.ckey], CONFIG_GET(number/urgent_ahelp_cooldown) * (1 SECONDS))
 
 	if(user_client.current_ticket)
-		user_client.current_ticket.TimeoutVerb()
 		if(urgent)
 			var/sanitized_message = sanitize(copytext_char(message, 1, MAX_MESSAGE_LEN))
 			user_client.current_ticket.send_message_to_tgs(sanitized_message, urgent = TRUE)
@@ -1099,33 +1077,34 @@ GLOBAL_DATUM_INIT(admin_help_ui_handler, /datum/admin_help_ui_handler, new)
 
 GAME_VERB_HIDDEN(/client, no_tgui_adminhelp, "NoTguiAdminhelp")
 	VERB_ARG(message, VERB_ARG_TYPE_MESSAGE, VERB_ARG_SOURCE_INPUT)
-	if(adminhelptimerid)
-		return
-
 	message = trim(message)
 
 	GLOB.admin_help_ui_handler.perform_adminhelp(src, message, FALSE)
 
 // [HORIZON-EDIT] ADMIN-TICKETS
-GAME_VERB(/client, adminhelp, "Adminhelp", "Admin")
+/client/proc/adminhelp_entry()
 	if(current_ticket || (current_mhelp && current_mhelp.open))
-		view_latest_ticket()
+		open_player_ticket_panel()
 		return
 	GLOB.admin_help_ui_handler.ui_interact(mob)
 	to_chat(src, span_boldnotice("Adminhelp failing to open or work? <a href='byond://?src=[REF(src)];tguiless_adminhelp=1'>Click here</a>"))
 
+GAME_VERB(/client, adminhelp, "Adminhelp", "Admin")
+	adminhelp_entry()
+
 GAME_VERB(/client, mentorhelp, "Mentorhelp", "Admin")
-	if(current_mhelp && current_mhelp.open)
-		view_latest_ticket()
-		return
-	GLOB.admin_help_ui_handler.ui_interact(mob)
+	adminhelp_entry()
 
 // Opens the TGUI player ticket panel listing the player's own tickets.
 GAME_VERB(/client, view_latest_ticket, "Ticket Panel", "Admin")
+	open_player_ticket_panel()
+	to_chat(src, span_boldnotice("Ticket panel failing to open or work? <a href='byond://?src=[REF(src)];tguiless_ticket_panel=1'>Click here</a>"))
+
+/// Opens player ticket panel.
+/client/proc/open_player_ticket_panel()
 	if(!player_ticket_panel)
 		player_ticket_panel = new /datum/player_ticket_panel()
 	player_ticket_panel.open_for(src)
-	to_chat(src, span_boldnotice("Ticket panel failing to open or work? <a href='byond://?src=[REF(src)];tguiless_ticket_panel=1'>Click here</a>"))
 
 /client/proc/legacy_player_ticket_panel()
 	if(current_ticket)

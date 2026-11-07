@@ -149,15 +149,7 @@
 			if(MH)
 				data["selected_ticket"] = format_player_mentorhelp_ticket(MH, C)
 
-	var/list/ticket_history = get_own_ticket_history(C)
-	var/history_index = 0
-	for(var/i in 1 to length(ticket_history))
-		var/list/entry = ticket_history[i]
-		if(entry["tab"] == selected_tab && entry["id"] == selected_ticket)
-			history_index = i
-			break
-	data["ticket_history_count"] = length(ticket_history)
-	data["ticket_history_index"] = history_index
+	data["ticket_history"] = get_own_ticket_history(C)
 
 	return data
 
