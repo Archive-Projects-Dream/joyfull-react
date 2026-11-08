@@ -6,7 +6,7 @@
 	pass_flags_self = PASSDOORS
 	smoothing_groups = SMOOTH_GROUP_AIRLOCK
 	armor_type = /datum/armor/machinery_door
-	disassembled_type = /obj/structure/hull_plating/airlock
+	disassembled_type = /obj/structure/disconnected_airlock
 	/// Animation timings matched to the "exterior" flick states in doors.dmi (5.2ds each way)
 	open_duration = 0.5 SECONDS
 	close_duration = 0.5 SECONDS
@@ -37,12 +37,18 @@
 	. = ..()
 	. += span_notice("You can cut this free with a welding tool of some kind.")
 
-/obj/structure/hull_plating/airlock
+/obj/structure/disconnected_airlock
 	name = "disconnected exterior airlock"
 	desc = "A manually operated airlock for the exteriors of ships, this one looks to be disconnected from the frame."
 	icon = '_horizon/code/modules/shipbreaking/icons/doors.dmi'
 	icon_state = "exterior_free"
+	density = TRUE
+	anchored = FALSE
 	armor_type = /datum/armor/machinery_door
+	drag_slowdown = 1.5
+	inertia_force_weight = 2
+	/// How much damage we do when we fall on or crash into someone
+	var/crush_damage = 40
 	custom_materials = list(
 		/datum/material/iron = SHEET_MATERIAL_AMOUNT * 4,
 		/datum/material/titanium = SHEET_MATERIAL_AMOUNT * 2.75,
@@ -50,8 +56,10 @@
 	/// What kind of thing do we make when welded back down
 	var/obj/reconnect_type = /obj/structure/mineral_door/manual_door/shuttle
 
-/obj/structure/hull_plating/airlock/Initialize(mapload)
+/obj/structure/disconnected_airlock/Initialize(mapload)
 	. = ..()
+	ADD_TRAIT(src, TRAIT_RECYCLE_LIKE_ITEM, TRAIT_GENERIC)
+	AddElement(/datum/element/falling_hazard, damage = crush_damage, wound_bonus = 20, hardhat_safety = FALSE, crushes = TRUE, impact_sound = 'sound/effects/bang.ogg')
 	var/static/list/tool_behaviors = list(
 		TOOL_WELDER = list(
 			SCREENTIP_CONTEXT_LMB = "Secure",
@@ -60,11 +68,11 @@
 	)
 	AddElement(/datum/element/contextual_screentip_tools, tool_behaviors)
 
-/obj/structure/hull_plating/airlock/examine(mob/user)
+/obj/structure/disconnected_airlock/examine(mob/user)
 	. = ..()
 	. += span_notice("You can secure this again with a welding tool of some kind.")
 
-/obj/structure/hull_plating/airlock/welder_act(mob/living/user, obj/item/tool)
+/obj/structure/disconnected_airlock/welder_act(mob/living/user, obj/item/tool)
 	if(!tool.get_temperature() >= FIRE_MINIMUM_TEMPERATURE_TO_EXIST)
 		return ITEM_INTERACT_FAILURE
 	balloon_alert(user, "securing...")
@@ -74,7 +82,7 @@
 	qdel(src)
 	return ITEM_INTERACT_SUCCESS
 
-/obj/structure/hull_plating/airlock/welder_act_secondary(mob/living/user, obj/item/tool)
+/obj/structure/disconnected_airlock/welder_act_secondary(mob/living/user, obj/item/tool)
 	if(!tool.get_temperature() >= FIRE_MINIMUM_TEMPERATURE_TO_EXIST)
 		return ITEM_INTERACT_FAILURE
 	balloon_alert(user, "destroying...")
@@ -83,7 +91,7 @@
 	deconstruct(TRUE)
 	return ITEM_INTERACT_SUCCESS
 
-/obj/structure/hull_plating/airlock/handle_deconstruct(disassembled)
+/obj/structure/disconnected_airlock/handle_deconstruct(disassembled)
 	. = ..()
 	new /obj/item/stack/sheet/iron(drop_location(), 4)
 	new /obj/item/stack/sheet/mineral/titanium(drop_location(), 2)
@@ -92,13 +100,13 @@
 	name = "manual interior airlock"
 	desc = "A manually operated airlock for the exteriors of ships, walkable and quicker to open than heavier airlocks."
 	icon_state = "interior"
-	disassembled_type = /obj/structure/hull_plating/airlock/interior
+	disassembled_type = /obj/structure/disconnected_airlock/interior
 	manual_actuation_delay = 0.25 SECONDS
 	/// Animation timings matched to the "interior" flick states in doors.dmi (4ds each way)
 	open_duration = 0.4 SECONDS
 	close_duration = 0.4 SECONDS
 
-/obj/structure/hull_plating/airlock/interior
+/obj/structure/disconnected_airlock/interior
 	name = "disconnected interior airlock"
 	desc = "A manually operated airlock for the interiors of ships, this one looks to be disconnected from the frame."
 	icon_state = "interior_free"
@@ -117,7 +125,7 @@
 	max_integrity = 150
 	armor_type = /datum/armor/machinery_door
 	/// What does this unweld into
-	var/obj/disassembled_type = /obj/structure/hull_plating/airlock/access_panel
+	var/obj/disassembled_type = /obj/structure/disconnected_airlock/access_panel
 
 /obj/structure/shuttle_access_panel/Initialize(mapload)
 	. = ..()
@@ -138,7 +146,7 @@
 	qdel(src)
 	return ITEM_INTERACT_SUCCESS
 
-/obj/structure/hull_plating/airlock/access_panel
+/obj/structure/disconnected_airlock/access_panel
 	name = "disconnected maintenance panel"
 	desc = "A maintenance panel used for access to crawlspaces and engines in ships, this one has been cut from the frame."
 	icon_state = "access_free"

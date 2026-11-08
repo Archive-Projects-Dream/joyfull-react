@@ -13,6 +13,8 @@
 	var/obj/structure/hull_plating/cut_plating = /obj/structure/hull_plating
 	/// Do we transfer our color to the cut_plating
 	var/keep_color = FALSE
+	/// Do we stamp our type and facing onto the cut plating, so it can be re-mounted
+	var/stamp_origin = TRUE
 
 /obj/structure/shuttle_decoration/wall_plate/Initialize(mapload)
 	. = ..()
@@ -29,9 +31,12 @@
 	balloon_alert(user, "cutting...")
 	if(!tool.use_tool(src, user, 4 SECONDS, amount = 1, volume=50))
 		return ITEM_INTERACT_BLOCKING
-	var/obj/new_plating = new cut_plating(get_turf(src))
+	var/obj/structure/hull_plating/new_plating = new cut_plating(get_turf(src))
 	if(keep_color)
 		new_plating.color = color
+	if(stamp_origin)
+		new_plating.reinstalls_decoration = type // remember what plate we came from...
+		new_plating.setDir(dir) // ...and which way we were facing
 	qdel(src)
 	return ITEM_INTERACT_SUCCESS
 

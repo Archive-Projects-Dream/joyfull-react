@@ -48,6 +48,13 @@
 		. += span_notice("Can be removed by cutting it off.")
 	else
 		. += span_notice("Can be removed by unfastening it.")
+	if(!anchored)
+		. += span_notice("It is loose enough to pick up with both hands free.")
+
+/obj/structure/shuttle_decoration/attack_hand(mob/user, list/modifiers)
+	if(!anchored && try_carry_component(src, user))
+		return TRUE
+	return ..()
 
 /obj/structure/shuttle_decoration/wrench_act(mob/living/user, obj/item/tool)
 	. = ..()

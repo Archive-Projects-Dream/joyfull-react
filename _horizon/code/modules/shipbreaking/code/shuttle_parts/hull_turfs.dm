@@ -17,8 +17,9 @@
 	fixed_underlay = list("space" = TRUE)
 
 /turf/closed/wall/mineral/nanocarbon/break_wall()
-	var/obj/new_plating = new /obj/structure/hull_plating/nanocarbon(src)
+	var/obj/structure/hull_plating/new_plating = new /obj/structure/hull_plating/nanocarbon(src)
 	new_plating.color = color
+	new_plating.reinstalls_wall = type // the exact wall variant we were
 	if(girder_type)
 		return new girder_type(src)
 
@@ -123,8 +124,9 @@
 	baseturfs = /turf/open/floor/plating/nanocarbon
 
 /turf/closed/wall/mineral/aluminum/break_wall()
-	var/obj/new_plating = new /obj/structure/hull_plating/aluminum(src)
+	var/obj/structure/hull_plating/new_plating = new /obj/structure/hull_plating/aluminum(src)
 	new_plating.color = color
+	new_plating.reinstalls_wall = type // the exact wall variant we were
 	if(girder_type)
 		return new girder_type(src)
 
@@ -138,7 +140,7 @@
 	upgradable = FALSE
 	rust_resistance = RUST_RESISTANCE_TITANIUM
 	/// What kind of plating we make when cut apart
-	var/obj/cut_plating = /obj/structure/hull_plating/nanocarbon/floor
+	var/obj/structure/hull_plating/cut_plating = /obj/structure/hull_plating/nanocarbon/floor
 
 /turf/open/floor/plating/nanocarbon/Initialize(mapload)
 	. = ..()
@@ -155,7 +157,10 @@
 	balloon_alert(user, "cutting...")
 	if(!tool.use_tool(src, user, 4 SECONDS, amount = 1, volume=50))
 		return ITEM_INTERACT_BLOCKING
-	new cut_plating(get_turf(src))
+	var/obj/structure/hull_plating/new_plating = new cut_plating(src)
+	new_plating.restores_turf = type // the exact floor variant we were
+	if(color)
+		new_plating.color = color
 	ScrapeAway()
 	return ITEM_INTERACT_SUCCESS
 
@@ -226,7 +231,7 @@
 	smoothing_groups = SMOOTH_GROUP_TURF_CHASM
 	canSmoothWith = SMOOTH_GROUP_TURF_CHASM
 	/// What kind of plating we make when cut apart
-	var/obj/cut_plating = /obj/structure/hull_plating/aluminum/floor
+	var/obj/structure/hull_plating/cut_plating = /obj/structure/hull_plating/aluminum/floor
 
 /turf/open/floor/plating/aluminum/Initialize(mapload)
 	. = ..()
@@ -243,7 +248,10 @@
 	balloon_alert(user, "cutting...")
 	if(!tool.use_tool(src, user, 4 SECONDS, amount = 1, volume=50))
 		return ITEM_INTERACT_BLOCKING
-	new cut_plating(get_turf(src))
+	var/obj/structure/hull_plating/new_plating = new cut_plating(src)
+	new_plating.restores_turf = type // the exact floor variant we were
+	if(color)
+		new_plating.color = color
 	ScrapeAway()
 	return ITEM_INTERACT_SUCCESS
 

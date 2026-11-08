@@ -36,6 +36,7 @@
 
 /obj/structure/hull_plating/window
 	name = "cut shuttle window"
+	reinstalls_window = /obj/structure/window/fulltile/salvage_shuttle
 	desc = "The glass of a shuttle window, cut out of its frame."
 	icon = '_horizon/code/modules/shipbreaking/icons/smooth/smooth_misc.dmi'
 	icon_state = "window"

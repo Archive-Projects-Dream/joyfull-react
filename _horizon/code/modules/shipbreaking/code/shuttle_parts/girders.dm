@@ -27,6 +27,8 @@
 /obj/structure/titanium_structure/Initialize(mapload)
 	. = ..()
 	ADD_TRAIT(src, TRAIT_RECYCLE_LIKE_ITEM, TRAIT_GENERIC)
+	// Lets hull plating sheets be used on us to build hull walls
+	AddElement(/datum/element/uses_girder_wall_recipes)
 	register_context()
 
 /obj/structure/titanium_structure/add_context(atom/source, list/context, obj/item/held_item, mob/user)

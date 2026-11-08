@@ -21,6 +21,16 @@
 /obj/machinery/exoscanner/shuttle_part/screwdriver_act(mob/user, obj/item/tool)
 	return
 
+/obj/machinery/exoscanner/shuttle_part/attack_hand(mob/user, list/modifiers)
+	if(!anchored && try_carry_component(src, user))
+		return TRUE
+	return ..()
+
+/obj/machinery/exoscanner/shuttle_part/examine(mob/user)
+	. = ..()
+	if(!anchored)
+		. += span_notice("It is loose enough to pick up with both hands free.")
+
 /obj/machinery/exoscanner/shuttle_part/update_icon_state()
 	. = ..()
 	icon_state = base_icon_state

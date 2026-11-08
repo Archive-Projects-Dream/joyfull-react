@@ -23,6 +23,8 @@ GLOBAL_LIST_INIT(material_girder_wall_recipes, init_material_girder_wall_recipes
 			/turf/closed/wall/mineral/snow,
 			/turf/closed/wall/mineral/abductor,
 			/turf/closed/wall/mineral/titanium,
+			/turf/closed/wall/mineral/nanocarbon, // HORIZON-EDIT ADDITION - shipbreaking hull wall, buildable on titanium framing
+			/turf/closed/wall/mineral/aluminum, // HORIZON-EDIT ADDITION - shipbreaking hull wall, buildable on girders
 			/turf/closed/wall/mineral/plastitanium,
 			/turf/closed/wall/mineral/plastitanium/wall_fill,
 			/turf/closed/wall/mineral/plastitanium/darkpod,

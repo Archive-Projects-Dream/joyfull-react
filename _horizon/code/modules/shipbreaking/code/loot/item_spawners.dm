@@ -212,9 +212,9 @@
 /obj/effect/spawner/random/salvage/cargo_machine/scrap
 	name = "random scrap machine"
 	loot = list(
-		/obj/structure/hull_plating/airlock,
-		/obj/structure/hull_plating/airlock/interior,
-		/obj/structure/hull_plating/airlock/access_panel,
+		/obj/structure/disconnected_airlock,
+		/obj/structure/disconnected_airlock/interior,
+		/obj/structure/disconnected_airlock/access_panel,
 		/obj/structure/hull_plating/nanocarbon,
 		/obj/structure/hull_plating/nanocarbon/floor,
 		/obj/structure/hull_plating/gold_foil,

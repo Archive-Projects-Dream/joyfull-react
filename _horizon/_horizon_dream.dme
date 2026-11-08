@@ -89,6 +89,7 @@
 #include "code\modules\shipbreaking\code\salvage_shuttles\salvage.dm"
 #include "code\modules\shipbreaking\code\salvage_shuttles\unmanned.dm"
 #include "code\modules\shipbreaking\code\shuttle_parts\airlocks.dm"
+#include "code\modules\shipbreaking\code\shuttle_parts\carryable.dm"
 #include "code\modules\shipbreaking\code\shuttle_parts\crates.dm"
 #include "code\modules\shipbreaking\code\shuttle_parts\engine_covers.dm"
 #include "code\modules\shipbreaking\code\shuttle_parts\engines.dm"

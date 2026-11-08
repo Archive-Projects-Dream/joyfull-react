@@ -6,6 +6,7 @@ GLOBAL_LIST_INIT(aluminum_recipes, list(
 
 /obj/item/stack/sheet/aluminum
 	name = "aluminum blocks"
+	usable_for_construction = TRUE
 	singular_name = "aluminum block"
 	desc = "Solid blocks of recycled aluminum, ready to be sent off to shipyards or to the back of the local \
 		gakster's wagon when you're not looking."
@@ -54,6 +55,7 @@ GLOBAL_LIST_INIT(aluminum_recipes, list(
 
 /obj/item/stack/sheet/nanocarbon
 	name = "nanocarbon wafers"
+	usable_for_construction = TRUE
 	singular_name = "nanocarbon wafer"
 	desc = "Processed wafers of recycled nanocarbon alloy. While an excellent material for ship hulls, the material \
 		properties require specialist tools to form and make permanent repairs to."

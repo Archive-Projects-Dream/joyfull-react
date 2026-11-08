@@ -126,7 +126,7 @@
 	cost = CARGO_CRATE_VALUE * 0.5
 	unit_name = "salvaged airlocks"
 	export_types = list(
-		/obj/structure/hull_plating/airlock,
-		/obj/structure/hull_plating/airlock/interior,
-		/obj/structure/hull_plating/airlock/access_panel,
+		/obj/structure/disconnected_airlock,
+		/obj/structure/disconnected_airlock/interior,
+		/obj/structure/disconnected_airlock/access_panel,
 	)

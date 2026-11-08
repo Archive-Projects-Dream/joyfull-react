@@ -7,11 +7,30 @@
 	inertia_force_weight = 2
 	/// How much damage we do when we fall on or crash into someone
 	var/crush_damage = 40
+	/// What wall turf our carryable form rebuilds on a girder or titanium framing
+	var/turf/reinstalls_wall
+	/// What floor turf our carryable form restores on an open floor
+	var/turf/restores_turf
+	/// What window our carryable form rebuilds on a grille
+	var/obj/reinstalls_window
+	/// What wall plate decoration we were cut from, stamped at cut time
+	var/obj/reinstalls_decoration
 
 /obj/structure/hull_plating/Initialize(mapload)
 	. = ..()
 	ADD_TRAIT(src, TRAIT_RECYCLE_LIKE_ITEM, TRAIT_GENERIC)
 	AddElement(/datum/element/falling_hazard, damage = crush_damage, wound_bonus = 20, hardhat_safety = FALSE, crushes = TRUE, impact_sound = 'sound/effects/bang.ogg')
+
+/obj/structure/hull_plating/attack_hand(mob/user, list/modifiers)
+	. = ..()
+	if(.)
+		return
+	if(try_carry_component(src, user))
+		return TRUE
+
+/obj/structure/hull_plating/examine(mob/user)
+	. = ..()
+	. += span_notice("Heavy, but you could pick it up with both hands free.")
 
 /obj/structure/hull_plating/throw_impact(atom/hit_atom, datum/thrownthing/throwingdatum)
 	if(isliving(hit_atom))
@@ -61,6 +80,7 @@
 
 /obj/structure/hull_plating/nanocarbon
 	name = "nanocarbon panels"
+	reinstalls_wall = /turf/closed/wall/mineral/nanocarbon
 	desc = "A large section of nanocarbon hull that has been cut free, and has considerable mass."
 	icon_state = "nanocarbon-2"
 	custom_materials = list(
@@ -88,6 +108,7 @@
 
 /obj/structure/hull_plating/nanocarbon/floor
 	name = "nanocarbon panel"
+	restores_turf = /turf/open/floor/plating/nanocarbon
 	desc = "A section of nanocarbon hull that has been cut free, and has considerable mass."
 	icon_state = "nanocarbon-1"
 	custom_materials = list(
@@ -142,6 +163,7 @@
 
 /obj/structure/hull_plating/aluminum
 	name = "aluminum panels"
+	reinstalls_wall = /turf/closed/wall/mineral/aluminum
 	desc = "A large section of aluminum hull that has been cut free, and has considerable mass."
 	icon_state = "aluminum-2"
 	custom_materials = list(
@@ -150,6 +172,7 @@
 
 /obj/structure/hull_plating/aluminum/floor
 	name = "aluminum panel"
+	restores_turf = /turf/open/floor/plating/aluminum
 	desc = "A section of aluminum hull that has been cut free, and has considerable mass."
 	icon_state = "aluminum-1"
 	custom_materials = list(
