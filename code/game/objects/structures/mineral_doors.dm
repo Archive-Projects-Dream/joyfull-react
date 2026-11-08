@@ -28,6 +28,13 @@
 	var/sheetType = /obj/item/stack/sheet/iron //what we're made of
 	var/sheetAmount = 10 //how much it takes to construct us.
 
+	// [HORIZON-ADD]
+	/// How long the door takes to swing open. Keep in sync with the "[icon_state]opening" flick animation in the door's DMI.
+	var/open_duration = 1 SECONDS
+	/// How long the door takes to swing shut. Keep in sync with the "[icon_state]closing" flick animation in the door's DMI.
+	var/close_duration = 1 SECONDS
+	// [/HORIZON-ADD]
+
 /datum/armor/structure_mineral_door
 	melee = 10
 	energy = 100
@@ -105,7 +112,8 @@
 	playsound(src, openSound, 100, TRUE)
 	set_opacity(FALSE)
 	flick("[initial(icon_state)]opening",src)
-	sleep(1 SECONDS)
+	icon_state = "[initial(icon_state)]open" // [HORIZON-EDIT] Soo stupid
+	sleep(open_duration) // [/HORIZON-EDIT]
 	set_density(FALSE)
 	door_opened = TRUE
 	layer = OPEN_DOOR_LAYER
@@ -125,7 +133,8 @@
 	isSwitchingStates = TRUE
 	playsound(src, closeSound, 100, TRUE)
 	flick("[initial(icon_state)]closing",src)
-	sleep(1 SECONDS)
+	icon_state = initial(icon_state) // [HORIZON-EDIT]
+	sleep(close_duration) // [/HORIZON-EDIT]
 	set_density(TRUE)
 	set_opacity(TRUE)
 	door_opened = FALSE

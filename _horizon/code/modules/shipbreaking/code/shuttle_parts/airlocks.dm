@@ -7,6 +7,9 @@
 	smoothing_groups = SMOOTH_GROUP_AIRLOCK
 	armor_type = /datum/armor/machinery_door
 	disassembled_type = /obj/structure/hull_plating/airlock
+	/// Animation timings matched to the "exterior" flick states in doors.dmi (5.2ds each way)
+	open_duration = 0.5 SECONDS
+	close_duration = 0.5 SECONDS
 
 /obj/structure/mineral_door/manual_colony_door/shuttle/Initialize(mapload)
 	. = ..()
@@ -91,6 +94,9 @@
 	icon_state = "interior"
 	disassembled_type = /obj/structure/hull_plating/airlock/interior
 	manual_actuation_delay = 0.25 SECONDS
+	/// Animation timings matched to the "interior" flick states in doors.dmi (4ds each way)
+	open_duration = 0.4 SECONDS
+	close_duration = 0.4 SECONDS
 
 /obj/structure/hull_plating/airlock/interior
 	name = "disconnected interior airlock"

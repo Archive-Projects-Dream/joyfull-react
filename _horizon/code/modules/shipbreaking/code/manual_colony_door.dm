@@ -14,6 +14,9 @@
 	var/disassembled_type = /obj/item/flatpacked_machine/airlock_kit_manual
 	/// How long it takes to open/close the door
 	var/manual_actuation_delay = 1 SECONDS
+	/// Animation timings matched to the "manual" flick states in airlock_manual.dmi (opening 6ds, closing 4.5ds)
+	open_duration = 0.6 SECONDS
+	close_duration = 0.45 SECONDS
 
 /obj/structure/mineral_door/manual_colony_door/atom_deconstruct(disassembled = TRUE)
 	if(disassembled)
