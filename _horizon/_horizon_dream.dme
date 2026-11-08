@@ -37,7 +37,6 @@
 #include "code\game\objects\items\tanks\internals_tactical.dm"
 #include "code\game\objects\structures\flora.dm"
 #include "code\game\objects\structures\markings.dm"
-#include "code\modules\admin\autoreply.dm"
 #include "code\modules\admin\check_players.dm"
 #include "code\modules\admin\log_viewer.dm"
 #include "code\modules\admin\mentorhelp.dm"

@@ -38,18 +38,8 @@
 /datum/log_viewer/ui_close(mob/user)
 	qdel(src)
 
-/datum/log_viewer/ui_static_data(mob/user)
-	. = list()
-	.["log_types"] = list(
-		list("name" = "Attack",   "flag" = INDIVIDUAL_ATTACK_LOG, "color" = "#ff6b6b"),
-		list("name" = "Say",      "flag" = INDIVIDUAL_SAY_LOG,    "color" = "#4dd0e1"),
-		list("name" = "Emote",    "flag" = INDIVIDUAL_EMOTE_LOG,  "color" = "#64b5f6"),
-		list("name" = "Comms",    "flag" = INDIVIDUAL_COMMS_LOG,  "color" = "#90a4ae"),
-		list("name" = "OOC",      "flag" = INDIVIDUAL_OOC_LOG,    "color" = "#5b9bd5"),
-		list("name" = "Game",     "flag" = INDIVIDUAL_GAME_LOG,   "color" = "#66bb6a"),
-		list("name" = "Show All", "flag" = INDIVIDUAL_SHOW_ALL_LOG, "color" = "#aaaaaa"),
-	)
-	.["source_options"] = list(LOGSRC_CKEY, LOGSRC_MOB)
+// No ui_static_data: the log type list, names, colors and the source options
+// are static frontend data (tgui/packages/tgui/_horizonUI/interfaces/LogViewer.tsx).
 
 /datum/log_viewer/ui_data(mob/user)
 	. = list()
@@ -171,6 +161,8 @@
 				SSadmin_verbs.dynamic_invoke_verb(usr, /datum/admin_verb/options_panel, target_mob)
 			return TRUE
 
+/// Build the ckey dropdown. Cached for 5 seconds (50 ticks) so opening
+/// the dropdown doesn't iterate every persistent_client on every render.
 /datum/log_viewer/proc/get_all_logged_ckeys()
 	if(cached_ckeys && last_ckey_cache + 50 > world.time)
 		return cached_ckeys

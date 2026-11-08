@@ -40,12 +40,42 @@ export type ServerState = {
   players: PlayerInfo[];
   ignoredOffline: string[];
   suicideIcon: string | null;
-  canOpenTicketPanel?: boolean;
-  ticketPanelLabel?: string | null;
-  pendingTickets?: number;
-  adminMode?: string | null;
+  // Raw facts sent by the backend; every label and derived value
+  // (button text, pending count, can-open checks) is computed here.
+  isStaff: boolean;
+  isMentor: boolean;
+  adminOpenTickets: number;
+  mentorOpenTickets: number;
+  isAdmin: boolean;
+  isDeadmined: boolean;
   uiVolume?: number;
 };
+
+/**
+ * BYOND has no distinct boolean type, so every DM `TRUE`/`FALSE` arrives as
+ * 1/0. Coerce them to real booleans once at the boundary so the rest of the
+ * code can use plain `serverState.foo && ...` without `!!` everywhere.
+ */
+const BOOLEAN_KEYS = [
+  'canLeaveBody',
+  'canAdminHelp',
+  'canSeeNotes',
+  'hasTicketNotification',
+  'isStaff',
+  'isMentor',
+  'isAdmin',
+  'isDeadmined',
+] as const;
+
+function normalizeServerState(state: Partial<ServerState>): Partial<ServerState> {
+  const result = { ...state };
+  for (const key of BOOLEAN_KEYS) {
+    if (result[key] !== undefined) {
+      result[key] = Boolean(result[key]);
+    }
+  }
+  return result;
+}
 
 export type ResourceLink = {
   id: string;
@@ -130,14 +160,14 @@ export function EscapeMenu() {
       if (data.uiVolume !== undefined) {
         setUiVolume(data.uiVolume);
       }
-      dispatch({ type: 'serverUpdate', state: data });
+      dispatch({ type: 'serverUpdate', state: normalizeServerState(data) });
     });
 
     Byond.subscribeTo('state', (data: Partial<ServerState>) => {
       if (data.uiVolume !== undefined) {
         setUiVolume(data.uiVolume);
       }
-      dispatch({ type: 'serverUpdate', state: data });
+      dispatch({ type: 'serverUpdate', state: normalizeServerState(data) });
     });
 
     Byond.subscribeTo('toggle', () => {
@@ -229,14 +259,14 @@ function Details({ serverState }: { serverState: ServerState }) {
         ) : (
           serverState.mapName || 'Loading...'
         )}
-        {!!serverState.mapWebmap && (
+        {serverState.mapWebmap ? (
           <span
             className="escape-menu__details-link"
             onClick={() => Byond.command(`.url ${serverState.mapWebmap}`)}
           >
-            {` (Open Map)`}
+            {' (Open Map)'}
           </span>
-        )}
+        ) : null}
       </div>
       <div>Time Dilation: {serverState.timeDilation}%</div>
     </div>

@@ -11,7 +11,13 @@ import {
   Stack,
   Tabs,
 } from 'tgui-core/components';
+import type { BooleanLike } from 'tgui-core/react';
 import { useStickToBottom } from '../hooks/useStickToBottom';
+import {
+  ADMIN_AUTOREPLIES,
+  MENTOR_AUTOREPLIES,
+  type AutoReply,
+} from './ticketPanelAutoreplies';
 
 type TicketResponse = {
   timestamp: string;
@@ -40,8 +46,8 @@ type Ticket = {
 };
 
 type Data = {
-  is_admin: boolean;
-  is_mentor: boolean;
+  is_admin: BooleanLike;
+  is_mentor: BooleanLike;
   selected_tab: string;
   selected_ticket: number | null;
   admin_open_tickets: Ticket[];
@@ -81,10 +87,12 @@ export const TicketPanel = (props) => {
 
   const [isInitialMessageExpanded, setIsInitialMessageExpanded] =
     useState(false);
+  const [isAutoReplyOpen, setIsAutoReplyOpen] = useState(false);
 
   useEffect(() => {
     setIsInitialMessageExpanded(false);
-  }, [data.selected_ticket]);
+    setIsAutoReplyOpen(false);
+  }, [data.selected_ticket, data.selected_tab]);
 
   const openTickets =
     data.selected_tab === 'admin'
@@ -117,6 +125,22 @@ export const TicketPanel = (props) => {
     selectedTicketData?.id ?? null,
     conversationResponses.length,
   );
+
+  const isAdminTab = data.selected_tab === 'admin';
+  const autoReplies = isAdminTab ? ADMIN_AUTOREPLIES : MENTOR_AUTOREPLIES;
+
+  const sendAutoReply = (reply: AutoReply) => {
+    if (!selectedTicketData) {
+      return;
+    }
+    act('autoreply', {
+      ticket_id: selectedTicketData.id,
+      title: reply.title,
+      message: reply.message,
+      resolve: reply.resolve === true,
+    });
+    setIsAutoReplyOpen(false);
+  };
 
   return (
     <Window width={1120} height={900}>
@@ -839,10 +863,9 @@ export const TicketPanel = (props) => {
                                   <Button
                                     icon="reply-all"
                                     fluid
+                                    selected={isAutoReplyOpen}
                                     onClick={() =>
-                                      act('autoreply', {
-                                        ticket_id: selectedTicketData.id,
-                                      })
+                                      setIsAutoReplyOpen((open) => !open)
                                     }
                                   >
                                     Auto Reply
@@ -850,6 +873,25 @@ export const TicketPanel = (props) => {
                                 </Stack.Item>
                               </Stack>
                             </Stack.Item>
+                            {isAutoReplyOpen && (
+                              <Stack.Item>
+                                <Section title="Canned Replies">
+                                  <Stack vertical>
+                                    {autoReplies.map((reply) => (
+                                      <Button
+                                        key={reply.title}
+                                        fluid
+                                        tooltip={reply.message}
+                                        onClick={() => sendAutoReply(reply)}
+                                      >
+                                        {reply.title}
+                                        {reply.resolve ? ' (resolves)' : ''}
+                                      </Button>
+                                    ))}
+                                  </Stack>
+                                </Section>
+                              </Stack.Item>
+                            )}
                           </Stack>
                         ) : (
                           <>

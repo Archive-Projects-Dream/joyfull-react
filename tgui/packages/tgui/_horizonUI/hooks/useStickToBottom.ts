@@ -1,24 +1,15 @@
 import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
-/**
- * Distance (in px) from the bottom within which the chat is
- * considered "scrolled to the bottom".
- */
+// Max distance (px) from the bottom that still counts as "at the bottom".
 const BOTTOM_THRESHOLD = 64;
 
 /**
- * Keeps a scrollable container pinned to the bottom when new content
- * arrives, but only if the user was already at the bottom. If they
- * scrolled up to read history, the scroll position is left untouched.
+ * Keeps the container scrolled to the bottom on new content, but only
+ * while the user is at the bottom; scrolling up to read history pauses
+ * the following until they return.
  *
- * - `resetKey`: when this changes (e.g. another ticket is selected or
- *   the window is first opened), the container jumps to the bottom and
- *   re-enables sticking.
- * - `updateKey`: when this changes (e.g. a new message arrives), the
- *   container scrolls to the bottom only if sticking is still enabled.
- *
- * Returns the ref to attach to the scrollable element and the onScroll
- * handler that tracks the user's position.
+ * `resetKey` (e.g. selected ticket) forces a jump to the bottom,
+ * `updateKey` (e.g. message count) scrolls only if still following.
  */
 export function useStickToBottom(
   resetKey: unknown,

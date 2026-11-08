@@ -1,12 +1,9 @@
 import { Tooltip } from 'tgui-core/components';
 
+import type { ServerState } from '../EscapeMenu';
+
 type Props = {
-  serverState: {
-    canAdminHelp: boolean;
-    canSeeNotes: boolean;
-    hasTicketNotification: boolean;
-    adminMode?: string | null;
-  };
+  serverState: ServerState;
   onNavigate: (page: 'home') => void;
   onAction: (action: string) => void;
   onClose: () => void;
@@ -18,6 +15,9 @@ export function AdminPage({
   onAction,
   onClose,
 }: Props) {
+  const isAdmin = serverState.isAdmin;
+  const canToggleAdmin = isAdmin || serverState.isDeadmined;
+
   return (
     <>
       <BackButton onClick={() => onNavigate('home')} />
@@ -58,7 +58,7 @@ export function AdminPage({
         >
           Pray
         </MenuButton>
-        {!!serverState.canSeeNotes && (
+        {serverState.canSeeNotes && (
           <MenuButton
             onClick={() => {
               onAction('see_notes');
@@ -68,19 +68,18 @@ export function AdminPage({
             See Notes
           </MenuButton>
         )}
-        {(serverState.adminMode === 'active' ||
-          serverState.adminMode === 'deadmined') && (
+        {canToggleAdmin && (
           <MenuButton
             onClick={() => {
-              onAction(serverState.adminMode === 'active' ? 'deadmin' : 'readmin');
+              onAction(isAdmin ? 'deadmin' : 'readmin');
             }}
             tooltip={
-              serverState.adminMode === 'active'
+              isAdmin
                 ? 'Give up your admin powers until you re-admin yourself'
                 : 'Regain your admin powers'
             }
           >
-            {serverState.adminMode === 'active' ? 'Deadmin' : 'Readmin'}
+            {isAdmin ? 'Deadmin' : 'Readmin'}
           </MenuButton>
         )}
       </div>

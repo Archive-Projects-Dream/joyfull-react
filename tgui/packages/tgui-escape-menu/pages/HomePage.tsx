@@ -1,18 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
-import type { ResourceLink } from '../EscapeMenu';
-
-type ServerState = {
-  stationName: string;
-  canLeaveBody: boolean;
-  canAdminHelp: boolean;
-  hasTicketNotification: boolean;
-  resources: ResourceLink[];
-  canOpenTicketPanel?: boolean;
-  ticketPanelLabel?: string | null;
-  pendingTickets?: number;
-};
+import type { ServerState } from '../EscapeMenu';
 
 type Props = {
   serverState: ServerState;
@@ -50,6 +39,17 @@ export function HomePage({
     }
   }, [showResources]);
 
+  // Derived from the raw facts sent by the backend; the labels themselves
+  // are frontend data.
+  const canOpenTicketPanel =
+    serverState.isStaff || serverState.isMentor;
+  const ticketPanelLabel = serverState.isStaff
+    ? 'Admin Ticket Panel'
+    : 'Mentor Ticket Panel';
+  const pendingTickets = serverState.isStaff
+    ? serverState.adminOpenTickets
+    : serverState.mentorOpenTickets;
+
   return (
     <>
       <div className="escape-menu__home-column">
@@ -78,24 +78,23 @@ export function HomePage({
             Settings
           </MenuButton>
           <MenuButton onClick={() => onNavigate('players')}>Players</MenuButton>
-          {!!serverState.canOpenTicketPanel && (
+          {canOpenTicketPanel && (
             <MenuButton
               onClick={() => {
                 onAction('open_ticket_panel');
                 onClose();
               }}
-              blinking={(serverState.pendingTickets ?? 0) > 0}
+              blinking={pendingTickets > 0}
               tooltip={
-                (serverState.pendingTickets ?? 0) > 0
-                  ? `${serverState.pendingTickets} open ticket${
-                      serverState.pendingTickets === 1 ? '' : 's'
+                pendingTickets > 0
+                  ? `${pendingTickets} open ticket${
+                      pendingTickets === 1 ? '' : 's'
                     } waiting for you!`
                   : undefined
               }
             >
-              {serverState.ticketPanelLabel || 'Ticket Panel'}
-              {!!serverState.pendingTickets &&
-                ` (${serverState.pendingTickets})`}
+              {ticketPanelLabel}
+              {pendingTickets > 0 && ` (${pendingTickets})`}
             </MenuButton>
           )}
           <MenuButton

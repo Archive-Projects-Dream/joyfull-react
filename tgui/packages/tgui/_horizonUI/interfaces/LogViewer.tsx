@@ -11,11 +11,6 @@ import {
 import { useBackend } from '../../backend';
 import { Window } from '../../layouts';
 
-type LogType = {
-  name: string;
-  flag: number;
-};
-
 type LogEntry = {
   time: string;
   timestamp?: number;
@@ -24,7 +19,6 @@ type LogEntry = {
   who: string;
   what: string;
   where: string;
-  type: string;
   health: string | null;
   color?: string | null;
   target_name: string | null;
@@ -40,14 +34,117 @@ type Data = {
   target_filter: string;
   zone_filter: string;
   viewing_type: number;
-  log_types: LogType[];
-  source_options: string[];
   ckeys_list: string[];
 };
 
 type Act = (action: string, payload?: Record<string, unknown>) => void;
 
 const SHOW_ALL_LABEL = 'Show All';
+
+/*
+ * Static log type data (mirrors the LOG_* defines in
+ * code/__DEFINES/logging.dm). Names, filter pages and colors are frontend
+ * concerns: the backend only sends numeric type flags with each entry.
+ */
+const LOG_ATTACK = 1 << 0;
+const LOG_SAY = 1 << 1;
+const LOG_WHISPER = 1 << 2;
+const LOG_EMOTE = 1 << 3;
+const LOG_DSAY = 1 << 4;
+const LOG_PDA = 1 << 5;
+const LOG_CHAT = 1 << 6;
+const LOG_COMMENT = 1 << 7;
+const LOG_TELECOMMS = 1 << 8;
+const LOG_OOC = 1 << 9;
+const LOG_ADMIN = 1 << 10;
+const LOG_OWNERSHIP = 1 << 11;
+const LOG_GAME = 1 << 12;
+const LOG_ADMIN_PRIVATE = 1 << 13;
+const LOG_ASAY = 1 << 14;
+const LOG_MECHA = 1 << 15;
+const LOG_VIRUS = 1 << 16;
+const LOG_SHUTTLE = 1 << 17;
+const LOG_ECON = 1 << 18;
+const LOG_VICTIM = 1 << 19;
+const LOG_RADIO_EMOTE = 1 << 20;
+const LOG_SPEECH_INDICATORS = 1 << 21;
+const LOG_TRANSPORT = 1 << 22;
+
+/** Display name per single log flag (exact-match, like the old backend switch). */
+const LOG_FLAG_NAMES: Record<number, string> = {
+  [LOG_ATTACK]: 'Attack',
+  [LOG_SAY]: 'Say',
+  [LOG_WHISPER]: 'Whisper',
+  [LOG_EMOTE]: 'Emote',
+  [LOG_RADIO_EMOTE]: 'RadioEmote',
+  [LOG_DSAY]: 'Deadchat',
+  [LOG_PDA]: 'PDA',
+  [LOG_CHAT]: 'Chat',
+  [LOG_COMMENT]: 'Comment',
+  [LOG_TELECOMMS]: 'Telecomms',
+  [LOG_TRANSPORT]: 'Transport',
+  [LOG_OOC]: 'OOC',
+  [LOG_ADMIN]: 'Admin',
+  [LOG_ADMIN_PRIVATE]: 'Admin',
+  [LOG_ASAY]: 'ASAY',
+  [LOG_OWNERSHIP]: 'Ownership',
+  [LOG_GAME]: 'Game',
+  [LOG_VIRUS]: 'Virus',
+  [LOG_MECHA]: 'Mecha',
+  [LOG_SHUTTLE]: 'Shuttle',
+  [LOG_VICTIM]: 'Victim',
+  [LOG_ECON]: 'Economy',
+  [LOG_SPEECH_INDICATORS]: 'Speech',
+};
+
+/** Log type display name for an entry, derived from its numeric flag. */
+const logTypeName = (flag: number | undefined) =>
+  flag === undefined ? 'Misc' : LOG_FLAG_NAMES[flag] ?? 'Misc';
+
+/** "Show All" flag (mirrors INDIVIDUAL_SHOW_ALL_LOG, transport excluded). */
+const LOG_SHOW_ALL =
+  LOG_ATTACK |
+  LOG_SAY |
+  LOG_WHISPER |
+  LOG_EMOTE |
+  LOG_RADIO_EMOTE |
+  LOG_DSAY |
+  LOG_PDA |
+  LOG_CHAT |
+  LOG_COMMENT |
+  LOG_TELECOMMS |
+  LOG_OOC |
+  LOG_ADMIN |
+  LOG_OWNERSHIP |
+  LOG_GAME |
+  LOG_ADMIN_PRIVATE |
+  LOG_ASAY |
+  LOG_MECHA |
+  LOG_VIRUS |
+  LOG_SHUTTLE |
+  LOG_ECON |
+  LOG_VICTIM |
+  LOG_SPEECH_INDICATORS;
+
+/** Filter pages (mirror the INDIVIDUAL_* defines from logging.dm). */
+const LOG_TYPE_FILTERS = [
+  { name: 'Attack', flag: LOG_ATTACK | LOG_VICTIM },
+  {
+    name: 'Say',
+    flag: LOG_SAY | LOG_WHISPER | LOG_DSAY | LOG_SPEECH_INDICATORS,
+  },
+  { name: 'Emote', flag: LOG_EMOTE | LOG_RADIO_EMOTE },
+  {
+    name: 'Comms',
+    flag: LOG_PDA | LOG_CHAT | LOG_COMMENT | LOG_TELECOMMS,
+  },
+  { name: 'OOC', flag: LOG_OOC | LOG_ADMIN },
+  { name: 'Game', flag: LOG_GAME },
+  { name: SHOW_ALL_LABEL, flag: LOG_SHOW_ALL },
+];
+
+/** Source selector options (LOGSRC_CKEY / LOGSRC_MOB from logging.dm). */
+const SOURCE_OPTIONS = ['Ckey', 'Mob'];
 
 const TYPE_LABELS: Record<string, string> = {
   RadioEmote: 'Radio Emote',
@@ -258,18 +355,17 @@ const sortNewestFirst = (entries: LogEntry[]) => {
 
 const LogEntryRow = (props: { entry: LogEntry; act: Act }) => {
   const { entry, act } = props;
+  const type = logTypeName(entry.type_flag);
   const location = parseLocation(entry.where);
   const target = entry.target_name || entry.target_key;
   const targetFilter = entry.target_key || entry.target_name;
   const rawMessage = formatMessage(entry);
-  const telecomms =
-    entry.type === 'Telecomms' ? parseTelecomms(rawMessage) : null;
+  const telecomms = type === 'Telecomms' ? parseTelecomms(rawMessage) : null;
   const spoken =
-    !telecomms && (entry.type === 'Say' || entry.type === 'Whisper')
+    !telecomms && (type === 'Say' || type === 'Whisper')
       ? extractLanguage(rawMessage)
       : null;
-  const chem =
-    !telecomms && !spoken ? parseChemTransfer(rawMessage) : null;
+  const chem = !telecomms && !spoken ? parseChemTransfer(rawMessage) : null;
   const message = telecomms
     ? telecomms.message
     : (spoken?.message ?? chem?.action ?? rawMessage);
@@ -278,14 +374,10 @@ const LogEntryRow = (props: { entry: LogEntry; act: Act }) => {
     entry.state && STATE_BADGES[entry.state] ? entry.state : '';
 
   return (
-    <Box
-      className={`LogViewer__entry ${typeModifier(entry.type || 'Misc')}`}
-    >
+    <Box className={`LogViewer__entry ${typeModifier(type)}`}>
       <Flex className="LogViewer__line">
         <Box className="LogViewer__time">{entry.time || '--:--:--'}</Box>
-        <Box className="LogViewer__type">
-          {TYPE_LABELS[entry.type] || entry.type || 'Misc'}
-        </Box>
+        <Box className="LogViewer__type">{TYPE_LABELS[type] || type}</Box>
         <Box className="LogViewer__msg" color={entry.color || undefined}>
           {!!telecomms && (
             <Box as="span" className="LogViewer__freq">
@@ -386,26 +478,19 @@ export const LogViewer = () => {
   }, [autoRefresh, act]);
 
   const logs: LogEntry[] = Array.isArray(data.logs) ? data.logs : [];
-  const logTypes: LogType[] = Array.isArray(data.log_types)
-    ? data.log_types
-    : [];
-  const sourceOptions: string[] = Array.isArray(data.source_options)
-    ? data.source_options
-    : [];
   const ckeys: string[] = Array.isArray(data.ckeys_list)
     ? data.ckeys_list
     : [];
 
-  // "Show All" is the OR of every individual flag, so we do not have to
-  // depend on its (localised) display name coming from the backend.
-  const showAllFlag = logTypes.reduce((acc, lt) => acc | lt.flag, 0);
-  const isShowAll = showAllFlag > 0 && data.viewing_type === showAllFlag;
+  // "Show All" is the OR of every individual flag; comparing against the
+  // static constant avoids depending on a display name from the backend.
+  const isShowAll = data.viewing_type === LOG_SHOW_ALL;
   const hasFilters =
     !!data.filter_text || !!data.target_filter || !!data.zone_filter;
 
   const handleTypeClick = (flag: number) => {
-    if (flag === showAllFlag) {
-      act('set_viewing_type', { type: showAllFlag });
+    if (flag === LOG_SHOW_ALL) {
+      act('set_viewing_type', { type: LOG_SHOW_ALL });
       return;
     }
     if (isShowAll) {
@@ -413,7 +498,7 @@ export const LogViewer = () => {
       return;
     }
     act('set_viewing_type', {
-      type: data.viewing_type ^ flag || showAllFlag,
+      type: data.viewing_type ^ flag || LOG_SHOW_ALL,
     });
   };
 
@@ -453,7 +538,7 @@ export const LogViewer = () => {
 
             <Flex align="center" gap={0.5} wrap>
               <Box className="LogViewer__label">Source</Box>
-              {sourceOptions.map((src) => {
+              {SOURCE_OPTIONS.map((src) => {
                 const info = SOURCE_INFO[src];
                 return (
                   <Button
@@ -489,8 +574,8 @@ export const LogViewer = () => {
 
             <Flex align="center" gap={0.5} wrap>
               <Box className="LogViewer__label">Type</Box>
-              {logTypes.map((lt) => {
-                const isShowAllOption = lt.flag === showAllFlag;
+              {LOG_TYPE_FILTERS.map((lt) => {
+                const isShowAllOption = lt.flag === LOG_SHOW_ALL;
                 const isSelected = isShowAllOption
                   ? isShowAll
                   : !isShowAll && !!(data.viewing_type & lt.flag);
@@ -581,7 +666,7 @@ export const LogViewer = () => {
               <LogEntryRow
                 key={[
                   entry.timestamp ?? entry.time,
-                  entry.type_flag ?? entry.type,
+                  entry.type_flag,
                   entry.who,
                   entry.where,
                   entry.target_key,

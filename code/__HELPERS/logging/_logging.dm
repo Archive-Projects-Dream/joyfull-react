@@ -1,54 +1,6 @@
 // [HORIZON-EDIT] ADMIN-TICKETS
-/proc/log_type_to_name(message_type)
-	switch(message_type)
-		if(LOG_ATTACK)
-			return "Attack"
-		if(LOG_SAY)
-			return "Say"
-		if(LOG_WHISPER)
-			return "Whisper"
-		if(LOG_EMOTE)
-			return "Emote"
-		if(LOG_RADIO_EMOTE)
-			return "RadioEmote"
-		if(LOG_DSAY)
-			return "Deadchat"
-		if(LOG_PDA)
-			return "PDA"
-		if(LOG_CHAT)
-			return "Chat"
-		if(LOG_COMMENT)
-			return "Comment"
-		if(LOG_TELECOMMS)
-			return "Telecomms"
-		if(LOG_TRANSPORT)
-			return "Transport"
-		if(LOG_OOC)
-			return "OOC"
-		if(LOG_ADMIN)
-			return "Admin"
-		if(LOG_ADMIN_PRIVATE)
-			return "Admin"
-		if(LOG_ASAY)
-			return "ASAY"
-		if(LOG_OWNERSHIP)
-			return "Ownership"
-		if(LOG_GAME)
-			return "Game"
-		if(LOG_VIRUS)
-			return "Virus"
-		if(LOG_MECHA)
-			return "Mecha"
-		if(LOG_SHUTTLE)
-			return "Shuttle"
-		if(LOG_VICTIM)
-			return "Victim"
-		if(LOG_ECON)
-			return "Economy"
-		if(LOG_SPEECH_INDICATORS)
-			return "Speech"
-	return "Misc"
-// [/HORIZON-ADD]
+// (log_type_to_name was removed: display names for log types are static
+// frontend data in LogViewer.tsx, derived from the numeric type_flag.)
 
 //print a warning message to world.log
 #define WARNING(MSG) warning("[MSG] in [__FILE__] at line [__LINE__] src: [UNLINT(src)] usr: [usr].")
