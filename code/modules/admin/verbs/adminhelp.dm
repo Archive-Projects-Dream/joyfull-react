@@ -1078,6 +1078,11 @@ GAME_VERB_HIDDEN(/client, no_tgui_adminhelp, "NoTguiAdminhelp")
 
 // [HORIZON-EDIT] ADMIN-TICKETS
 /client/proc/adminhelp_entry()
+	// Only an AHELP_ACTIVE ticket counts as open. A stale current_ticket
+	// (ticket closed while the client reference survived) must not hijack
+	// F1 away from the new-ticket dialog; mirrors the mentorhelp `.open` check.
+	if(current_ticket && current_ticket.state != AHELP_ACTIVE)
+		current_ticket = null
 	if(current_ticket || (current_mhelp && current_mhelp.open))
 		open_player_ticket_panel()
 		return

@@ -274,8 +274,14 @@
 	selected_ticket = null
 	selected_tab = "admin"
 
-	if(istype(C.current_ticket))
-		selected_ticket = C.current_ticket.id
+	// Only an AHELP_ACTIVE ticket claims the admin tab; a stale reference to
+	// a closed one is dropped so it can't shadow the mentor/archived picks.
+	var/datum/admin_help/open_admin = C.current_ticket
+	if(open_admin && open_admin.state != AHELP_ACTIVE)
+		C.current_ticket = null
+		open_admin = null
+	if(open_admin)
+		selected_ticket = open_admin.id
 	else if(istype(C.current_mhelp) && C.current_mhelp.open)
 		selected_tab = "mentor"
 	else
