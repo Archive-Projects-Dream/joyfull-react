@@ -313,16 +313,30 @@
 
 		if("autoreply")
 			var/ticket_id = text2num(params["ticket_id"])
+			var/title = params["title"]
+			var/message = params["message"]
+			if(!ticket_id || !title || !message)
+				return FALSE
+			if(selected_tab == ADMIN_TAB && !is_staff(current_client))
+				return FALSE
+			if(selected_tab == MENTOR_TAB && !is_mentor(current_client) && !is_staff(current_client))
+				return FALSE
+			// The canned reply list lives in the frontend; whether the
+			// reply auto-resolves the ticket is a client-sent flag, which
+			// is fine: resolve permissions are checked in Resolve() anyway.
+			var/resolve = text2num(params["resolve"]) > 0
 			if(selected_tab == ADMIN_TAB)
 				var/datum/admin_help/AH = GLOB.ahelp_tickets.TicketByID(ticket_id)
-				if(AH)
-					AH.AutoReply()
-					return TRUE
+				if(!AH)
+					return FALSE
+				AH.apply_autoreply(title, message, current_client, resolve)
+				return TRUE
 			else
 				var/datum/mentorhelp/MH = mentorhelp_by_id(ticket_id)
-				if(MH)
-					MH.autoresponse(current_client)
-					return TRUE
+				if(!MH)
+					return FALSE
+				MH.apply_autoreply(title, message, current_client)
+				return TRUE
 
 		if("reopen_ticket")
 			var/ticket_id = text2num(params["ticket_id"])

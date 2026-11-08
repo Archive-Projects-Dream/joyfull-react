@@ -433,7 +433,6 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		ref_src = "[REF(src)]"
 	. = " (<A href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];ahelp=[ref_src];ahelp_action=mark'>[marked_admin ? "UNMARK" : "MARK"]</A>)"
 	. += " (<A href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];ahelp=[ref_src];ahelp_action=reject'>REJT</A>)"
-	. += " (<A href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];ahelp=[ref_src];ahelp_action=autoreply'>AUTO</A>)"
 	. += " (<A href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];ahelp=[ref_src];ahelp_action=close'>CLOSE</A>)"
 	. += " (<A href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];ahelp=[ref_src];ahelp_action=resolve'>RSLVE</A>)"
 // [/HORIZON-EDIT]
@@ -740,40 +739,38 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	SSblackbox.LogAhelp(id, "Unmarked", "Unmarked by [usr.key] (previously [marked_admin])", sender = usr.ckey)
 	marked_admin = null
 
-/// Resolve ticket with a premade message
-/datum/admin_help/proc/AutoReply()
-	var/key_name = key_name_admin(usr)
+/// Applies a canned auto-reply picked in the tgui ticket panel.
+/// The list of canned replies itself lives in the frontend
+/// (tgui/packages/tgui/_horizonUI/interfaces/ticketPanelAutoreplies.ts);
+/// the backend only receives the chosen title and message text.
+/datum/admin_help/proc/apply_autoreply(title, message, client/responder, resolve = FALSE)
 	if(state != AHELP_ACTIVE)
-		to_chat(usr, span_warning("This ticket is already closed!"), confidential = TRUE)
-		return
+		to_chat(responder, span_warning("This ticket is already closed!"), confidential = TRUE)
+		return FALSE
 
-	if(marked_admin != usr.ckey)
-		if(marked_admin)
-			SEND_SOUND(usr, sound('_horizon/sound/adminhelp-error.ogg', volume = 30)) // [HORIZON-EDIT] ADMIN-TICKETS
-			to_chat(usr, span_warning("This ticket is currently marked by [marked_admin]. Please override their mark to interact with this ticket!"), confidential = TRUE)
-			return
-		else
-			mark_ticket(usr)
+	if(marked_admin && marked_admin != responder.ckey)
+		SEND_SOUND(responder, sound('_horizon/sound/adminhelp-error.ogg', volume = 30)) // [HORIZON-EDIT] ADMIN-TICKETS
+		to_chat(responder, span_warning("This ticket is currently marked by [marked_admin]. Please override their mark to interact with this ticket!"), confidential = TRUE)
+		return FALSE
 
-	var/chosen = tgui_input_list(usr, "Which auto response do you wish to send?", "AutoReply", GLOB.adminreplies)
-	var/datum/autoreply/admin/response = GLOB.adminreplies[chosen]
+	if(!marked_admin)
+		mark_ticket(responder.mob)
 
-	if(!response || !istype(response))
-		return
+	var/key_name = key_name_admin(responder)
 
-	var/msg = "[span_boldwarning("- AdminHelp marked as [response.title]! -")]<br>"
-	msg += span_warning("[response.message]")
+	var/msg = "[span_boldwarning("- AdminHelp marked as [title]! -")]<br>"
+	msg += span_warning(message)
 
 	if(initiator)
 		to_chat(initiator, msg, confidential = TRUE)
 
-	msg = "Ticket [TicketHref("#[id]")] marked as [response.title] by [key_name]"
-	message_admins(msg)
-	AddInteraction("Marked as [response.title] by [key_name]",
-		plain_message = "Marked as [response.title] by [usr.key]", message_type = "system")
-	SSblackbox.LogAhelp(id, "Autoreply", "Marked as [response.title] by [usr.key]", null,  usr.ckey)
-	if(response.closer)
+	message_admins("Ticket [TicketHref("#[id]")] marked as [title] by [key_name]")
+	AddInteraction("Marked as [title] by [key_name]",
+		plain_message = "Marked as [title] by [responder.key]", message_type = "system")
+	SSblackbox.LogAhelp(id, "Autoreply", "Marked as [title] by [responder.key]", null, responder.ckey)
+	if(resolve)
 		Resolve(silent = TRUE)
+	return TRUE
 
 /datum/admin_help/proc/OpenInTicketPanel()
 	var/client/C = usr.client
@@ -887,8 +884,6 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 			Reject()
 		if("reply")
 			usr.client.cmd_ahelp_reply(initiator)
-		if("autoreply")
-			AutoReply()
 		if("close")
 			Close()
 		if("resolve")

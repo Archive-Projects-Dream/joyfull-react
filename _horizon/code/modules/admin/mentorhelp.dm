@@ -28,6 +28,21 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	author.current_mhelp = MH
 	return MH
 
+/// Called from /client/Destroy() when a player disconnects: their open
+/// mentorhelp thread is closed immediately (with the disconnect notice)
+/// instead of being discovered lazily on the next interaction.
+/datum/mentorhelp_manager/proc/client_logout(client/C)
+	var/datum/mentorhelp/MH = get_active_ticket_by_ckey(C?.ckey)
+	if(!MH)
+		return
+	if(C.current_mhelp == MH)
+		C.current_mhelp = null
+	if(MH.author == C)
+		// Drop the client reference so close() takes the dedicated
+		// "author disconnected" path and notifies mentors.
+		MH.author = null
+	MH.close()
+
 // Represents a mentorhelp thread
 /datum/mentorhelp
 	var/id = 0
@@ -91,7 +106,8 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	else if(GLOB.mentorhelp_manager.archived_tickets["[id]"] == src)
 		GLOB.mentorhelp_manager.archived_tickets -= "[id]"
 
-	author.current_mhelp = null
+	if(author)
+		author.current_mhelp = null
 	author = null
 	mentor = null
 	return ..()
@@ -116,12 +132,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	if(M.job)
 		return M.job
 	return "Unknown"
-
-/datum/mentorhelp/proc/check_author()
-	if(!author)
-		close()
-		return FALSE
-	return TRUE
 
 /datum/mentorhelp/proc/check_open(client/C)
 	if(!open)
@@ -250,7 +260,7 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	defer_ticket_panel_update()
 
 /datum/mentorhelp/proc/broadcast_request(client/opener, message = null)
-	if(!opener || !open || !check_author())
+	if(!opener || !open)
 		return FALSE
 	if(mentor)
 		return TRUE
@@ -276,7 +286,7 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 		addtimer(CALLBACK(src, PROC_REF(broadcast_unhandled), msg, sender), 5 MINUTES)
 
 /datum/mentorhelp/proc/message_handlers(msg, client/sender, client/recipient, with_sound = TRUE, staff_only = FALSE, include_keys = TRUE)
-	if(!sender || !check_author())
+	if(!sender)
 		return
 
 	var/msg_type = "mentor"
@@ -368,8 +378,7 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	var/message_body = "<b>[message_sender_key]</b>"
 	if(sender == author)
 		message_body += " (<a class='button' href='byond://?src=[REF(src)];action=mark'>Mark/Unmark</a>"
-		message_body += " | <a class='button' href='byond://?src=[REF(src)];action=close'>Close</a>"
-		message_body += " | <a class='button' href='byond://?src=[REF(src)];action=autorespond'>AutoResponse</a>)"
+		message_body += " | <a class='button' href='byond://?src=[REF(src)];action=close'>Close</a>)"
 	message_body += "\n\n[span_mentor("<span class='message'>[message]</span>")]"
 	if(recipient == author)
 		message_body += "\n\n<i>Click on the mentor's name to reply.</i>"
@@ -383,9 +392,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
  * Marking
  */
 /datum/mentorhelp/proc/mark(client/thread_mentor)
-	if(!check_author())
-		return
-
 	if(!check_open(thread_mentor))
 		return
 
@@ -428,9 +434,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	to_chat(author, span_mentorhelp("NOTICE: [get_display_name(author, mentor)] has marked your thread and is preparing to respond."), confidential = TRUE)
 
 /datum/mentorhelp/proc/unmark(client/thread_mentor)
-	if(!check_author())
-		return
-
 	if(!check_open(thread_mentor))
 		return
 
@@ -451,9 +454,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
  * Misc.
  */
 /datum/mentorhelp/proc/reopen()
-	if(!check_author())
-		return
-
 	if(open)
 		to_chat(usr, span_warning("This ticket is already open!"), confidential = TRUE)
 		return
@@ -580,9 +580,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	player_panel.open()
 
 /datum/mentorhelp/proc/Respond(msg, client/responder)
-	if(!check_author())
-		return
-
 	if(!check_open(responder))
 		return
 
@@ -609,8 +606,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	switch(href_list["action"])
 		if("message")
 			input_message(C)
-		if("autorespond")
-			autoresponse(C)
 		if("mark")
 			if(!mentor)
 				mark(C)
@@ -623,47 +618,29 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 /*
  * Autoresponse
  */
-/datum/mentorhelp/proc/autoresponse(client/responder)
-	if(!check_author())
-		return
 
+/// Applies a canned autoresponse picked in the tgui ticket panel.
+/// The list of canned replies itself lives in the frontend
+/// (tgui/packages/tgui/_horizonUI/interfaces/ticketPanelAutoreplies.ts);
+/// the backend only receives the chosen title and message text.
+/datum/mentorhelp/proc/apply_autoreply(title, message, client/responder)
 	if(!check_open(responder))
-		return
+		return FALSE
 
 	if(!is_mentor(responder))
-		return
+		return FALSE
 
 	if(!mentor)
 		mark(responder)
 	else if(mentor != responder)
 		to_chat(responder, span_notice("<b>NOTICE:</b> A mentor is already handling this thread!"), confidential = TRUE)
-		return
+		return FALSE
 
-	var/choice = tgui_input_list(usr, "Which autoresponse option do you want to send to the player?", "Autoresponse", GLOB.mentorreplies)
-	var/datum/autoreply/mentor/response = GLOB.mentorreplies[choice]
-
-	if(!response || !istype(response))
-		return
-
-	if(!check_author())
-		return
-
-	if(!check_open(responder))
-		return
-
-	if(!is_mentor(responder))
-		return
-
-	if(!mentor)
-		mark(responder)
-	else if(mentor != responder)
-		to_chat(responder, span_notice("<b>NOTICE:</b> A mentor is already handling this thread!"), confidential = TRUE)
-		return
-
-	var/msg = "- MentorHelp marked as [response.title]! -"
-	msg += "[response.message]"
+	var/msg = "- MentorHelp marked as [title]! -"
+	msg += message
 
 	message_handlers(msg, responder, author)
+	return TRUE
 
 /proc/message_mentors(message)
 	for(var/client/mentor in GLOB.clients)
@@ -684,9 +661,6 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	return TRUE
 
 /datum/mentorhelp/proc/defer_to_admins(client/deferrer)
-	if(!check_author())
-		return
-
 	if(!check_open(deferrer))
 		return
 

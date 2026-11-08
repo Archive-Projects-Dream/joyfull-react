@@ -639,6 +639,7 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 
 	log_access("Logout: [key_name(src)]")
 	GLOB.ahelp_tickets.ClientLogout(src)
+	GLOB.mentorhelp_manager.client_logout(src) // [HORIZON-ADD] ADMIN-TICKETS: close the disconnecting player's open mentorhelp thread
 	GLOB.interviews.client_logout(src)
 	GLOB.requests.client_logout(src)
 	SSserver_maint.UpdateHubStatus()

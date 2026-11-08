@@ -30,7 +30,6 @@
 	var/log_time = server_timestamp("hh:mm:ss")
 	var/log_who = key_name_and_tag(src)
 	var/log_where = loc_name(src)
-	var/log_type_name = log_type_to_name(message_type)
 	var/mob/living/L = src
 	var/log_health = null
 	if(istype(L) && (message_type == LOG_ATTACK || message_type == LOG_VICTIM))
@@ -71,7 +70,6 @@
 		"who" = log_who,
 		"what" = colored_message,
 		"where" = log_where,
-		"type" = log_type_name,
 		"type_flag" = message_type,
 		"state" = log_state,
 		"ckey" = ckey,

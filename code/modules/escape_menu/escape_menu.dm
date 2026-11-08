@@ -195,30 +195,20 @@ GAME_VERB_HIDDEN(/client, reset_held_keys_verb, "Reset Held Keys")
 	return result
 
 // [HORIZON-ADD] ADMIN-TICKETS
+// Raw facts only: every display label and derived value (button text, pending
+// ticket count, can-open checks) is computed on the frontend from these.
 /datum/escape_menu/proc/build_admin_mode_data()
-	if(client?.holder)
-		return list("adminMode" = "active")
-	if(client && !isnull(GLOB.deadmins[client.ckey]))
-		return list("adminMode" = "deadmined")
-	return list("adminMode" = "none")
+	return list(
+		"isAdmin" = client?.holder ? TRUE : FALSE,
+		"isDeadmined" = client && !isnull(GLOB.deadmins[client.ckey]) ? TRUE : FALSE,
+	)
 
 /datum/escape_menu/proc/build_ticket_panel_data()
-	if(is_staff(client))
-		return list(
-			"canOpenTicketPanel" = TRUE,
-			"ticketPanelLabel" = "Admin Ticket Panel",
-			"pendingTickets" = length(GLOB.ahelp_tickets.active_tickets),
-		)
-	if(is_mentor(client))
-		return list(
-			"canOpenTicketPanel" = TRUE,
-			"ticketPanelLabel" = "Mentor Ticket Panel",
-			"pendingTickets" = length(GLOB.mentorhelp_manager.active_tickets),
-		)
 	return list(
-		"canOpenTicketPanel" = FALSE,
-		"ticketPanelLabel" = null,
-		"pendingTickets" = 0,
+		"isStaff" = is_staff(client) ? TRUE : FALSE,
+		"isMentor" = is_mentor(client) ? TRUE : FALSE,
+		"adminOpenTickets" = length(GLOB.ahelp_tickets.active_tickets),
+		"mentorOpenTickets" = length(GLOB.mentorhelp_manager.active_tickets),
 	)
 // [/HORIZON-ADD]
 
