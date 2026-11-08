@@ -78,25 +78,6 @@
 		/datum/material/gold = SHEET_MATERIAL_AMOUNT * 2,
 		/datum/material/uranium = HALF_SHEET_MATERIAL_AMOUNT,
 	)
-	/// Is this shipmind core inhabitable by ghosts with a soulcatcher?
-	var/has_soulcatcher = TRUE
-
-/obj/structure/shuttle_decoration/liquid_tank/battery/shipmind/Initialize(mapload)
-	. = ..()
-	if(has_soulcatcher)
-		var/datum/component/soulcatcher/shipmind = AddComponent(/datum/component/soulcatcher/shipmind_core)
-		shipmind.create_room(target_name = "Shipmind Corespace", target_desc = "An environment of constantly flowing information, data, and controls. You should be in control of a ship, and yet your contacts have worn and your senses have dulled.")
-
-/obj/structure/shuttle_decoration/liquid_tank/battery/shipmind/inert
-	has_soulcatcher = FALSE
-
-/datum/component/soulcatcher/shipmind_core
-	name = "Defunct Shipmind Core"
-	ghost_joinable = TRUE
-	require_approval = FALSE
-	max_souls = 1
-	communicate_as_parent = TRUE
-	removable = FALSE
 
 /obj/structure/shuttle_decoration/liquid_tank/coolant
 	name = "coolant tank"
