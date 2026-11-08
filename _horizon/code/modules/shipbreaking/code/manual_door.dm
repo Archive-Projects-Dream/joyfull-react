@@ -1,9 +1,6 @@
 /// Manual colony doors: slowly actuated, non-powered airlocks made from a parts kit.
-/// Ported from NovaSector (modular_nova/modules/colony_fabricator/code/construction/manual_door.dm) as a
-/// dependency of the shipbreaking shuttle airlocks, which extend this type.
-/// The flatpacked machine base from NovaSector's colony_fabricator (colony_fabricator.dm) is included here
-/// so the door's parts kit can be deployed; it uses the local deployable component.
-/obj/structure/mineral_door/manual_colony_door
+/// The flatpacked machine base colony_fabricator it uses the local deployable component.
+/obj/structure/mineral_door/manual_door
 	name = "manual airlock"
 	icon = '_horizon/code/modules/shipbreaking/icons/airlock_manual.dmi'
 	material_flags = NONE
@@ -18,16 +15,16 @@
 	open_duration = 0.6 SECONDS
 	close_duration = 0.45 SECONDS
 
-/obj/structure/mineral_door/manual_colony_door/atom_deconstruct(disassembled = TRUE)
+/obj/structure/mineral_door/manual_door/atom_deconstruct(disassembled = TRUE)
 	if(disassembled)
 		new disassembled_type(get_turf(src))
 
 // Pickaxes won't dig these apart
-/obj/structure/mineral_door/manual_colony_door/pickaxe_door(mob/living/user, obj/item/item_in_question)
+/obj/structure/mineral_door/manual_door/pickaxe_door(mob/living/user, obj/item/item_in_question)
 	return
 
 // These doors have a short do_after to check if you can open or close them
-/obj/structure/mineral_door/manual_colony_door/TryToSwitchState(atom/user)
+/obj/structure/mineral_door/manual_door/TryToSwitchState(atom/user)
 	if(isSwitchingStates || !anchored)
 		return
 	if(!do_after(user, manual_actuation_delay, src))
@@ -35,7 +32,7 @@
 	return ..()
 
 // We don't care about being bumped, these doors have to be actuated manually
-/obj/structure/mineral_door/manual_colony_door/Bumped(atom/movable/bumped_atom)
+/obj/structure/mineral_door/manual_door/Bumped(atom/movable/bumped_atom)
 	return
 
 // Parts kit for putting the door together
@@ -68,10 +65,10 @@
 
 /obj/item/flatpacked_machine/airlock_kit_manual
 	name = "prefab manual airlock parts kit"
-	desc = /obj/structure/mineral_door/manual_colony_door::desc
+	desc = /obj/structure/mineral_door/manual_door::desc
 	icon = '_horizon/code/modules/shipbreaking/icons/doors_packed.dmi'
 	icon_state = "airlock_parts_manual"
-	type_to_deploy = /obj/structure/mineral_door/manual_colony_door
+	type_to_deploy = /obj/structure/mineral_door/manual_door
 	custom_materials = list(
 		/datum/material/iron = SHEET_MATERIAL_AMOUNT * 5,
 		/datum/material/glass = SHEET_MATERIAL_AMOUNT * 2,

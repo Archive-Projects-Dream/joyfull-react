@@ -1,4 +1,4 @@
-/obj/structure/mineral_door/manual_colony_door/shuttle
+/obj/structure/mineral_door/manual_door/shuttle
 	name = "manual exterior airlock"
 	desc = "A manually operated airlock for the exteriors of ships, sized just enough to crawl through in zero gravity."
 	icon = '_horizon/code/modules/shipbreaking/icons/doors.dmi'
@@ -11,7 +11,7 @@
 	open_duration = 0.5 SECONDS
 	close_duration = 0.5 SECONDS
 
-/obj/structure/mineral_door/manual_colony_door/shuttle/Initialize(mapload)
+/obj/structure/mineral_door/manual_door/shuttle/Initialize(mapload)
 	. = ..()
 	var/static/list/tool_behaviors = list(
 		TOOL_WELDER = list(
@@ -20,7 +20,7 @@
 	)
 	AddElement(/datum/element/contextual_screentip_tools, tool_behaviors)
 
-/obj/structure/mineral_door/manual_colony_door/shuttle/welder_act(mob/living/user, obj/item/tool) //override if the door is supposed to be flammable.
+/obj/structure/mineral_door/manual_door/shuttle/welder_act(mob/living/user, obj/item/tool) //override if the door is supposed to be flammable.
 	if(!tool.get_temperature() >= FIRE_MINIMUM_TEMPERATURE_TO_EXIST)
 		return ITEM_INTERACT_FAILURE
 	balloon_alert(user, "cutting...")
@@ -30,10 +30,10 @@
 	return ITEM_INTERACT_SUCCESS
 
 /// Overridden because only welders should be unsecuring the door, we don't deconstruct like normal
-/obj/structure/mineral_door/manual_colony_door/shuttle/wrench_act(mob/living/user, obj/item/tool)
+/obj/structure/mineral_door/manual_door/shuttle/wrench_act(mob/living/user, obj/item/tool)
 	return
 
-/obj/structure/mineral_door/manual_colony_door/shuttle/examine(mob/user)
+/obj/structure/mineral_door/manual_door/shuttle/examine(mob/user)
 	. = ..()
 	. += span_notice("You can cut this free with a welding tool of some kind.")
 
@@ -48,7 +48,7 @@
 		/datum/material/titanium = SHEET_MATERIAL_AMOUNT * 2.75,
 	)
 	/// What kind of thing do we make when welded back down
-	var/obj/reconnect_type = /obj/structure/mineral_door/manual_colony_door/shuttle
+	var/obj/reconnect_type = /obj/structure/mineral_door/manual_door/shuttle
 
 /obj/structure/hull_plating/airlock/Initialize(mapload)
 	. = ..()
@@ -88,7 +88,7 @@
 	new /obj/item/stack/sheet/iron(drop_location(), 4)
 	new /obj/item/stack/sheet/mineral/titanium(drop_location(), 2)
 
-/obj/structure/mineral_door/manual_colony_door/shuttle/interior
+/obj/structure/mineral_door/manual_door/shuttle/interior
 	name = "manual interior airlock"
 	desc = "A manually operated airlock for the exteriors of ships, walkable and quicker to open than heavier airlocks."
 	icon_state = "interior"
@@ -102,7 +102,7 @@
 	name = "disconnected interior airlock"
 	desc = "A manually operated airlock for the interiors of ships, this one looks to be disconnected from the frame."
 	icon_state = "interior_free"
-	reconnect_type = /obj/structure/mineral_door/manual_colony_door/shuttle/interior
+	reconnect_type = /obj/structure/mineral_door/manual_door/shuttle/interior
 
 /obj/structure/shuttle_access_panel
 	name = "maintenance panel"
@@ -145,7 +145,6 @@
 	reconnect_type = /obj/structure/shuttle_access_panel
 
 // Actual powered airlock
-
 /obj/machinery/door/airlock/spacer
 	name = "spacer airlock"
 	desc = "An airlock in the general style of spacers and their void habitats. Built for reliability and low maintenance over all else."
