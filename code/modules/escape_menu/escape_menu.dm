@@ -75,7 +75,7 @@ GAME_VERB_HIDDEN(/client, reset_held_keys_verb, "Reset Held Keys")
 		"players" = build_player_list(),
 		"ignoredOffline" = build_ignored_offline(),
 		"uiVolume" = client?.prefs ? calculate_mixed_volume(client, 100, CHANNEL_UI) / 100 : 0.8, // [HORIZON-EDIT] Master_Sounds
-	) + build_ticket_panel_data() + build_admin_mode_data())
+	) + build_staff_data())
 
 /datum/escape_menu/proc/on_client_qdel()
 	SIGNAL_HANDLER
@@ -152,7 +152,7 @@ GAME_VERB_HIDDEN(/client, reset_held_keys_verb, "Reset Held Keys")
 		"resources" = resources,
 		"suicideIcon" = GLOB.escape_menu_suicide_icon_base64,
 		"uiVolume" = client?.prefs ? calculate_mixed_volume(client, 100, CHANNEL_UI) / 100 : 0.8, // [HORIZON-EDIT] Master_Sounds
-	) + build_ticket_panel_data() + build_admin_mode_data())
+	) + build_staff_data())
 
 /datum/escape_menu/proc/build_admin_list()
 	var/list/result = list()
@@ -195,16 +195,13 @@ GAME_VERB_HIDDEN(/client, reset_held_keys_verb, "Reset Held Keys")
 	return result
 
 // [HORIZON-ADD] ADMIN-TICKETS
-// Raw facts only: every display label and derived value (button text, pending
-// ticket count, can-open checks) is computed on the frontend from these.
-/datum/escape_menu/proc/build_admin_mode_data()
+// Raw facts only: every display label and derived value (button text,
+// pending ticket count, deadmin/readmin wording, can-open checks) is
+// computed on the frontend from these.
+/datum/escape_menu/proc/build_staff_data()
 	return list(
 		"isAdmin" = client?.holder ? TRUE : FALSE,
 		"isDeadmined" = client && !isnull(GLOB.deadmins[client.ckey]) ? TRUE : FALSE,
-	)
-
-/datum/escape_menu/proc/build_ticket_panel_data()
-	return list(
 		"isStaff" = is_staff(client) ? TRUE : FALSE,
 		"isMentor" = is_mentor(client) ? TRUE : FALSE,
 		"adminOpenTickets" = length(GLOB.ahelp_tickets.active_tickets),

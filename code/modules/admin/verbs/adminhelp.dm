@@ -744,6 +744,16 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 /// (tgui/packages/tgui/_horizonUI/interfaces/ticketPanelAutoreplies.ts);
 /// the backend only receives the chosen title and message text.
 /datum/admin_help/proc/apply_autoreply(title, message, client/responder, resolve = FALSE)
+	// The title and message are client-sent (the canned list lives in the
+	// frontend), so type-check and sanitize them before they reach any
+	// to_chat, exactly like player replies.
+	if(!istext(title) || !istext(message))
+		return FALSE
+	title = strip_html(html_decode(title))
+	message = strip_html(html_decode(message))
+	if(!title || !message)
+		return FALSE
+
 	if(state != AHELP_ACTIVE)
 		to_chat(responder, span_warning("This ticket is already closed!"), confidential = TRUE)
 		return FALSE

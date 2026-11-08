@@ -624,6 +624,16 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 /// (tgui/packages/tgui/_horizonUI/interfaces/ticketPanelAutoreplies.ts);
 /// the backend only receives the chosen title and message text.
 /datum/mentorhelp/proc/apply_autoreply(title, message, client/responder)
+	// The title and message are client-sent (the canned list lives in the
+	// frontend), so type-check and sanitize them before they reach any
+	// to_chat, exactly like player replies.
+	if(!istext(title) || !istext(message))
+		return FALSE
+	title = strip_html(html_decode(title))
+	message = strip_html(html_decode(message))
+	if(!title || !message)
+		return FALSE
+
 	if(!check_open(responder))
 		return FALSE
 

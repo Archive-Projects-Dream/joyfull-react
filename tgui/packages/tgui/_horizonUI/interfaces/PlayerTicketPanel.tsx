@@ -74,8 +74,9 @@ const responseTypeColor = (type: string) => {
 export const PlayerTicketPanel = (props) => {
   const { act, data } = useBackend<Data>();
   const { selected_tab, selected_ticket } = data;
-  const hasAdminTickets = !!data.has_admin_tickets;
-  const hasMentorTickets = !!data.has_mentor_tickets;
+  // BooleanLike -> boolean, normalized once at the boundary.
+  const hasAdminTickets = Boolean(data.has_admin_tickets);
+  const hasMentorTickets = Boolean(data.has_mentor_tickets);
 
   const FONT_SIZE_KEY = 'playerTicketPanelFontSize';
   const FONT_SIZE_DEFAULT = 12;
@@ -141,7 +142,7 @@ export const PlayerTicketPanel = (props) => {
   );
 
   const responses = selected_ticket?.all_responses ?? [];
-  const isArchived = !!selected_ticket?.is_archived;
+  const isArchived = Boolean(selected_ticket?.is_archived);
 
   const {
     ref: conversationRef,
@@ -191,7 +192,7 @@ export const PlayerTicketPanel = (props) => {
           >
             New Ticket
           </Button>
-          {!!otherTabAvailable && (
+          {otherTabAvailable && (
             <Button
               icon="exchange-alt"
               tooltip={`Switch to your ${otherTab} ticket`}

@@ -16,11 +16,9 @@
 	if(M.real_name)
 		info["ic_name"] = M.real_name
 
-	// Antag status instead of faction
-	if(M.mind?.special_roles?.len)
-		info["faction"] = "Antag: [M.mind.special_roles.Join(", ")]"
-	else
-		info["faction"] = null
+	// Raw antag roles; the frontend renders the label
+	if(length(M.mind?.special_roles))
+		info["antag_roles"] = M.mind.special_roles.Copy()
 
 	info["role"] = get_mob_role(M)
 
@@ -82,7 +80,7 @@
 		"viewer_is_claiming" = (AH.marked_admin == (viewer ? viewer.ckey : usr?.ckey) ? TRUE : FALSE),
 		"is_archived" = (AH.state != AHELP_ACTIVE),
 		"ic_name" = player_info ? player_info["ic_name"] : null,
-		"faction" = player_info ? player_info["faction"] : null,
+		"antag_roles" = player_info ? player_info["antag_roles"] : null,
 		"role" = player_info ? player_info["role"] : null
 	)
 
@@ -93,7 +91,7 @@
 	var/status = MH.open ? (MH.mentor ? "claimed" : "open") : "closed"
 	var/list/player_info = get_player_info(MH.author)
 	var/ic_name = (player_info ? player_info["ic_name"] : null) || MH.get_author_ic_name()
-	var/faction = (player_info ? player_info["faction"] : null)
+	var/antag_roles = player_info ? player_info["antag_roles"] : null
 	var/role = (player_info ? player_info["role"] : null) || MH.get_author_role()
 
 	var/list/formatted_responses = list()
@@ -132,7 +130,7 @@
 		"viewer_is_claiming" = (MH.mentor && (MH.mentor.ckey == viewer?.ckey) ? TRUE : FALSE),
 		"is_archived" = !MH.open,
 		"ic_name" = ic_name,
-		"faction" = faction,
+		"antag_roles" = antag_roles,
 		"role" = role
 	)
 
@@ -141,14 +139,12 @@
 		return
 
 	var/client/C = user.client
-	if(!C.ticket_panel)
-		C.ticket_panel = new /datum/ticket_panel()
 
 	var/list/data = list(
-		"is_admin" = is_staff(C) ? TRUE: FALSE,
+		"is_admin" = is_staff(C) ? TRUE : FALSE,
 		"is_mentor" = is_mentor(C) ? TRUE : FALSE,
-		"selected_tab" = C.ticket_panel.selected_tab,
-		"selected_ticket" = C.ticket_panel.selected_ticket,
+		"selected_tab" = selected_tab,
+		"selected_ticket" = selected_ticket,
 		"admin_open_tickets" = list(),
 		"mentor_open_tickets" = list(),
 		"admin_archived_tickets" = list(),
@@ -183,7 +179,6 @@
 		return
 
 	var/client/current_client = ui.user.client
-	var/client/parent_client = current_client
 	var/mob/current_mob = ui.user
 
 	if(!is_staff(current_client))
@@ -196,16 +191,12 @@
 		if("select_tab")
 			if(params["tab"] == ADMIN_TAB && !is_staff(current_client))
 				return FALSE
-			if(!current_client.ticket_panel)
-				parent_client.ticket_panel = new /datum/ticket_panel()
-			parent_client.ticket_panel.selected_tab = params["tab"]
-			parent_client.ticket_panel.selected_ticket = null
+			selected_tab = params["tab"]
+			selected_ticket = null
 			return TRUE
 
 		if("select_ticket")
-			if(!parent_client.ticket_panel)
-				parent_client.ticket_panel = new /datum/ticket_panel()
-			parent_client.ticket_panel.selected_ticket = text2num(params["ticket_id"])
+			selected_ticket = text2num(params["ticket_id"])
 			return TRUE
 
 		if("start_adminhelp")
@@ -228,12 +219,12 @@
 				return FALSE
 
 			if(istype(target.current_ticket) && target.current_ticket.state == AHELP_ACTIVE)
-				parent_client.ticket_panel.selected_tab = ADMIN_TAB
-				parent_client.ticket_panel.selected_ticket = target.current_ticket.id
-				to_chat(parent_client, span_notice("Switched to existing admin ticket for [target.key]"), confidential = TRUE)
+				selected_tab = ADMIN_TAB
+				selected_ticket = target.current_ticket.id
+				to_chat(current_client, span_notice("Switched to existing admin ticket for [target.key]"), confidential = TRUE)
 				return TRUE
 
-			parent_client.cmd_admin_pm(target, null)
+			current_client.cmd_admin_pm(target, null)
 			return TRUE
 
 		if("start_mentorhelp")
@@ -260,9 +251,9 @@
 				return FALSE
 
 			if(istype(target.current_mhelp) && target.current_mhelp.open)
-				parent_client.ticket_panel.selected_tab = MENTOR_TAB
-				parent_client.ticket_panel.selected_ticket = target.current_mhelp.id
-				to_chat(parent_client, span_notice("Switched to existing mentor ticket for [target.current_mhelp.get_display_name(current_client, target)]"), confidential = TRUE)
+				selected_tab = MENTOR_TAB
+				selected_ticket = target.current_mhelp.id
+				to_chat(current_client, span_notice("Switched to existing mentor ticket for [target.current_mhelp.get_display_name(current_client, target)]"), confidential = TRUE)
 				return TRUE
 
 			if(GLOB.mentorhelp_manager.get_active_ticket_by_ckey(target.ckey))
@@ -277,16 +268,16 @@
 			if(!MH)
 				return FALSE
 			MH.notify(span_mentorhelp("[MH.get_display_name(null, current_client)] started a mentor conversation with [MH.get_display_name(current_client, target)]"),
-				unformatted_text = "[MH.get_display_name(null, parent_client)] started a mentor conversation with [MH.get_display_name(current_client, target)]")
+				unformatted_text = "[MH.get_display_name(null, current_client)] started a mentor conversation with [MH.get_display_name(current_client, target)]")
 			MH.initial_message = msg
-			MH.mark(parent_client)
-			MH.Respond(msg, parent_client)
+			MH.mark(current_client)
+			MH.Respond(msg, current_client)
 
 			return TRUE
 
 		if("open_player_panel")
 			if(!is_staff(current_client))
-				to_chat(parent_client, span_warning("You don't have permission to open a player panel."), confidential = TRUE)
+				to_chat(current_client, span_warning("You don't have permission to open a player panel."), confidential = TRUE)
 				return FALSE
 
 			var/mob/player = get_ticket_player(text2num(params["ticket_id"]))
@@ -299,7 +290,7 @@
 
 		if("open_logs")
 			if(!is_staff(current_client))
-				to_chat(parent_client, span_warning("You don't have permission to open logs."), confidential = TRUE)
+				to_chat(current_client, span_warning("You don't have permission to open logs."), confidential = TRUE)
 				return FALSE
 
 			var/mob/player = get_ticket_player(text2num(params["ticket_id"]))
@@ -556,8 +547,11 @@
 		ui.open()
 
 
-/datum/ticket_panel/ui_status(mob/user, datum/ui_state/state)
-	return UI_INTERACTIVE
+/// Staff (R_ADMIN) or mentors (R_MENTOR) only: losing both - e.g. after
+/// deadminning - closes the window instead of leaving a stale interactive
+/// panel behind, like the BeeStation ticket browser.
+/datum/ticket_panel/ui_state(mob/user)
+	return ADMIN_STATE(R_ADMIN | R_MENTOR)
 
 /// Admin verb to open the ticket panel
 ADMIN_VERB(ticket_panel, R_ADMIN | R_MENTOR, "Ticket Panel", "Allows you to see tickets open for adminhelps and mentorhelps.", ADMIN_CATEGORY_GAME)

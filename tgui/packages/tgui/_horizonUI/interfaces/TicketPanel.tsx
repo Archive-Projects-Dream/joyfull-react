@@ -41,7 +41,7 @@ type Ticket = {
   all_responses: TicketResponse[];
   is_archived: boolean;
   ic_name: string | null;
-  faction: string | null;
+  antag_roles: string[] | null;
   role: string | null;
 };
 
@@ -58,6 +58,10 @@ type Data = {
 
 export const TicketPanel = (props) => {
   const { act, data } = useBackend<Data>();
+
+  // BooleanLike -> boolean, normalized once so JSX below can use plain
+  // `isAdmin && ...` instead of !!-scattered comparisons.
+  const isAdmin = Boolean(data.is_admin);
 
   const FONT_SIZE_KEY = 'ticketPanelFontSize';
   const FONT_SIZE_DEFAULT = 12;
@@ -226,7 +230,7 @@ export const TicketPanel = (props) => {
                 }}
               >
                 <Tabs vertical>
-                  {data.is_admin ? (
+                  {isAdmin ? (
                     <Tabs.Tab
                       selected={data.selected_tab === 'admin'}
                       onClick={() => act('select_tab', { tab: 'admin' })}
@@ -302,7 +306,7 @@ export const TicketPanel = (props) => {
                                       }
                                       tooltip="Close Ticket"
                                       disabled={
-                                        !!ticket.claimed_by &&
+                                        ticket.claimed_by !== null &&
                                         !ticket.viewer_is_claiming
                                       }
                                       onClick={(e) => {
@@ -503,7 +507,7 @@ export const TicketPanel = (props) => {
                         buttons={
                           !selectedTicketData.is_archived ? (
                             <>
-                              {!!data.is_admin && (
+                              {isAdmin && (
                                 <>
                                   <Button
                                     icon="user"
@@ -540,7 +544,7 @@ export const TicketPanel = (props) => {
                               >
                                 Set Subject
                               </Button>
-                              {!!data.is_admin && (
+                              {isAdmin && (
                                 <>
                                   <Button
                                     icon="sticky-note"
@@ -639,11 +643,11 @@ export const TicketPanel = (props) => {
                                   {selectedTicketData.ic_name}
                                 </LabeledList.Item>
                               )}
-                              {selectedTicketData.faction && (
-                                <LabeledList.Item label="Status">
-                                  {selectedTicketData.faction}
+                              {selectedTicketData.antag_roles?.length ? (
+                                <LabeledList.Item label="Antag">
+                                  {selectedTicketData.antag_roles.join(', ')}
                                 </LabeledList.Item>
-                              )}
+                              ) : null}
                               {selectedTicketData.role && (
                                 <LabeledList.Item label="Role">
                                   {selectedTicketData.role}
