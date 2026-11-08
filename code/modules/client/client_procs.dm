@@ -247,6 +247,7 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 	///////////
 
 /client/New(TopicData)
+	new_started = TRUE
 	var/tdata = TopicData //save this for later use
 	TopicData = null //Prevent calls to client.Topic from connect
 
@@ -271,9 +272,6 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 	stat_panel = new(src, "statbrowser")
 	stat_panel.subscribe(src, PROC_REF(on_stat_panel_message))
 
-	// Instantiate tgui panel
-	tgui_panel = new(src, "browseroutput")
-
 	tgui_say = new(src, "tgui_say")
 
 	initialize_commandbar_spy()
@@ -294,6 +292,11 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 		GLOB.preferences_datums[ckey] = prefs
 	prefs.last_ip = address //these are gonna be used for banning
 	prefs.last_id = computer_id //these are gonna be used for banning
+
+	// [HORIZON-ADD] UI
+	tgui_panel = new(src, "browseroutput")
+	tgui_panel.create_browser(prefs.read_preference(/datum/preference/choiced/tgpanel_layout))
+	// [/HORIZON-ADD]
 
 	if(fexists(roundend_report_file()))
 		ASSIGN_GAME_VERB(src, /client, show_previous_roundend_report)
@@ -609,7 +612,12 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 	return ..()
 
 /client/Destroy()
+	if(!new_started)
+		..()
+		return QDEL_HINT_HARDDEL_NOW
+
 	SSdebugview.stop_processing(src) // [HORIZON-ADD]
+
 	if(mob)
 		var/stealth_admin = mob.client?.holder?.fakekey
 		var/announce_join = mob.client?.prefs?.read_preference(/datum/preference/toggle/broadcast_login_logout)
@@ -1052,6 +1060,7 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 					else
 						winset(src, "default-[REF(key)]", "parent=default;name=[key];command=")
 	calculate_move_dir()
+	SEND_SIGNAL(mob, COMSIG_MOB_HOTKEYS_UPDATED)
 
 /client/proc/change_view(new_size)
 	if (isnull(new_size))

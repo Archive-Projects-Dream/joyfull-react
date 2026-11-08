@@ -4,8 +4,8 @@
 	icon = '_horizon/code/modules/shipbreaking/epic_loot/icons/storage_items.dmi'
 	icon_state = "pencase"
 	equip_sound = 'sound/items/equip/toolbelt_equip.ogg'
-	pickup_sound = SFX_CLOTH_PICKUP
-	drop_sound = SFX_CLOTH_DROP
+	pickup_sound = /datum/sound_effect/cloth_pickup
+	drop_sound = /datum/sound_effect/cloth_drop
 	storage_type = /datum/storage/maintenance_loot_structure/epic_loot_medpen_case
 	slot_flags = ITEM_SLOT_POCKETS
 	w_class = WEIGHT_CLASS_BULKY
@@ -38,8 +38,8 @@
 	icon = '_horizon/code/modules/shipbreaking/epic_loot/icons/storage_items.dmi'
 	icon_state = "documents"
 	equip_sound = 'sound/items/equip/toolbelt_equip.ogg'
-	pickup_sound = SFX_CLOTH_PICKUP
-	drop_sound = SFX_CLOTH_DROP
+	pickup_sound = /datum/sound_effect/cloth_pickup
+	drop_sound = /datum/sound_effect/cloth_drop
 	storage_type = /datum/storage/maintenance_loot_structure/epic_loot_docs_case
 	slot_flags = ITEM_SLOT_POCKETS
 	w_class = WEIGHT_CLASS_BULKY
@@ -75,8 +75,8 @@
 	icon = '_horizon/code/modules/shipbreaking/epic_loot/icons/storage_items.dmi'
 	icon_state = "sick"
 	equip_sound = 'sound/items/equip/toolbelt_equip.ogg'
-	pickup_sound = SFX_CLOTH_PICKUP
-	drop_sound = SFX_CLOTH_DROP
+	pickup_sound = /datum/sound_effect/cloth_pickup
+	drop_sound = /datum/sound_effect/cloth_drop
 	storage_type = /datum/storage/maintenance_loot_structure/epic_loot_org_pouch
 	slot_flags = ITEM_SLOT_POCKETS
 	w_class = WEIGHT_CLASS_BULKY

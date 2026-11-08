@@ -402,16 +402,16 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 
 	var/action = payload["action"]
 	var/mob/dead/new_player/player = client?.mob
-	if(!istype(player) || client.interviewee) // [/HORIZON-EDIT] LOBBY
+	if(!istype(player) || client.interviewee) // [HORIZON-EDIT] LOBBY
 		return TRUE
 
 	switch(action)
 		if("ready_toggle")
 			if(player.ready == PLAYER_NOT_READY)
 				player.auto_deadmin_on_ready_or_latejoin()
-				player.ready = PLAYER_READY_TO_PLAY
+				player.ready()
 			else
-				player.ready = PLAYER_NOT_READY
+				player.unready()
 			send_update(list("isReady" = player.ready == PLAYER_READY_TO_PLAY))
 		if("join")
 			if(!SSticker?.IsRoundInProgress())
@@ -521,6 +521,8 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	set waitfor = FALSE
 	if(!client?.prefs || !window)
 		// Preferences are not settled yet (very early login) - process() retries
+		return
+	if(SSatoms.initialized != INITIALIZATION_INNEW_REGULAR || SSearly_assets.initialized != INITIALIZATION_INNEW_REGULAR) // [HORIZON-ADD] LOBBY
 		return
 	preview_dirty = FALSE
 
