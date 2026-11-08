@@ -53,14 +53,14 @@
 
 /obj/structure/shuttle_decoration/wall_plate/CanAllowThrough(atom/movable/mover, border_dir)
 	. = ..()
-	if(border_dir != dir)
+	if(!(border_dir & dir))
 		return TRUE
 
 /obj/structure/shuttle_decoration/wall_plate/CanPass(atom/movable/mover, border_dir)
 	return (border_dir & dir) ? ..() : TRUE
 
 /obj/structure/shuttle_decoration/wall_plate/CanAStarPass(to_dir, datum/can_pass_info/pass_info)
-	return !density || (dir != to_dir)
+	return !density || !(to_dir & dir)
 
 /obj/structure/shuttle_decoration/wall_plate/gold_foil
 	name = "gold foil wrapping"

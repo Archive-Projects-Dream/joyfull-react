@@ -63,17 +63,17 @@
 
 /obj/structure/engine_covers/CanAllowThrough(atom/movable/mover, border_dir)
 	. = ..()
-	if(border_dir != dir)
+	if(!(border_dir & dir))
 		return TRUE
 
 /obj/structure/engine_covers/CanPass(atom/movable/mover, border_dir)
 	return (border_dir & dir) ? ..() : TRUE
 
 /obj/structure/engine_covers/CanAStarPass(to_dir, datum/can_pass_info/pass_info)
-	return !density || (dir != to_dir)
+	return !density || !(to_dir & dir)
 
 /obj/structure/engine_covers/can_atmos_pass(turf/the_turf, vertical = FALSE)
-	if(get_dir(loc, the_turf) == dir)
+	if(get_dir(loc, the_turf) & dir)
 		return !density
 	else
 		return TRUE
