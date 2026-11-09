@@ -40,6 +40,8 @@
 	RegisterSignal(current_area, COMSIG_AREA_POWER_CHANGE, PROC_REF(AreaPowerCheck))
 	if(mapload)
 		find_and_mount_on_atom()
+	if(!unscrewed)
+		AddComponent(/datum/component/examine_balloon, pixel_y_offset = 36)
 	GLOB.intercoms_list += src
 
 /obj/item/radio/intercom/Destroy()

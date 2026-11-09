@@ -130,6 +130,7 @@ GLOBAL_LIST_EMPTY(req_console_ckey_departments)
 
 	if(mapload)
 		find_and_mount_on_atom()
+	AddComponent(/datum/component/examine_balloon)
 
 /obj/machinery/requests_console/Destroy()
 	QDEL_LIST(messages)

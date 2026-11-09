@@ -158,6 +158,8 @@
 #define RUNECHAT_PLANE 34
 /// Plane for balloon text (text that fades up)
 #define BALLOON_CHAT_PLANE 35
+/// Plane for the wallmount examine balloons
+#define EXAMINE_BALLOONS_PLANE 36
 
 //-------------------- HUD ---------------------
 //HUD layer defines

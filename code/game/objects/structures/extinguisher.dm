@@ -21,6 +21,7 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/structure/extinguisher_cabinet, 22) // [HORIZON
 		find_and_mount_on_atom()
 	update_appearance(UPDATE_ICON)
 	register_context()
+	AddComponent(/datum/component/examine_balloon, pixel_y_offset = 36)
 
 /obj/structure/extinguisher_cabinet/add_context(atom/source, list/context, obj/item/held_item, mob/user)
 	. = ..()

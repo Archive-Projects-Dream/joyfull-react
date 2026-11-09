@@ -85,6 +85,7 @@
 	register_context()
 	if(mapload)
 		find_and_mount_on_atom()
+	AddComponent(/datum/component/examine_balloon)
 	update_appearance()
 
 /obj/machinery/firealarm/Destroy()

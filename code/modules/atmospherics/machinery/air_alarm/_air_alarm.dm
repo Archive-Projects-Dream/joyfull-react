@@ -129,6 +129,7 @@ GLOBAL_LIST_EMPTY_TYPED(air_alarms, /obj/machinery/airalarm)
 			/obj/item/circuit_component/air_alarm_vents
 		), only_root_path = TRUE) \
 	)
+	AddComponent(/datum/component/examine_balloon)
 
 	GLOB.air_alarms += src
 	if(mapload)
