@@ -63,6 +63,11 @@
 #define WALLS_FOV_PLANE_14 1065
 #define WALLS_FOV_PLANE_15 1066
 #define WALLS_FOV_PLANE_16 1067
+/// Plane for the wallmount examine balloons. Must stay right above WALLS_FOV_PLANE_16, which the
+/// wall shadows relay into the game plate from: only one plane higher do the balloons draw over them
+#define EXAMINE_BALLOONS_PLANE 1068
+/// Holds the soft range mask the examine balloons are clipped to around the viewer, used only as a render target
+#define EXAMINE_BALLOONS_RANGE_MASK_PLANE 1069
 
 #define WALL_FOV_PLANE 10000
 #define WALL_FOV_RENDER_TARGET "*wall_fov_target"
@@ -84,6 +89,7 @@
 #define WALLS_FOV_PLANE_14_RENDER_TARGET "*WALLS_FOV_PLANE_14"
 #define WALLS_FOV_PLANE_15_RENDER_TARGET "*WALLS_FOV_PLANE_15"
 #define WALLS_FOV_PLANE_16_RENDER_TARGET "*WALLS_FOV_PLANE_16"
+#define EXAMINE_BALLOONS_RANGE_MASK_RENDER_TARGET "*EXAMINE_BALLOONS_RANGE_MASK_PLANE"
 
 //---------- LIGHTING -------------
 /// Normal 1 per turf dynamic lighting objects
@@ -158,8 +164,6 @@
 #define RUNECHAT_PLANE 34
 /// Plane for balloon text (text that fades up)
 #define BALLOON_CHAT_PLANE 35
-/// Plane for the wallmount examine balloons
-#define EXAMINE_BALLOONS_PLANE 36
 
 //-------------------- HUD ---------------------
 //HUD layer defines

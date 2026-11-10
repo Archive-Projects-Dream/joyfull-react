@@ -177,15 +177,15 @@
 	. = ..()
 
 	var/datum/hud/our_hud = user.mob.hud_used
-	for(var/atom/movable/screen/plane_master/balloons in our_hud.get_true_plane_masters(EXAMINE_BALLOONS_PLANE))
-		animate(balloons, 0.2 SECONDS, alpha = 255)
+	for(var/atom/movable/screen/plane_master/examine_balloons/balloons in our_hud.get_true_plane_masters(EXAMINE_BALLOONS_PLANE))
+		balloons.show_balloons()
 
 /datum/keybinding/living/toggle_examine_balloons/up(client/user, turf/target)
 	. = ..()
 
 	var/datum/hud/our_hud = user.mob.hud_used
-	for(var/atom/movable/screen/plane_master/balloons in our_hud.get_true_plane_masters(EXAMINE_BALLOONS_PLANE))
-		animate(balloons, 0.2 SECONDS, alpha = 0)
+	for(var/atom/movable/screen/plane_master/examine_balloons/balloons in our_hud.get_true_plane_masters(EXAMINE_BALLOONS_PLANE))
+		balloons.hide_balloons()
 
 /datum/keybinding/living/toggle_throw_mode
 	hotkey_keys = list("R", "Southwest") // END

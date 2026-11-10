@@ -570,12 +570,77 @@
 
 /atom/movable/screen/plane_master/examine_balloons
 	name = "Examine Balloons"
-	documentation = "The balloons that appear above objects (often wallmounts) when holding shift."
+	documentation = "The balloons that appear above objects (often wallmounts) when holding shift. \
+		Draws on top of the wall shadows, and two masks decide where it is visible at all: the wall shadow \
+		mask, so only wallmounts in direct sight show up, and a soft round mask around the viewer, so only close ones do."
 	plane = EXAMINE_BALLOONS_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	appearance_flags = PLANE_MASTER|NO_CLIENT_COLOR
-	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+	render_relay_planes = list(RENDER_PLANE_GAME)
 	alpha = 0
+	/// Soft round mask centered on the viewer while the balloons are shown, see show_balloons()
+	var/image/range_mask
+	/// Takes the range mask back off the screen once the balloons have faded out
+	var/range_mask_timer
+
+/atom/movable/screen/plane_master/examine_balloons/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
+	. = ..()
+	// Both masks are pulled a tile down, to be sampled where the wallmount sits and not where its balloon hovers
+	// Hidden wherever the wall shadows are: the same sight the player has
+	add_filter("wall_fov_mask", 1, alpha_mask_filter(y = EXAMINE_BALLOON_MASK_SAMPLE_OFFSET, render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_15_RENDER_TARGET, offset), flags = MASK_INVERSE))
+	// Only close around the viewer, fading out with the distance
+	add_filter("range_mask", 2, alpha_mask_filter(y = EXAMINE_BALLOON_MASK_SAMPLE_OFFSET, render_source = OFFSET_RENDER_TARGET(EXAMINE_BALLOONS_RANGE_MASK_RENDER_TARGET, offset)))
+
+/atom/movable/screen/plane_master/examine_balloons/Destroy()
+	if(range_mask_timer)
+		deltimer(range_mask_timer)
+	clear_range_mask()
+	return ..()
+
+/// The examine hotkey was pressed: fade the balloons in and center the range mask on what the viewer is looking from
+/atom/movable/screen/plane_master/examine_balloons/proc/show_balloons()
+	if(range_mask_timer)
+		deltimer(range_mask_timer)
+		range_mask_timer = null
+	clear_range_mask()
+	animate(src, EXAMINE_BALLOON_FADE_TIME, alpha = 255)
+
+	var/mob/viewer = home?.our_hud?.mymob
+	var/client/viewer_client = viewer?.canon_client
+	var/atom/anchor = viewer_client?.eye || viewer
+	var/turf/anchor_turf = get_turf(anchor)
+	// Every z offset has its own plane master, only the one of the level we are looking at gets the mask
+	if(isnull(anchor_turf) || !viewer_client || GET_Z_PLANE_OFFSET(anchor_turf.z) != offset)
+		return
+
+	range_mask = image(EXAMINE_BALLOON_RANGE_MASK_ICON, loc = anchor, icon_state = "light")
+	range_mask.pixel_x = EXAMINE_BALLOON_RANGE_MASK_CENTERING
+	range_mask.pixel_y = EXAMINE_BALLOON_RANGE_MASK_CENTERING
+	SET_PLANE_EXPLICIT(range_mask, EXAMINE_BALLOONS_RANGE_MASK_PLANE, anchor_turf)
+	viewer_client.images += range_mask
+
+/// The examine hotkey was released: fade the balloons out and take the range mask off the screen once they are gone
+/atom/movable/screen/plane_master/examine_balloons/proc/hide_balloons()
+	animate(src, EXAMINE_BALLOON_FADE_TIME, alpha = 0)
+	if(range_mask_timer)
+		deltimer(range_mask_timer)
+	range_mask_timer = addtimer(CALLBACK(src, PROC_REF(clear_range_mask)), EXAMINE_BALLOON_FADE_TIME + 1 DECISECONDS, TIMER_STOPPABLE | TIMER_DELETE_ME)
+
+/atom/movable/screen/plane_master/examine_balloons/proc/clear_range_mask()
+	range_mask_timer = null
+	if(!range_mask)
+		return
+	home?.our_hud?.mymob?.canon_client?.images -= range_mask
+	range_mask = null
+
+/// Holds the range mask image for the examine balloons plane to clip itself with, relays nowhere so it is never drawn itself
+/atom/movable/screen/plane_master/examine_balloons_range_mask
+	name = "Examine Balloons Range Mask"
+	plane = EXAMINE_BALLOONS_RANGE_MASK_PLANE
+	render_target = EXAMINE_BALLOONS_RANGE_MASK_RENDER_TARGET
+	appearance_flags = PLANE_MASTER|NO_CLIENT_COLOR
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	render_relay_planes = list()
 
 /atom/movable/screen/plane_master/hud
 	name = "HUD"
