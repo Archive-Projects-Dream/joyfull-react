@@ -558,6 +558,99 @@
 	appearance_flags = PLANE_MASTER|NO_CLIENT_COLOR
 	render_relay_planes = list(RENDER_PLANE_NON_GAME)
 
+/atom/movable/screen/plane_master/examine_balloons
+	name = "Examine Balloons"
+	documentation = "The balloons that appear above objects (often wallmounts) when holding shift."
+	plane = EXAMINE_BALLOONS_PLANE
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	appearance_flags = PLANE_MASTER|NO_CLIENT_COLOR
+	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+	alpha = 0
+	/// The soft round mask centered on the viewer while the balloons are shown, see show_balloons()
+	var/image/range_mask
+	/// Timer that takes the range mask off the screen once the balloons have faded out
+	var/range_mask_timer
+
+/atom/movable/screen/plane_master/examine_balloons/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
+	. = ..()
+	// Only close to us, and fading with the distance
+	add_filter("range_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(EXAMINE_BALLOONS_RANGE_MASK_RENDER_TARGET, offset)))
+
+/atom/movable/screen/plane_master/examine_balloons/Destroy()
+	clear_range_mask()
+	return ..()
+
+/// Returns the client this plane master is drawn for, or null if it has no hud, mob or client at the moment
+/atom/movable/screen/plane_master/examine_balloons/proc/get_viewer_client()
+	if(isnull(home))
+		return null
+	var/datum/hud/our_hud = home.our_hud
+	if(isnull(our_hud))
+		return null
+	var/mob/viewer = our_hud.mymob
+	if(isnull(viewer))
+		return null
+	return viewer.canon_client
+
+/// The examine hotkey was pressed: fades the balloons in and centers the range mask on what the viewer is looking from
+/atom/movable/screen/plane_master/examine_balloons/proc/show_balloons()
+	if(range_mask_timer)
+		deltimer(range_mask_timer)
+		range_mask_timer = null
+	clear_range_mask()
+	animate(src, EXAMINE_BALLOON_FADE_TIME, alpha = 255)
+
+	var/client/viewer_client = get_viewer_client()
+	if(isnull(viewer_client))
+		return
+
+	// What the client is looking from: a camera eye, or its own mob
+	var/atom/center = viewer_client.eye
+	if(isnull(center))
+		center = viewer_client.mob
+	if(isnull(center))
+		return
+
+	var/turf/center_turf = get_turf(center)
+	if(isnull(center_turf))
+		return
+
+	// Every z offset has its own plane master, only the one of the level we are looking at needs the mask
+	if(GET_Z_PLANE_OFFSET(center_turf.z) != offset)
+		return
+
+	range_mask = image(EXAMINE_BALLOON_RANGE_MASK_ICON, loc = center, icon_state = "light")
+	range_mask.pixel_x = EXAMINE_BALLOON_RANGE_MASK_CENTERING
+	range_mask.pixel_y = EXAMINE_BALLOON_RANGE_MASK_CENTERING
+	SET_PLANE_EXPLICIT(range_mask, EXAMINE_BALLOONS_RANGE_MASK_PLANE, center_turf)
+	viewer_client.images += range_mask
+
+/// The examine hotkey was released: fades the balloons out and takes the range mask off the screen once they are gone
+/atom/movable/screen/plane_master/examine_balloons/proc/hide_balloons()
+	animate(src, EXAMINE_BALLOON_FADE_TIME, alpha = 0)
+	if(range_mask_timer)
+		deltimer(range_mask_timer)
+	range_mask_timer = addtimer(CALLBACK(src, PROC_REF(clear_range_mask)), EXAMINE_BALLOON_FADE_TIME + 1 DECISECONDS, TIMER_STOPPABLE | TIMER_DELETE_ME)
+
+/atom/movable/screen/plane_master/examine_balloons/proc/clear_range_mask()
+	range_mask_timer = null
+	if(isnull(range_mask))
+		return
+
+	var/client/viewer_client = get_viewer_client()
+	if(!isnull(viewer_client))
+		viewer_client.images -= range_mask
+	range_mask = null
+
+/atom/movable/screen/plane_master/examine_balloons_range_mask
+	name = "Examine Balloons Range Mask"
+	documentation = "Holds the soft round mask that the examine balloons plane master centers on the viewer. Only a render target for the examine balloons plane."
+	plane = EXAMINE_BALLOONS_RANGE_MASK_PLANE
+	render_target = EXAMINE_BALLOONS_RANGE_MASK_RENDER_TARGET
+	appearance_flags = PLANE_MASTER|NO_CLIENT_COLOR
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	render_relay_planes = list()
+
 /atom/movable/screen/plane_master/hud
 	name = "HUD"
 	documentation = "Contains anything that want to be rendered on the hud. Typically is just screen elements."

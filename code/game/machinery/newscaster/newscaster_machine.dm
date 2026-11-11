@@ -79,6 +79,7 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/newscaster, 24) // [HORIZON-EDIT]
 	update_appearance()
 	if(mapload)
 		find_and_mount_on_atom()
+	AddComponent(/datum/component/examine_balloon, hologram_distance = 42)
 
 /obj/machinery/newscaster/Destroy()
 	GLOB.allCasters -= src

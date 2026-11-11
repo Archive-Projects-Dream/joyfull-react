@@ -54,6 +54,7 @@ GLOBAL_DATUM_INIT(status_font, /datum/font, new /datum/font/tiny_unicode/size_12
 /obj/machinery/status_display/Initialize(mapload)
 	. = ..()
 	update_appearance()
+	AddComponent(/datum/component/examine_balloon, hologram_distance = 40)
 
 /obj/machinery/status_display/wrench_act_secondary(mob/living/user, obj/item/tool)
 	. = ..()

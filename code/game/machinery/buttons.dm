@@ -63,6 +63,7 @@
 	setup_device(mapload)
 	if(mapload)
 		find_and_mount_on_atom()
+	AddComponent(/datum/component/examine_balloon, hologram_distance = 24, arrow_distance = 0, size_upscaling = 2)
 	register_context()
 
 /obj/machinery/button/Destroy()

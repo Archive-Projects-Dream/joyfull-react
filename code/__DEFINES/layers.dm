@@ -115,6 +115,17 @@
 #define RUNECHAT_PLANE 34
 /// Plane for balloon text (text that fades up)
 #define BALLOON_CHAT_PLANE 35
+/// Plane for the wallmount examine balloons
+#define EXAMINE_BALLOONS_PLANE 36
+/// Plane of the soft round mask that limits how far the examine balloons show and fades them out, only ever used as a render target
+#define EXAMINE_BALLOONS_RANGE_MASK_PLANE 37
+#define EXAMINE_BALLOONS_RANGE_MASK_RENDER_TARGET "*EXAMINE_BALLOONS_RANGE_MASK_RENDER_TARGET"
+/// The soft round mask: 11x11 tiles, solid close to the viewer and gone at about 5 tiles
+#define EXAMINE_BALLOON_RANGE_MASK_ICON 'icons/effects/light_overlays/light_352.dmi'
+/// How far the mask is moved to be centered on a tile: (352 - 32) / 2
+#define EXAMINE_BALLOON_RANGE_MASK_CENTERING -160
+/// How long the examine balloons take to fade in and out
+#define EXAMINE_BALLOON_FADE_TIME (0.2 SECONDS)
 
 //-------------------- HUD ---------------------
 //HUD layer defines
