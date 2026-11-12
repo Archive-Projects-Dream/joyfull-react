@@ -1,3 +1,7 @@
+/turf/closed/wall/mineral
+	blend_turfs = list(/turf/closed/wall/mineral)
+	noblend_turfs = list()
+
 /*
 /turf/closed/wall
 	icon = '_horizon/icons/turf/walls/wall.dmi'
