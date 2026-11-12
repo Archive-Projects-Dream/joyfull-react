@@ -13,17 +13,23 @@
 	smoothing_groups = null
 	canSmoothWith = null
 
-/turf/closed/wall/Initialize(mapload)
+/turf/closed/Initialize(mapload)
 	. = ..()
 	shadow = new(src)
 
-/turf/closed/wall/Destroy()
+/turf/closed/Destroy()
 	qdel(shadow)
 	return ..()
 
-/turf/closed/wall/setDir(newDir)
+/turf/closed/setDir(newDir)
 	..()
 	QUEUE_SMOOTH(src)
+
+/// A shuttle recreates the wall (and its shadow) on the new turf, so the corners must be recalculated once everything has arrived
+/turf/closed/afterShuttleMove(turf/oldT, rotation)
+	. = ..()
+	QUEUE_SMOOTH(src)
+	QUEUE_SMOOTH_NEIGHBORS(src)
 
 // MARK: Types
 /turf/closed/wall/r_wall
