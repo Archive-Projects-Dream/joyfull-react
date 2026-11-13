@@ -1,17 +1,17 @@
 /// Adds balloons next to wallmounts so they can be seen and clicked while holding the examine hotkey
 /// Ported from wallening (wall-nerds/wallening). Adapted for our wallmount dir convention:
 /// our wallmount dirs point INTO the wall, so north-mounted wallmounts already face the camera and get no balloon.
-/// The balloon of the others is drawn toward their dir (over the wall they are mounted on), keeps their dir,
+/// The balloon of the others is drawn opposite their dir (into the room, away from the wall they are mounted on), keeps their dir,
 /// and the arrow is turned to point back at the wallmount.
 /datum/component/examine_balloon
 	/// Store the overlays applied in the previous turn and clean them up (because of how managed_overlays checks for changes we need to do this manually)
 	var/list/previous_overlays
-	/// How far from the wallmount the hologram is drawn, in pixels, toward the dir of the wallmount
+	/// How far from the wallmount the hologram is drawn, in pixels, opposite the dir of the wallmount
 	var/hologram_distance
 	/// Our x and y size is multiplied by this, for small sprites like buttons
 	var/size_upscaling
 
-	/// How far from the wallmount the arrow is drawn, in pixels, toward the dir of the wallmount
+	/// How far from the wallmount the arrow is drawn, in pixels, opposite the dir of the wallmount
 	var/arrow_distance = 16
 	/// The alpha we apply to the hologram
 	var/hologram_alpha = 200
@@ -47,8 +47,8 @@
 
 	parent.cut_overlay(previous_overlays)
 
-	// The balloon goes toward the dir of the wallmount, and the arrow (its sprite points down) is turned by the same angle to point back at it
-	var/dir_angle = dir2angle(parent.dir)
+	// The balloon goes opposite the dir of the wallmount, away from the wall and into the room, and the arrow (its sprite points down) is turned by the same angle to point back at it
+	var/dir_angle = dir2angle(turn(parent.dir, 180))
 
 	// Make a copy of the wallmount, it keeps the dir the wallmount has
 	var/mutable_appearance/hologram = new /mutable_appearance(parent)
