@@ -15,11 +15,13 @@
 		vis.plane = plane
 	return make_mutable_appearance_directional(vis, dir)
 
-/atom/proc/render_corner_frames(atom/A, list/wall_connections, plane, diagonal = FALSE)
+/atom/proc/render_corner_frames(atom/A, list/wall_connections, plane, diagonal = FALSE, icon_file)
 	A.overlays.Cut()
 	A.icon_state = "blank"
+	if(!icon_file)
+		icon_file = A.icon
 	for(var/i in 1 to 4)
-		A.overlays += get_wall_object(A.icon, corner_icon_state(wall_connections[i], diagonal), 1<<(i-1), plane = plane, offset_spokesman = A)
+		A.overlays += get_wall_object(icon_file, corner_icon_state(wall_connections[i], diagonal), 1<<(i-1), plane = plane, offset_spokesman = A)
 
 /turf/closed/proc/build_wall_sprite(plane)
 	var/mutable_appearance/frill/sprite = new()
@@ -108,6 +110,8 @@
 	smoothing_flags &= ~SMOOTH_QUEUED
 	update_connections()
 	update_icon()
+	if(diagonal)
+		update_wall_underlay()
 
 	if(shadow)
 		shadow.shadow_connections = wall_connections // the wall's corners are the shadow's corners
@@ -130,6 +134,50 @@
 	icon_state = "blank"
 	overlays += build_wall_sprite(WALL_PLANE)
 	overlays += build_wall_sprite(ABOVE_GAME_PLANE)
+
+/// Every transparent corner shows a 16x16 piece of the diagonal neighbour's floor, or space if that neighbour is not a floor
+/turf/closed/proc/update_wall_underlay()
+	underlays.Cut()
+	var/static/list/corner_dirs = list(NORTHWEST, SOUTHEAST, NORTHEAST, SOUTHWEST)
+	var/static/list/pieces = list() // cropped floor icons by "icon-state-dir-corner", cut once and reused
+	var/half = ICON_SIZE_X / 2
+	var/need_space = FALSE
+	for(var/i in 1 to 4)
+		if(wall_connections[i] != "0" && wall_connections[i] != "5")
+			continue
+		var/corner = corner_dirs[i]
+		var/turf/open/floor/floor_turf = get_step(src, corner)
+		if(!istype(floor_turf))
+			need_space = TRUE
+			continue
+		var/offset_x = (corner & EAST) ? half : 0
+		var/offset_y = (corner & NORTH) ? half : 0
+		var/key = "[floor_turf.icon]-[floor_turf.icon_state]-[floor_turf.dir]-[corner]"
+		var/icon/piece = pieces[key]
+		if(!piece)
+			piece = icon(floor_turf.icon, floor_turf.icon_state, floor_turf.dir)
+			piece.Crop(offset_x + 1, offset_y + 1, offset_x + half, offset_y + half)
+			pieces[key] = piece
+		var/mutable_appearance/floor_piece = mutable_appearance(layer = LOW_FLOOR_LAYER, offset_spokesman = src, plane = FLOOR_PLANE)
+		floor_piece.icon = piece
+		floor_piece.pixel_x = offset_x
+		floor_piece.pixel_y = offset_y
+		underlays += floor_piece
+	if(need_space)
+		var/mutable_appearance/space_appearance = mutable_appearance(layer = LOW_FLOOR_LAYER, offset_spokesman = src, plane = FLOOR_PLANE)
+		generate_space_underlay(space_appearance, src, get_wall_silhouette()) // PLANE_SPACE is below FLOOR_PLANE, so floor pieces cover it
+		underlays += space_appearance
+
+/// One flat copy of the wall sprite for the space underlay mask: the real appearance is overlays on explicit planes with RESET_COLOR, which the mask recolouring cannot flatten
+/turf/closed/proc/get_wall_silhouette()
+	var/mutable_appearance/silhouette = new()
+	silhouette.appearance_flags = KEEP_TOGETHER
+	for(var/i in 1 to 4)
+		var/mutable_appearance/quarter = new()
+		quarter.icon = icon
+		quarter.icon_state = corner_icon_state(wall_connections[i], diagonal)
+		silhouette.overlays += make_mutable_appearance_directional(quarter, 1<<(i-1))
+	return silhouette
 
 /turf/closed/proc/update_connections()
 	var/list/glass = list()
@@ -190,6 +238,7 @@
 	if(!special_icon)
 		return ..()
 	render_corner_frames(src, wall_connections, ABOVE_WALL_PLANE)
+	add_overlay(update_overlays(~UPDATE_SMOOTHING))
 
 /obj/structure/window/proc/update_connections()
 	wall_connections = dirs_to_corner_states(scan_blend_dirs(src, blend_turfs, noblend_turfs, blend_objects, noblend_objects))
@@ -234,6 +283,14 @@
 /obj/structure/grille/update_icon()
 	if(!special_icon)
 		return ..()
+	overlays.Cut()
+	icon_state = "blank"
+	if(broken)
+		overlays += get_wall_object('_horizon/icons/obj/smooth_structures/grille_broken.dmi', "brokengrille", plane = WALL_PLANE, offset_spokesman = src)
+		return
+	if(atom_integrity / max_integrity <= 0.5)
+		render_corner_frames(src, wall_connections, WALL_PLANE, icon_file = '_horizon/icons/obj/smooth_structures/grille_damaged.dmi')
+		return
 	render_corner_frames(src, wall_connections, WALL_PLANE)
 
 /obj/structure/grille/proc/update_connections()
