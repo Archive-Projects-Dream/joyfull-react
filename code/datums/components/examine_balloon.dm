@@ -1,7 +1,7 @@
 /// Adds balloons above wallmounts so they can be seen and clicked while holding the examine hotkey
 /// Ported from wallening (wall-nerds/wallening). Adapted for our wallmount dir convention:
 /// our wallmount dirs point INTO the wall, so north-mounted wallmounts already face the camera,
-/// and the hologram is forced to NORTH to show the front-facing sprite
+/// and the hologram is always forced to SOUTH (dir 2), so even rotated wallmounts show their standard sprite
 /datum/component/examine_balloon
 	/// Store the overlays applied in the previous turn and clean them up (because of how managed_overlays checks for changes we need to do this manually)
 	var/list/previous_overlays
@@ -46,8 +46,8 @@
 
 	parent.cut_overlay(previous_overlays)
 
-	// Make a copy of the wallmount and force it north, so it always shows its front face
-	var/mutable_appearance/hologram = make_mutable_appearance_directional(new /mutable_appearance(parent), NORTH)
+	// Copy the wallmount and force it to the standard dir 2 (south), so even rotated wallmounts always show their usual sprite
+	var/mutable_appearance/hologram = make_mutable_appearance_directional(new /mutable_appearance(parent), SOUTH)
 	SET_PLANE_EXPLICIT(hologram, EXAMINE_BALLOONS_PLANE, parent)
 
 	hologram.pixel_w = 0
