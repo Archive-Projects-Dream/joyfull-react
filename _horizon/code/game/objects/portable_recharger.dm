@@ -19,7 +19,7 @@
 	drop_sound = 'sound/items/handling/toolbox/toolbox_drop.ogg'
 	pickup_sound =  'sound/items/handling/toolbox/toolbox_pickup.ogg'
 	max_integrity = 200
-	//armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 100, RAD = 100, FIRE = 100, ACID = 30)
+	//armor = list(BLUNT = 0, PIERCE = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 100, RAD = 100, FIRE = 100, ACID = 30)
 	resistance_flags = FIRE_PROOF
 	wound_bonus = 5
 	var/cell_charge = 10000

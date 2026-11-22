@@ -101,7 +101,7 @@
 			log_combat(user, living_target, "gibbed", src)
 		return TRUE
 	else if(target.uses_integrity)
-		target.take_damage(force*damage_mod*3, BRUTE, MELEE, FALSE, null, 50)
+		target.take_damage(force*damage_mod*3, BRUTE, SLASH, FALSE, null, 50)
 		return TRUE
 	else if(iswallturf(target) && prob(force*damage_mod*0.5))
 		var/turf/closed/wall/wall_target = target

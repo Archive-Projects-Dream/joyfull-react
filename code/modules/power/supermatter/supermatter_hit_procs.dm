@@ -21,7 +21,7 @@
 
 	if(!istype(projectile.firer, /obj/machinery/power/emitter))
 		investigate_log("has been hit by [projectile] fired by [key_name(projectile.firer)]", INVESTIGATE_ENGINE)
-	if(projectile.armor_flag != BULLET || kiss_power)
+	if(projectile.armor_flag != PIERCE || kiss_power)
 		if(kiss_power)
 			psy_coeff = 1
 		log_activation(who = projectile.firer, how = projectile.fired_from)

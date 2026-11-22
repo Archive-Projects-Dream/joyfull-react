@@ -57,7 +57,7 @@
 	pass_flags = PASSTABLE
 	damage = 10 // +10 from the grab
 	speed = 1
-	armor_flag = MELEE
+	armor_flag = BLUNT
 	range = 7
 	hit_prone_targets = TRUE
 	hitsound = 'sound/effects/wounds/pierce1.ogg'

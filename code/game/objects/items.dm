@@ -369,7 +369,7 @@
 
 /obj/item/blob_act(obj/structure/blob/B)
 	if(B && B.loc == loc && !(resistance_flags & INDESTRUCTIBLE))
-		atom_destruction(MELEE)
+		atom_destruction(BLUNT)
 
 /**Makes cool stuff happen when you suicide with an item
  *

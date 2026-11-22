@@ -41,10 +41,6 @@
 /// Involved in checking the likelihood of applying a wound to a mob.
 #define WOUND "wound"
 
-// Legacy aliases — remove after full migration
-// Legacy aliases, kept only so old callers compile. Prefer BLUNT / SLASH / PIERCE.
-#define MELEE BLUNT
-#define BULLET PIERCE
 /// Any of the three physical armor/damage flags
 #define ARMOR_IS_PHYSICAL(flag) (flag == BLUNT || flag == SLASH || flag == PIERCE)
 /// Physical flags that a hand-held melee weapon can't confuse with a projectile (pointy weapons still use PIERCE)

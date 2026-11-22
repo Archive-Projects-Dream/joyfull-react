@@ -162,7 +162,7 @@
 	if(!.)
 		return
 	if(!shock(user, 70, allow_modifiers = FALSE) && !QDELETED(src)) //Last hit still shocks but shouldn't deal damage to the grille
-		take_damage(rand(5,10), BRUTE, MELEE, 1)
+		take_damage(rand(5,10), BRUTE, BLUNT, 1)
 
 /obj/structure/grille/attack_paw(mob/user, list/modifiers)
 	return attack_hand(user, modifiers)
@@ -184,14 +184,14 @@
 	user.visible_message(span_warning("[user] hits [src]."), null, null, COMBAT_MESSAGE_RANGE)
 	log_combat(user, src, "hit")
 	if(!shock(user, 70, allow_modifiers = FALSE))
-		take_damage(rand(5,10), BRUTE, MELEE, 1)
+		take_damage(rand(5,10), BRUTE, BLUNT, 1)
 
 /obj/structure/grille/attack_alien(mob/living/user, list/modifiers)
 	user.do_attack_animation(src)
 	user.changeNext_move(CLICK_CD_MELEE)
 	user.visible_message(span_warning("[user] mangles [src]."), null, null, COMBAT_MESSAGE_RANGE)
 	if(!shock(user, 70, allow_modifiers = FALSE))
-		take_damage(20, BRUTE, MELEE, 1)
+		take_damage(20, BRUTE, BLUNT, 1)
 
 /obj/structure/grille/CanAllowThrough(atom/movable/mover, border_dir)
 	. = ..()

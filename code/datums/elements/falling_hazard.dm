@@ -40,7 +40,7 @@
 	if(!poor_target)
 		return
 
-	var/target_head_armor = poor_target.run_armor_check(BODY_ZONE_HEAD, MELEE, silent = TRUE)
+	var/target_head_armor = poor_target.run_armor_check(BODY_ZONE_HEAD, BLUNT, silent = TRUE)
 
 	if(obeys_hardhats && target_head_armor >= 15) // 15 melee armor is enough that most head items dont have this, but anything above a hardhat should protect you
 		poor_target.visible_message(

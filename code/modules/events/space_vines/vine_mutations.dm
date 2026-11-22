@@ -253,7 +253,7 @@
 		return
 
 	if(!iscarbon(living_mob))
-		living_mob.apply_damage(75, BRUTE, blocked = living_mob.run_armor_check(attack_flag = MELEE, silent = TRUE))
+		living_mob.apply_damage(75, BRUTE, blocked = living_mob.run_armor_check(attack_flag = BLUNT, silent = TRUE))
 		playsound(living_mob, 'sound/items/weapons/whip.ogg', 50, TRUE, -1)
 		living_mob.visible_message(span_danger("[living_mob] is brutally threshed by [vine]!"), \
 		span_userdanger("You are brutally threshed by [vine]!"))
@@ -262,7 +262,7 @@
 
 	var/mob/living/carbon/victim = living_mob
 	var/obj/item/bodypart/limb = victim.get_bodypart(victim.get_random_valid_zone(even_weights = TRUE))
-	var/armor = victim.run_armor_check(def_zone = limb, attack_flag = MELEE)
+	var/armor = victim.run_armor_check(def_zone = limb, attack_flag = PIERCE)
 
 	if(!HAS_TRAIT(victim, TRAIT_PIERCEIMMUNE))
 		var/datum/spacevine_mutation/thorns/thorn = locate() in vine.mutations
@@ -379,7 +379,7 @@
 		return
 	if(prob(THORN_MUTATION_CUT_PROB))
 		var/mob/living/victim = crosser
-		if(victim.apply_damage(15, BRUTE, blocked = victim.run_armor_check(attack_flag = MELEE, silent = TRUE), spread_damage = TRUE))
+		if(victim.apply_damage(15, BRUTE, blocked = victim.run_armor_check(attack_flag = PIERCE, silent = TRUE), spread_damage = TRUE))
 			to_chat(victim, span_danger("You cut yourself on the thorny vines."))
 
 /datum/spacevine_mutation/thorns/on_hit(obj/structure/spacevine/vine, obj/item/item,  mob/living/hitter, list/modifiers, list/attack_modifiers)
@@ -394,7 +394,7 @@
 
 	if(prob(THORN_MUTATION_CUT_PROB))
 		var/mob/living/victim = hitter
-		if(victim.apply_damage(15, BRUTE, blocked = victim.run_armor_check(attack_flag = MELEE, silent = TRUE), spread_damage = TRUE))
+		if(victim.apply_damage(15, BRUTE, blocked = victim.run_armor_check(attack_flag = PIERCE, silent = TRUE), spread_damage = TRUE))
 			to_chat(victim, span_danger("You cut yourself on the thorny vines."))
 
 /datum/spacevine_mutation/thorns/equip_venus_trap(mob/living/basic/venus_human_trap/venus_trap)

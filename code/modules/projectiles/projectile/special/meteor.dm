@@ -7,7 +7,7 @@
 	dismemberment = 90
 	armour_penetration = 100
 	damage_type = BRUTE
-	armor_flag = BULLET
+	armor_flag = PIERCE
 	mouse_opacity = MOUSE_OPACITY_ICON
 	obj_flags = NONE
 

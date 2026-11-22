@@ -59,7 +59,7 @@
 	return "structure"
 
 /obj/structure/rust_heretic_act()
-	take_damage(500, BRUTE, MELEE, 1)
+	take_damage(500, BRUTE, BLUNT, 1)
 	return TRUE
 
 /obj/structure/zap_act(power, zap_flags)

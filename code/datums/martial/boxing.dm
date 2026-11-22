@@ -225,7 +225,7 @@
 		if(defender.stat <= HARD_CRIT) // Do not grant experience against dead targets
 			grant_experience = TRUE
 
-	var/armor_block = defender.run_armor_check(affecting, MELEE, armour_penetration = base_unarmed_effectiveness)
+	var/armor_block = defender.run_armor_check(affecting, BLUNT, armour_penetration = base_unarmed_effectiveness)
 
 	playsound(defender, attack_sound, 25, TRUE, -1)
 

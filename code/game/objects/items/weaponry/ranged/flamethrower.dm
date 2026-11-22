@@ -245,7 +245,7 @@
 		block_chance = 15,\
 		on_intercepted = CALLBACK(src, PROC_REF(intercepted_bullet_reaction)),\
 		active_slots = ITEM_SLOT_HANDS,\
-		block_type = list(BULLET,LASER),\
+		block_type = list(PIERCE,LASER),\
 		is_blocking_check = CALLBACK(src, PROC_REF(check_tank)),\
 	)
 	if(create_full)

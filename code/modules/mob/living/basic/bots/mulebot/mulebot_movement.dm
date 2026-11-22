@@ -58,7 +58,7 @@
 		BODY_ZONE_R_ARM = 0.5,
 	)
 	for(var/body_zone in zone_damages)
-		crushed.apply_damage(zone_damages[body_zone] * damage, BRUTE, body_zone, run_armor_check(body_zone, MELEE))
+		crushed.apply_damage(zone_damages[body_zone] * damage, BRUTE, body_zone, run_armor_check(body_zone, BLUNT))
 
 	add_mob_blood(crushed)
 

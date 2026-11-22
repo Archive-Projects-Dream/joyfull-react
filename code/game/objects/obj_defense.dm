@@ -5,7 +5,7 @@
 	if(isitem(hit_by))
 		var/obj/item/as_item = hit_by
 		damage_taken *= as_item.get_demolition_modifier(src)
-	take_damage(damage_taken, BRUTE, MELEE, 1, get_dir(src, hit_by))
+	take_damage(damage_taken, BRUTE, BLUNT, 1, get_dir(src, hit_by))
 
 /obj/ex_act(severity, target)
 	if(resistance_flags & (INDESTRUCTIBLE|BOMB_PROOF))
@@ -56,17 +56,17 @@
 		playsound(src, 'sound/effects/meteorimpact.ogg', 100, TRUE)
 	else
 		playsound(src, 'sound/effects/bang.ogg', 50, TRUE)
-	var/damage = take_damage(hulk_damage(), BRUTE, MELEE, 0, get_dir(src, user))
+	var/damage = take_damage(hulk_damage(), BRUTE, BLUNT, 0, get_dir(src, user))
 	user.visible_message(span_danger("[user] smashes [src][damage ? "" : ", [no_damage_feedback]"]!"), span_danger("You smash [src][damage ? "" : ", [no_damage_feedback]"]!"), null, COMBAT_MESSAGE_RANGE)
 	return TRUE
 
 /obj/blob_act(obj/structure/blob/B)
 	if (!..() || HAS_TRAIT(src, TRAIT_UNDERFLOOR))
 		return
-	take_damage(400, BRUTE, MELEE, 0, get_dir(src, B))
+	take_damage(400, BRUTE, BLUNT, 0, get_dir(src, B))
 
 /obj/attack_alien(mob/living/carbon/alien/adult/user, list/modifiers)
-	if(attack_generic(user, 60, BRUTE, MELEE, 0))
+	if(attack_generic(user, 60, BRUTE, BLUNT, 0))
 		playsound(src.loc, 'sound/items/weapons/slash.ogg', 100, TRUE)
 
 /obj/attack_animal(mob/living/simple_animal/user, list/modifiers)
@@ -78,9 +78,9 @@
 		var/turf/current_turf = get_turf(src) //we want to save the turf to play the sound there, cause being destroyed deletes us!
 		var/play_soundeffect = user.environment_smash
 		if(user.obj_damage)
-			. = attack_generic(user, user.obj_damage, user.melee_damage_type, MELEE, play_soundeffect, user.armour_penetration)
+			. = attack_generic(user, user.obj_damage, user.melee_damage_type, BLUNT, play_soundeffect, user.armour_penetration)
 		else
-			. = attack_generic(user, rand(user.melee_damage_lower,user.melee_damage_upper), user.melee_damage_type, MELEE, play_soundeffect, user.armour_penetration)
+			. = attack_generic(user, rand(user.melee_damage_lower,user.melee_damage_upper), user.melee_damage_type, BLUNT, play_soundeffect, user.armour_penetration)
 		if(. && play_soundeffect)
 			playsound(current_turf, 'sound/effects/meteorimpact.ogg', 100, TRUE)
 		if(user.client)

@@ -113,7 +113,7 @@
 	if(target.resistance_flags & INDESTRUCTIBLE)
 		return
 	if(istype(target, /obj/structure/window) || istype(target, /obj/structure/grille))
-		target.atom_destruction(MELEE)
+		target.atom_destruction(BLUNT)
 
 /obj/item/sledgehammer/get_demolition_modifier(obj/target)
 	. = ..()
@@ -316,7 +316,7 @@
 /obj/item/sledgehammer/proc/smash_screen(obj/machinery/screen)
 	if(screen.resistance_flags & INDESTRUCTIBLE)
 		return
-	if(screen.atom_break(MELEE)) // and you'll see why 2484 won't be like "1984"
+	if(screen.atom_break(BLUNT)) // and you'll see why 2484 won't be like "1984"
 		screen.visible_message(span_danger("[src] smashes straight through [screen]!"))
 
 /obj/item/sledgehammer/throw_at(atom/target, range, speed, mob/thrower, spin = 1, diagonals_first = 0, datum/callback/callback, force, gentle = FALSE, quickstart = TRUE, throw_type_path = /datum/thrownthing)

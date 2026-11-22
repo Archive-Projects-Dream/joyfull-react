@@ -137,7 +137,7 @@
 		to_chat(attacker, span_danger("You kick [defender]'s head, knocking [defender.p_them()] out!"))
 		playsound(attacker, 'sound/items/weapons/genhit1.ogg', 50, TRUE, -1)
 
-		var/helmet_protection = defender.run_armor_check(BODY_ZONE_HEAD, MELEE)
+		var/helmet_protection = defender.run_armor_check(BODY_ZONE_HEAD, BLUNT)
 		defender.apply_effect(20 SECONDS, EFFECT_KNOCKDOWN, helmet_protection)
 		defender.apply_effect(10 SECONDS, EFFECT_UNCONSCIOUS, helmet_protection)
 		defender.adjust_organ_loss(ORGAN_SLOT_BRAIN, 15, 150)

@@ -73,7 +73,7 @@
 /obj/vehicle/sealed/mecha/attack_alien(mob/living/user, list/modifiers)
 	log_message("Attack by alien. Attacker - [user].", LOG_MECHA, color="red")
 	playsound(loc, 'sound/items/weapons/slash.ogg', 100, TRUE)
-	return attack_generic(user, rand(user.melee_damage_lower, user.melee_damage_upper), BRUTE, MELEE, 0)
+	return attack_generic(user, rand(user.melee_damage_lower, user.melee_damage_upper), BRUTE, BLUNT, 0)
 
 /obj/vehicle/sealed/mecha/attack_animal(mob/living/simple_animal/user, list/modifiers)
 	log_message("Attack by simple animal. Attacker - [user].", LOG_MECHA, color="red")
@@ -91,7 +91,7 @@
 		animal_damage = user.obj_damage
 	animal_damage = min(animal_damage, 20*user.environment_smash)
 	log_combat(user, src, "attacked")
-	return attack_generic(user, animal_damage, user.melee_damage_type, MELEE, play_soundeffect)
+	return attack_generic(user, animal_damage, user.melee_damage_type, BLUNT, play_soundeffect)
 
 /obj/vehicle/sealed/mecha/hulk_damage()
 	return 15
@@ -104,7 +104,7 @@
 
 /obj/vehicle/sealed/mecha/blob_act(obj/structure/blob/B)
 	log_message("Attack by blob. Attacker - [B].", LOG_MECHA, color="red")
-	take_damage(30, BRUTE, MELEE, 0, get_dir(src, B))
+	take_damage(30, BRUTE, BLUNT, 0, get_dir(src, B))
 
 /obj/vehicle/sealed/mecha/attack_tk()
 	return
@@ -230,7 +230,7 @@
 /obj/vehicle/sealed/mecha/attackby(obj/item/weapon, mob/living/user, list/modifiers, list/attack_modifiers)
 	. = ..()
 	//If our weapon that we are hitting the mech with has armour penetration, we could potentially get a hit in on the occupant
-	var/peeling_the_onion = clamp(weapon.armour_penetration - (get_armor_rating(MELEE)/2), 0, 100)
+	var/peeling_the_onion = clamp(weapon.armour_penetration - (get_armor_rating(weapon.get_attack_armor_flag())/2), 0, 100)
 
 	if(peeling_the_onion && prob(peeling_the_onion) && !(mecha_flags & CANNOT_OVERPENETRATE) \
 		&& LAZYLEN(occupants) \

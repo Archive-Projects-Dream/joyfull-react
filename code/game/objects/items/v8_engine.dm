@@ -169,7 +169,7 @@
 	desc = "Someone is about to cash out."
 	icon_state = "flaming_slash"
 	damage_type = BURN
-	armor_flag = MELEE //We're operating off of anime remote slash logic here. As such, we can treat this as a hybrid burn/brute this way.
+	armor_flag = SLASH //We're operating off of anime remote slash logic here. As such, we can treat this as a hybrid burn/brute this way.
 	damage = 10 // Damage amps based on the number of flame_charges it was created off of.
 	speed = 2
 	light_range = 1

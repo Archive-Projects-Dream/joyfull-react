@@ -211,7 +211,7 @@
 		10,
 		BRUTE,
 		def_zone,
-		blocked = target.run_armor_check(def_zone, MELEE),
+		blocked = target.run_armor_check(def_zone, PIERCE),
 		wound_bonus = 30,
 		exposed_wound_bonus = 50,
 		sharpness = SHARP_POINTY

@@ -22,7 +22,7 @@
 		if(ismecha(thing_to_break) && mecha_damage)
 			damage_to_deal += mecha_damage
 		if(damage_to_deal)
-			thing_to_break.take_damage(damage_to_deal, BRUTE, BULLET, FALSE)
+			thing_to_break.take_damage(damage_to_deal, BRUTE, PIERCE, FALSE)
 	return ..()
 
 /obj/projectile/bullet/p50/surplus
@@ -142,5 +142,5 @@
 		if(ismecha(thing_to_break) && mecha_damage)
 			damage_to_deal += mecha_damage
 		if(damage_to_deal)
-			thing_to_break.take_damage(damage_to_deal, BRUTE, BULLET, FALSE)
+			thing_to_break.take_damage(damage_to_deal, BRUTE, PIERCE, FALSE)
 	return ..()

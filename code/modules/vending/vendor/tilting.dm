@@ -33,12 +33,12 @@
  * * paralyze_time: The time, in deciseconds, a given mob/living will be paralyzed for if crushed.
  * * crush_dir: The direction the crush is coming from. Default: dir of src to [target].
  * * damage_type: The type of damage to do. Default: BRUTE
- * * damage_flag: The attack flag for armor purposes. Default: MELEE
+ * * damage_flag: The attack flag for armor purposes. Default: BLUNT
  * * rotation: The angle of which to rotate src's transform by on a successful tilt. Default: 90.
  *
  * Returns: A collection of bitflags defined in crushing.dm. Read that file's documentation for info.
  */
-/atom/movable/proc/fall_and_crush(turf/target, damage, chance_to_crit = 0, forced_crit_case = null, paralyze_time, crush_dir = get_dir(get_turf(src), target), damage_type = BRUTE, damage_flag = MELEE, rotation = 90)
+/atom/movable/proc/fall_and_crush(turf/target, damage, chance_to_crit = 0, forced_crit_case = null, paralyze_time, crush_dir = get_dir(get_turf(src), target), damage_type = BRUTE, damage_flag = BLUNT, rotation = 90)
 
 	ASSERT(!isnull(target))
 

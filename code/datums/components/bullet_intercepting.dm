@@ -17,7 +17,7 @@
 	/// Callback to check if the object is currently able to block
 	var/datum/callback/is_blocking_check
 
-/datum/component/bullet_intercepting/Initialize(block_chance = 2, list/block_type = list(BULLET), active_slots, datum/callback/on_intercepted, block_charges = INFINITY, datum/callback/is_blocking_check = null)
+/datum/component/bullet_intercepting/Initialize(block_chance = 2, list/block_type = list(PIERCE), active_slots, datum/callback/on_intercepted, block_charges = INFINITY, datum/callback/is_blocking_check = null)
 	. = ..()
 	if (!isitem(parent))
 		return COMPONENT_INCOMPATIBLE

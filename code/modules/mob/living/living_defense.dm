@@ -1,5 +1,5 @@
 
-/mob/living/proc/run_armor_check(def_zone = null, attack_flag = MELEE, absorb_text = null, soften_text = null, armour_penetration, penetrated_text, silent=FALSE, weak_against_armour = FALSE)
+/mob/living/proc/run_armor_check(def_zone = null, attack_flag = BLUNT, absorb_text = null, soften_text = null, armour_penetration, penetrated_text, silent=FALSE, weak_against_armour = FALSE)
 	var/our_armor = getarmor(def_zone, attack_flag)
 
 	if(our_armor <= 0)
@@ -500,7 +500,7 @@
 	if(!dam_zone) //Dismemberment successful
 		return FALSE
 
-	var/armor_block = run_armor_check(user.zone_selected, MELEE, armour_penetration = user.armour_penetration)
+	var/armor_block = run_armor_check(user.zone_selected, BLUNT, armour_penetration = user.armour_penetration)
 
 	to_chat(user, span_danger("You [user.attack_verb_simple] [src]!"))
 	var/damage_done = apply_damage(

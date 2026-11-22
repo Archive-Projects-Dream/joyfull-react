@@ -1080,7 +1080,7 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/structure/window/reinforced/survival_pod/spawne
 	if(.)
 		return
 	if(user.combat_mode)
-		take_damage(4, BRUTE, MELEE, 0)
+		take_damage(4, BRUTE, BLUNT, 0)
 		if(!QDELETED(src))
 			update_appearance()
 

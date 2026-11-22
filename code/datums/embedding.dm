@@ -182,7 +182,7 @@
 		return prob(embed_chance)
 
 	// We'll be nice and take the better of bullet and bomb armor, halved
-	var/armor = max(victim.run_armor_check(hit_zone, BULLET, armour_penetration = parent.armour_penetration, silent = TRUE), victim.run_armor_check(hit_zone, BOMB, armour_penetration = parent.armour_penetration,  silent = TRUE)) * 0.5
+	var/armor = max(victim.run_armor_check(hit_zone, PIERCE, armour_penetration = parent.armour_penetration, silent = TRUE), victim.run_armor_check(hit_zone, BOMB, armour_penetration = parent.armour_penetration,  silent = TRUE)) * 0.5
 	// We only care about armor penetration if there's actually armor to penetrate
 	if(!armor)
 		return prob(chance)
@@ -242,7 +242,7 @@
 	if (damage <= 0)
 		return TRUE
 
-	var/armor = owner.run_armor_check(owner_limb.body_zone, MELEE, "Your armor has protected your [owner_limb.plaintext_zone].",
+	var/armor = owner.run_armor_check(owner_limb.body_zone, parent.get_attack_armor_flag(), "Your armor has protected your [owner_limb.plaintext_zone].",
 		"Your armor has softened a hit to your [owner_limb.plaintext_zone].", parent.armour_penetration,
 		weak_against_armour = parent.weak_against_armour,
 	)

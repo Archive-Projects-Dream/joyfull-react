@@ -736,7 +736,7 @@
 
 	user.changeNext_move(CLICK_CD_MELEE)
 	user.do_attack_animation(src, ATTACK_EFFECT_PUNCH)
-	var/damage = take_damage(damage_amount = 4, damage_type = BRUTE, damage_flag = MELEE, sound_effect = TRUE, attack_dir = get_dir(user, src))
+	var/damage = take_damage(damage_amount = 4, damage_type = BRUTE, damage_flag = BLUNT, sound_effect = TRUE, attack_dir = get_dir(user, src))
 
 	var/hit_with_what_noun = "paws"
 	var/obj/item/bodypart/arm/arm = user.get_active_hand()

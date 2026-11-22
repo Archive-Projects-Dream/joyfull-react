@@ -253,7 +253,7 @@
 
 	// deals damage to mechs
 	for(var/obj/vehicle/sealed/mecha/mech in our_turf)
-		mech.take_damage(45, BRUTE, MELEE, 1)
+		mech.take_damage(45, BRUTE, BLUNT, 1)
 
 	// changes turf to lava temporarily if possible, create a fire visual otherwise
 	if(!can_transform_turf)

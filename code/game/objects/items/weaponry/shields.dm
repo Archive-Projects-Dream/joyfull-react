@@ -91,19 +91,22 @@
 	if(!breakable_by_damage || (damage_type != BRUTE && damage_type != BURN))
 		return TRUE
 	var/penetration = 0
-	var/armor_flag = MELEE
+	var/armor_flag = BLUNT
 	if(isprojectile(hitby))
 		var/obj/projectile/bang_bang = hitby
 		armor_flag = bang_bang.armor_flag
 		penetration = bang_bang.armour_penetration
 	else if(isitem(hitby))
 		var/obj/item/weapon = hitby
+		armor_flag = weapon.get_attack_armor_flag()
 		penetration = weapon.armour_penetration
 	else if(isanimal(hitby))
 		var/mob/living/simple_animal/critter = hitby
+		armor_flag = get_armor_flag_from_sharpness(critter.sharpness)
 		penetration = critter.armour_penetration
 	else if(isbasicmob(hitby))
 		var/mob/living/basic/critter = hitby
+		armor_flag = get_armor_flag_from_sharpness(critter.sharpness)
 		penetration = critter.armour_penetration
 	take_damage(damage, damage_type, armor_flag, armour_penetration = penetration)
 

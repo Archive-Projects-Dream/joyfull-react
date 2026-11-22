@@ -219,7 +219,7 @@
 	if(attack_type == PROJECTILE_ATTACK || attack_type == LEAP_ATTACK || attack_type == OVERWHELMING_ATTACK)
 		final_block_chance = 0
 	if(attack_type != PROJECTILE_ATTACK && prob(30))
-		atom_destruction(MELEE)
+		atom_destruction(SLASH)
 		return FALSE
 
 	return ..()

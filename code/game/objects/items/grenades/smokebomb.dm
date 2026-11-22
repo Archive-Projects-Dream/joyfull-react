@@ -46,5 +46,5 @@
 	do_smoke(4, src, loc, smoke_type = /datum/effect_system/fluid_spread/smoke/bad)
 	for(var/obj/structure/blob/blob in view(8, src))
 		var/damage = round(30/(get_dist(blob, src) + 1))
-		blob.take_damage(damage, BURN, MELEE, 0)
+		blob.take_damage(damage, BURN, BLUNT, 0)
 	qdel(src)

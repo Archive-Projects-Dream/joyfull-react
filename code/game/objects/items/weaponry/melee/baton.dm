@@ -32,7 +32,7 @@
 	/// How much armor does our baton ignore? This operates as armour penetration, but only applies to the stun attack.
 	var/stun_armour_penetration = 15 // pens very light / cosmetic armor
 	/// What armor does our stun attack check before delivering the attack?
-	var/armour_type_against_stun = MELEE
+	var/armour_type_against_stun = BLUNT
 	/// Chance of causing force_say() when stunning a human mob
 	var/force_say_chance = 33
 	/// Can we stun cyborgs?

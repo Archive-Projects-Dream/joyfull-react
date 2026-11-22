@@ -564,7 +564,7 @@
 		for(var/mob/living/within_rock in rock)
 			within_rock.Paralyze(1 SECONDS)
 			within_rock.Knockdown(3 SECONDS)
-			within_rock.apply_damage(10, BRUTE, BODY_ZONE_CHEST, blocked = within_rock.getarmor(BODY_ZONE_CHEST, MELEE), wound_bonus = 10, exposed_wound_bonus = 10)
+			within_rock.apply_damage(10, BRUTE, BODY_ZONE_CHEST, blocked = within_rock.getarmor(BODY_ZONE_CHEST, BLUNT), wound_bonus = 10, exposed_wound_bonus = 10)
 			to_chat(within_rock, span_danger("You are smashed by [rock]!"))
 	warn_admins(user, "Rocks", FALSE)
 	if(prob(20))

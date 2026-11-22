@@ -74,7 +74,7 @@
 		trapped_mobs = TRUE
 
 	for (var/obj/vehicle/sealed/mecha/mech in loc)
-		mech.take_damage(rand(min_damage, max_damage), damage_type = BRUTE, damage_flag = MELEE, sound_effect = TRUE)
+		mech.take_damage(rand(min_damage, max_damage), damage_type = BRUTE, damage_flag = BLUNT, sound_effect = TRUE)
 
 	// Already retracting
 	if (icon_state == "goliath_tentacle_retract")
