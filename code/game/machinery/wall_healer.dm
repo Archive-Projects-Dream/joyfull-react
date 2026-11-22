@@ -54,8 +54,9 @@
 	VAR_PRIVATE/antispam_counter = 0
 
 /datum/armor/obj_machinery/wall_healer
-	melee = 20
-	bullet = 20
+	blunt = 20
+	slash = 20
+	pierce = 20
 	laser = 30
 	energy = 30
 	bomb = 10

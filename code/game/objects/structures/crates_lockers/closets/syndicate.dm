@@ -6,8 +6,9 @@
 	paint_jobs = null
 
 /datum/armor/closet_syndicate
-	melee = 70
-	bullet = 40
+	blunt = 70
+	slash = 70
+	pierce = 40
 	laser = 40
 	energy = 30
 	bomb = 30

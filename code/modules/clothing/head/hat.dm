@@ -13,8 +13,9 @@
 	strip_delay = 8 SECONDS
 
 /datum/armor/hats_centhat
-	melee = 30
-	bullet = 15
+	blunt = 30
+	slash = 30
+	pierce = 15
 	laser = 30
 	energy = 40
 	bomb = 25
@@ -139,8 +140,9 @@
 	playsound(victim, /datum/sound_effect/ricochet, 100, TRUE)
 
 /datum/armor/head_cowboy
-	melee = 5
-	bullet = 5
+	blunt = 5
+	slash = 5
+	pierce = 5
 	laser = 5
 	energy = 15
 
@@ -299,8 +301,9 @@
 	armor_type = /datum/armor/hats_coordinator
 
 /datum/armor/hats_coordinator
-	melee = 25
-	bullet = 15
+	blunt = 25
+	slash = 25
+	pierce = 15
 	laser = 25
 	energy = 35
 	bomb = 25
@@ -329,8 +332,9 @@
 	strip_delay = 8 SECONDS
 
 /datum/armor/hats_centcom_cap
-	melee = 30
-	bullet = 15
+	blunt = 30
+	slash = 30
+	pierce = 15
 	laser = 30
 	energy = 40
 	bomb = 25

@@ -22,8 +22,9 @@
 	return "#796755"
 
 /datum/armor/hooded_explorer
-	melee = 30
-	bullet = 10
+	blunt = 30
+	slash = 30
+	pierce = 10
 	laser = 10
 	energy = 20
 	bomb = 50
@@ -69,8 +70,9 @@
 	resistance_flags = FIRE_PROOF
 
 /datum/armor/gas_explorer
-	melee = 10
-	bullet = 5
+	blunt = 10
+	slash = 10
+	pierce = 5
 	laser = 5
 	energy = 5
 	bio = 50
@@ -130,8 +132,9 @@
 	allowed = GLOB.mining_suit_allowed
 
 /datum/armor/hooded_goliath
-	melee = 60
-	bullet = 10
+	blunt = 60
+	slash = 60
+	pierce = 10
 	laser = 10
 	energy = 20
 	bomb = 50
@@ -235,8 +238,9 @@
 	armor_type = /datum/armor/hooded_explorer_syndicate
 
 /datum/armor/hooded_explorer_syndicate
-	melee = 30
-	bullet = 15
+	blunt = 30
+	slash = 30
+	pierce = 15
 	laser = 25
 	energy = 35
 	bomb = 50

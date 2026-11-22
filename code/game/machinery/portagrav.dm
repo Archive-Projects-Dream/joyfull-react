@@ -32,7 +32,8 @@
 
 /datum/armor/portable_gravity
 	fire = 100
-	melee = 10
+	blunt = 10
+	slash = 10
 	bomb = 40
 
 /obj/machinery/power/portagrav/Initialize(mapload)

@@ -26,8 +26,9 @@
 	hood_up_affix = ""
 
 /datum/armor/chaplainsuit_armor_weaker
-	melee = 40
-	bullet = 5
+	blunt = 40
+	slash = 40
+	pierce = 5
 	laser = 5
 	energy = 5
 	fire = 60
@@ -67,8 +68,9 @@
 	armor_type = /datum/armor/shoes_divine_archer
 
 /datum/armor/shoes_divine_archer
-	melee = 10
-	bullet = 5
+	blunt = 10
+	slash = 10
+	pierce = 5
 	laser = 5
 	energy = 5
 	fire = 60

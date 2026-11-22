@@ -98,7 +98,8 @@
 	hoodtype = /obj/item/clothing/head/hooded/winterhood/eva
 
 /datum/armor/wintercoat_eva
-	melee = 10
+	blunt = 10
+	slash = 10
 	laser = 10
 	energy = 10
 	bio = 50
@@ -121,7 +122,8 @@
 
 // CentCom
 /datum/armor/winterhood_eva
-	melee = 10
+	blunt = 10
+	slash = 10
 	laser = 10
 	energy = 10
 	bio = 50
@@ -137,8 +139,9 @@
 	hoodtype = /obj/item/clothing/head/hooded/winterhood/centcom
 
 /datum/armor/wintercoat_centcom
-	melee = 35
-	bullet = 40
+	blunt = 35
+	slash = 35
+	pierce = 40
 	laser = 40
 	energy = 50
 	bomb = 35
@@ -156,8 +159,9 @@
 
 // Captain
 /datum/armor/winterhood_centcom
-	melee = 35
-	bullet = 40
+	blunt = 35
+	slash = 35
+	pierce = 40
 	laser = 40
 	energy = 50
 	bomb = 35
@@ -176,8 +180,9 @@
 	hoodtype = /obj/item/clothing/head/hooded/winterhood/captain
 
 /datum/armor/wintercoat_captain
-	melee = 25
-	bullet = 30
+	blunt = 25
+	slash = 25
+	pierce = 30
 	laser = 30
 	energy = 40
 	bomb = 25
@@ -193,8 +198,9 @@
 
 // Head of Personnel
 /datum/armor/winterhood_captain
-	melee = 25
-	bullet = 30
+	blunt = 25
+	slash = 25
+	pierce = 30
 	laser = 30
 	energy = 40
 	bomb = 25
@@ -213,8 +219,9 @@
 	hoodtype = /obj/item/clothing/head/hooded/winterhood/hop
 
 /datum/armor/wintercoat_hop
-	melee = 10
-	bullet = 15
+	blunt = 10
+	slash = 10
+	pierce = 15
 	laser = 15
 	energy = 25
 	bomb = 10
@@ -273,8 +280,9 @@
 	hoodtype = /obj/item/clothing/head/hooded/winterhood/security
 
 /datum/armor/wintercoat_security
-	melee = 25
-	bullet = 15
+	blunt = 25
+	slash = 25
+	pierce = 15
 	laser = 30
 	energy = 40
 	bomb = 25
@@ -291,8 +299,9 @@
 
 // Medical Doctor
 /datum/armor/winterhood_security
-	melee = 25
-	bullet = 15
+	blunt = 25
+	slash = 25
+	pierce = 15
 	laser = 30
 	energy = 40
 	bomb = 25
@@ -655,7 +664,8 @@
 	hoodtype = /obj/item/clothing/head/hooded/winterhood/miner
 
 /datum/armor/wintercoat_miner
-	melee = 10
+	blunt = 10
+	slash = 10
 
 /obj/item/clothing/head/hooded/winterhood/miner
 	desc = "A dusty winter coat hood."
@@ -663,7 +673,8 @@
 	armor_type = /datum/armor/winterhood_miner
 
 /datum/armor/winterhood_miner
-	melee = 10
+	blunt = 10
+	slash = 10
 
 /obj/item/clothing/suit/hooded/wintercoat/custom
 	name = "tailored winter coat"

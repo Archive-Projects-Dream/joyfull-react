@@ -21,8 +21,9 @@
 	hoodtype = /obj/item/clothing/head/hooded/cult_hoodie
 
 /datum/armor/hooded_cultrobes
-	melee = 40
-	bullet = 30
+	blunt = 40
+	slash = 40
+	pierce = 30
 	laser = 40
 	energy = 40
 	bomb = 25
@@ -136,8 +137,9 @@
 	qdel(src)
 
 /datum/armor/cultrobes_hardened
-	melee = 50
-	bullet = 40
+	blunt = 50
+	slash = 50
+	pierce = 40
 	laser = 50
 	energy = 60
 	bomb = 50
@@ -203,8 +205,9 @@
 	hoodtype = /obj/item/clothing/head/hooded/cult_hoodie/cult_shield
 
 /datum/armor/cultrobes_cult_shield
-	melee = 50
-	bullet = 40
+	blunt = 50
+	slash = 50
+	pierce = 40
 	laser = 50
 	energy = 50
 	bomb = 50

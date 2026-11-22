@@ -755,8 +755,9 @@
 	can_flip = FALSE
 
 /datum/armor/table_reinforced
-	melee = 10
-	bullet = 30
+	blunt = 10
+	slash = 10
+	pierce = 30
 	laser = 30
 	energy = 100
 	bomb = 20

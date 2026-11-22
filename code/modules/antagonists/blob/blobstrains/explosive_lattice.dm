@@ -14,7 +14,7 @@
 /datum/blobstrain/reagent/explosive_lattice/damage_reaction(obj/structure/blob/B, damage, damage_type, damage_flag)
 	if(damage_flag == BOMB)
 		return 0
-	else if(damage_flag != MELEE && damage_flag != BULLET && damage_flag != LASER)
+	else if(!ARMOR_IS_PHYSICAL(damage_flag) && damage_flag != LASER)
 		return damage * 1.5
 	return ..()
 

@@ -11,8 +11,9 @@
 	cell = /obj/item/stock_parts/power_store/cell/hyper
 
 /datum/armor/space_hunter
-	melee = 60
-	bullet = 40
+	blunt = 60
+	slash = 60
+	pierce = 40
 	laser = 40
 	energy = 50
 	bomb = 100

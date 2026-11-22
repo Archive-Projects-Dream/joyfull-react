@@ -331,8 +331,9 @@
 	shot_delay = 1 SECONDS
 
 /datum/armor/donk_turret
-	melee = 20
-	bullet = 20
+	blunt = 20
+	slash = 20
+	pierce = 20
 	laser = 40
 	energy = 40
 	bomb = 20

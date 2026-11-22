@@ -237,7 +237,8 @@ GLOBAL_LIST_INIT(clown_mask_options, list(
 	dirt_state = "welding_dirt"
 
 /datum/armor/gas_welding
-	melee = 10
+	blunt = 10
+	slash = 10
 	bio = 100
 	fire = 100
 	acid = 55

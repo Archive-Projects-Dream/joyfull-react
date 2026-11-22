@@ -10,7 +10,7 @@
 	layer = FLY_LAYER
 
 /datum/armor/trader_sign
-	bullet = 50
+	pierce = 50
 	laser = 50
 	energy = 50
 	fire = 20

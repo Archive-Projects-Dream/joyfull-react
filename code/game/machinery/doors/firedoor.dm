@@ -64,8 +64,9 @@
 
 
 /datum/armor/door_firedoor
-	melee = 10
-	bullet = 30
+	blunt = 10
+	slash = 10
+	pierce = 30
 	laser = 20
 	energy = 20
 	bomb = 30

@@ -62,8 +62,9 @@
 	base_icon_state = "tram-split"
 
 /datum/armor/tram_structure
-	melee = 40
-	bullet = 10
+	blunt = 40
+	slash = 40
+	pierce = 10
 	laser = 10
 	bomb = 45
 	fire = 90

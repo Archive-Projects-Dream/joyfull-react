@@ -7,7 +7,8 @@
 	custom_materials = list(/datum/material/gold = SHEET_MATERIAL_AMOUNT * 5)
 
 /datum/armor/costume_crown
-	melee = 15
+	blunt = 15
+	slash = 15
 	energy = 10
 	fire = 100
 	acid = 50

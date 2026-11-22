@@ -40,7 +40,8 @@
 	var/added_leaning = FALSE
 
 /datum/armor/structure_window
-	melee = 50
+	blunt = 50
+	slash = 50
 	fire = 80
 	acid = 100
 
@@ -534,7 +535,8 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/structure/window/unanchored/spawner, 0)
 //2023 ONE YEAR TO GO! -LT3
 //2026 just a week away - kemble
 /datum/armor/window_reinforced
-	melee = 80
+	blunt = 80
+	slash = 80
 	bomb = 25
 	fire = 80
 	acid = 100
@@ -697,8 +699,9 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/structure/window/reinforced/unanchored/spawner,
 	custom_materials = list(/datum/material/alloy/plasmaglass = SHEET_MATERIAL_AMOUNT)
 
 /datum/armor/window_plasma
-	melee = 80
-	bullet = 5
+	blunt = 80
+	slash = 80
+	pierce = 5
 	bomb = 45
 	fire = 99
 	acid = 100
@@ -728,8 +731,9 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/structure/window/plasma/spawner, 0)
 	custom_materials = list(/datum/material/alloy/plasmaglass = SHEET_MATERIAL_AMOUNT, /datum/material/iron = HALF_SHEET_MATERIAL_AMOUNT)
 
 /datum/armor/reinforced_plasma
-	melee = 80
-	bullet = 20
+	blunt = 80
+	slash = 80
+	pierce = 20
 	bomb = 60
 	fire = 99
 	acid = 100
@@ -891,7 +895,8 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/structure/window/reinforced/tinted/frosted/spaw
 	glass_material_datum = /datum/material/alloy/titaniumglass
 
 /datum/armor/reinforced_shuttle
-	melee = 90
+	blunt = 90
+	slash = 90
 	bomb = 50
 	fire = 80
 	acid = 100
@@ -1018,7 +1023,8 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/structure/window/reinforced/survival_pod/spawne
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
 
 /datum/armor/plasma_plastitanium
-	melee = 95
+	blunt = 95
+	slash = 95
 	bomb = 50
 	fire = 80
 	acid = 100

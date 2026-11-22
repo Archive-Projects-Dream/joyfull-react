@@ -55,8 +55,9 @@ no power level overlay is currently in the overlays list.
 	var/instantenous = FALSE
 
 /datum/armor/field_generator
-	melee = 25
-	bullet = 10
+	blunt = 25
+	slash = 25
+	pierce = 10
 	laser = 100
 	energy = 100
 	fire = 50

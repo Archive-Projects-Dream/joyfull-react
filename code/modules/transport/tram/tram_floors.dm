@@ -203,8 +203,9 @@
 	AddElement(/datum/element/force_move_pulled)
 
 /datum/armor/tram_floor
-	melee = 40
-	bullet = 10
+	blunt = 40
+	slash = 40
+	pierce = 10
 	laser = 10
 	bomb = 45
 	fire = 90

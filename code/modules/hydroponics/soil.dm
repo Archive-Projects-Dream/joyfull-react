@@ -53,8 +53,9 @@
 	return
 
 /datum/armor/obj_soil
-	melee = 80
-	bullet = 100
+	blunt = 80
+	slash = 80
+	pierce = 100
 	laser = 90
 	fire = 70
 	acid = 30

@@ -29,8 +29,9 @@
 	var/switching = FALSE
 
 /datum/armor/mecha_durand
-	melee = 40
-	bullet = 35
+	blunt = 40
+	slash = 40
+	pierce = 35
 	laser = 15
 	energy = 10
 	bomb = 20

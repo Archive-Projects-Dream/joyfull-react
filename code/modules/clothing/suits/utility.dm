@@ -46,8 +46,9 @@
 	AddElement(/datum/element/equipment_bodypart_texture, BODY_ZONE_CHEST, /datum/bodypart_texture/mesh/firesuit)
 
 /datum/armor/utility_fire
-	melee = 15
-	bullet = 5
+	blunt = 15
+	slash = 15
+	pierce = 5
 	laser = 20
 	energy = 20
 	bomb = 20
@@ -118,7 +119,8 @@
 	AddElement(/datum/element/equipment_bodypart_texture, BODY_ZONE_HEAD, texture_type)
 
 /datum/armor/utility_bomb_hood
-	melee = 20
+	blunt = 20
+	slash = 20
 	laser = 20
 	energy = 30
 	bomb = 100
@@ -153,7 +155,8 @@
 	AddElement(/datum/element/equipment_bodypart_texture, BODY_ZONE_CHEST, texture_type)
 
 /datum/armor/utility_bomb_suit
-	melee = 20
+	blunt = 20
+	slash = 20
 	laser = 20
 	energy = 30
 	bomb = 100

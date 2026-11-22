@@ -17,7 +17,8 @@
 	var/obj/item/mecha_parts/mecha_equipment/armor/armor_plate/plate_component = null
 
 /datum/armor/armor_plate
-	melee = 10
+	blunt = 10
+	slash = 10
 
 /datum/component/armor_plate/Initialize(maxamount, obj/item/upgrade_item, datum/armor/armor_mod, upgrade_prefix = "reinforced")
 	if(!isobj(parent))

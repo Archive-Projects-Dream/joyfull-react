@@ -31,8 +31,9 @@
 	var/cable = 1
 
 /datum/armor/door_window
-	melee = 20
-	bullet = 50
+	blunt = 20
+	slash = 20
+	pierce = 50
 	laser = 50
 	energy = 50
 	bomb = 10

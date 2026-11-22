@@ -85,7 +85,11 @@ GLOBAL_LIST_EMPTY(objects_by_id_tag)
 
 	var/demo_mod = attacking_item.get_demolition_modifier(src)
 	var/total_force = CALCULATE_FORCE(attacking_item, attack_modifiers) * demo_mod
-	var/damage = take_damage(total_force, attacking_item.damtype, MELEE, TRUE, get_dir(src, user), attacking_item.armour_penetration)
+	var/attack_flag = attacking_item.get_attack_armor_flag()
+	// PIERCE isn't covered by the melee deflection check in run_atom_armor (bullets use it too), so pointy weapons are checked here
+	var/damage = 0
+	if(attack_flag != PIERCE || total_force >= damage_deflection)
+		damage = take_damage(total_force, attacking_item.damtype, attack_flag, TRUE, get_dir(src, user), attacking_item.armour_penetration)
 
 	if(!LAZYACCESS(attack_modifiers, SILENCE_DEFAULT_MESSAGES))
 		// Sanity in case one is null for some reason

@@ -139,8 +139,9 @@
 	armor_type = /datum/armor/barricade_security
 
 /datum/armor/barricade_security
-	melee = 10
-	bullet = 50
+	blunt = 10
+	slash = 10
+	pierce = 50
 	laser = 50
 	energy = 50
 	bomb = 10

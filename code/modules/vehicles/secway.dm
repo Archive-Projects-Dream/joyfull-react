@@ -12,7 +12,8 @@
 	var/obj/item/food/grown/banana/eddie_murphy
 
 /datum/armor/ridden_secway
-	melee = 10
+	blunt = 10
+	slash = 10
 	laser = 10
 	fire = 60
 	acid = 60

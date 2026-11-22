@@ -47,8 +47,9 @@
 	flags_1 = IS_PLAYER_COLORABLE_1
 
 /datum/armor/hooded_hostile_environment
-	melee = 70
-	bullet = 40
+	blunt = 70
+	slash = 70
+	pierce = 40
 	laser = 10
 	energy = 20
 	bomb = 50

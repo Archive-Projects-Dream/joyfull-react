@@ -15,8 +15,9 @@
 	req_access = list(ACCESS_AI_UPLOAD)
 
 /datum/armor/machinery_ai_slipper
-	melee = 50
-	bullet = 20
+	blunt = 50
+	slash = 50
+	pierce = 20
 	laser = 20
 	energy = 20
 	fire = 50

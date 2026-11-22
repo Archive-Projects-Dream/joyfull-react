@@ -20,8 +20,9 @@
 	visor_dirt = null
 
 /datum/armor/space_beret
-	melee = 80
-	bullet = 80
+	blunt = 80
+	slash = 80
+	pierce = 80
 	laser = 50
 	energy = 60
 	bomb = 100
@@ -49,8 +50,9 @@
 	fishing_modifier = 0
 
 /datum/armor/space_officer
-	melee = 80
-	bullet = 80
+	blunt = 80
+	slash = 80
+	pierce = 80
 	laser = 50
 	energy = 60
 	bomb = 100

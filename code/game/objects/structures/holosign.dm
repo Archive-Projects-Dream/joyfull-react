@@ -13,7 +13,7 @@
 	var/use_vis_overlay = TRUE
 
 /datum/armor/structure_holosign
-	bullet = 50
+	pierce = 50
 	laser = 50
 	energy = 50
 	fire = 20
@@ -252,10 +252,11 @@
 	armor_type = /datum/armor/structure_holosign/cyborg_barrier // Gets a special armor subtype which is extra good at defense.
 
 /datum/armor/structure_holosign/cyborg_barrier
-	bullet = 80
+	pierce = 80
 	laser = 80
 	energy = 80
-	melee = 20
+	blunt = 20
+	slash = 20
 
 /obj/structure/holosign/barrier/medical
 	name = "\improper PENLITE holobarrier"

@@ -26,8 +26,9 @@
 	overclock_safety = TRUE
 
 /datum/armor/mecha_gygax
-	melee = 25
-	bullet = 20
+	blunt = 25
+	slash = 25
+	pierce = 20
 	laser = 30
 	energy = 15
 	fire = 100
@@ -65,8 +66,9 @@
 	destruction_sleep_duration = 20
 
 /datum/armor/gygax_dark
-	melee = 70
-	bullet = 50
+	blunt = 70
+	slash = 70
+	pierce = 50
 	laser = 55
 	energy = 35
 	bomb = 20

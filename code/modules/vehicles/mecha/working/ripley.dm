@@ -44,8 +44,9 @@
 	var/slow_pressure_step_in = 2
 
 /datum/armor/mecha_ripley
-	melee = 40
-	bullet = 20
+	blunt = 40
+	slash = 40
+	pierce = 20
 	laser = 10
 	energy = 20
 	bomb = 40
@@ -61,8 +62,9 @@
 	AddComponent(/datum/component/armor_plate, 3, /obj/item/stack/sheet/animalhide/goliath_hide, /datum/armor/armor_plate_ripley_goliath)
 
 /datum/armor/armor_plate_ripley_goliath
-	melee = 10
-	bullet = 5
+	blunt = 10
+	slash = 10
+	pierce = 5
 	laser = 5
 
 /obj/vehicle/sealed/mecha/ripley/mk2
@@ -83,8 +85,9 @@
 	silicon_icon_state = null
 
 /datum/armor/mecha_ripley_mk2
-	melee = 40
-	bullet = 30
+	blunt = 40
+	slash = 40
+	pierce = 30
 	laser = 30
 	energy = 30
 	bomb = 60
@@ -123,8 +126,9 @@
 	var/datum/looping_sound/siren/weewooloop
 
 /datum/armor/mecha_paddy
-	melee = 40
-	bullet = 20
+	blunt = 40
+	slash = 40
+	pierce = 20
 	laser = 10
 	energy = 20
 	bomb = 40

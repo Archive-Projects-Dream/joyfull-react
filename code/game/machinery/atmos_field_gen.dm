@@ -32,7 +32,8 @@
 	var/obj/machinery/atmos_shield_gen/master = null
 
 /datum/armor/atmos_shield_gen
-	melee = 50
+	blunt = 50
+	slash = 50
 	fire = 100
 	acid = 50
 

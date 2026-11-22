@@ -6,16 +6,18 @@
 #define MODULE_NAME(all_modules, named_module) (all_modules[named_module] == MODULE_WELDED ? "unidentified welded module" : (named_module?.name || "Empty"))
 
 /datum/armor/obj_machinery/law_rack
-	melee = 50
-	bullet = 30
+	blunt = 50
+	slash = 50
+	pierce = 30
 	laser = 30
 	bomb = 50
 	fire = 100
 	acid = 100
 
 /datum/armor/obj_machinery/law_rack/portable
-	melee = 30
-	bullet = 10
+	blunt = 30
+	slash = 30
+	pierce = 10
 	laser = 10
 
 /obj/machinery/ai_law_rack

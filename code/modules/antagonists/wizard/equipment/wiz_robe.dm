@@ -20,8 +20,9 @@
 	AddElement(/datum/element/adjust_fishing_difficulty, fishing_modifier) //A wizard always practices his casting (ba dum tsh)
 
 /datum/armor/head_wizard
-	melee = 30
-	bullet = 20
+	blunt = 30
+	slash = 30
+	pierce = 20
 	laser = 20
 	energy = 30
 	bomb = 20
@@ -134,8 +135,9 @@
 	AddElement(/datum/element/adjust_fishing_difficulty, fishing_modifier) //A wizard always practices his casting (ba dum tsh)
 
 /datum/armor/suit_wizrobe
-	melee = 30
-	bullet = 20
+	blunt = 30
+	slash = 30
+	pierce = 20
 	laser = 20
 	energy = 30
 	bomb = 20
@@ -243,8 +245,9 @@
 	fishing_modifier = -6
 
 /datum/armor/robe_durathread
-	melee = 15
-	bullet = 5
+	blunt = 15
+	slash = 15
+	pierce = 5
 	laser = 25
 	energy = 30
 	bomb = 10

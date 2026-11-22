@@ -37,8 +37,9 @@
 	var/datum/icon_snapshot/disguise
 
 /datum/armor/abductor_combat
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 50
 	energy = 50
 	bomb = 50
@@ -47,8 +48,9 @@
 	acid = 90
 
 /datum/armor/abductor_vest
-	melee = 15
-	bullet = 15
+	blunt = 15
+	slash = 15
+	pierce = 15
 	laser = 15
 	energy = 25
 	bomb = 15

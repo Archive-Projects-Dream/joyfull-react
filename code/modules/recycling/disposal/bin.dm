@@ -38,8 +38,9 @@ GLOBAL_VAR_INIT(disposals_animals_spawned, 0)
 	var/obj/structure/disposalconstruct/stored
 
 /datum/armor/machinery_disposal
-	melee = 25
-	bullet = 10
+	blunt = 25
+	slash = 25
+	pierce = 10
 	laser = 10
 	energy = 100
 	fire = 90

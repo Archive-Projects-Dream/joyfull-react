@@ -173,7 +173,8 @@
 	custom_materials = list(/datum/material/iron = SHEET_MATERIAL_AMOUNT * 10, /datum/material/silver = SHEET_MATERIAL_AMOUNT * 2.5)
 
 /datum/armor/mecha_equipment_ccw_boost
-	melee = 20
+	blunt = 20
+	slash = 20
 
 /obj/item/mecha_parts/mecha_equipment/armor/antiproj_armor_booster
 	name = "exosuit projectile shielding"
@@ -183,7 +184,7 @@
 	custom_materials = list(/datum/material/iron = SHEET_MATERIAL_AMOUNT * 10, /datum/material/gold = SHEET_MATERIAL_AMOUNT * 2.5)
 
 /datum/armor/mecha_equipment_ranged_boost
-	bullet = 15
+	pierce = 15
 	laser = 15
 
 /obj/item/mecha_parts/mecha_equipment/armor/antiemp_armor_booster
@@ -195,8 +196,9 @@
 	custom_materials = list(/datum/material/iron = SHEET_MATERIAL_AMOUNT * 10, /datum/material/gold = SHEET_MATERIAL_AMOUNT * 2.5)
 
 /datum/armor/mecha_equipment_energy_boost
-	melee = -5
-	bullet = -10
+	blunt = -5
+	slash = -5
+	pierce = -10
 	energy = 15
 
 /obj/item/mecha_parts/mecha_equipment/armor/antiemp_armor_booster/attach(obj/vehicle/sealed/mecha/new_mecha, attach_right)

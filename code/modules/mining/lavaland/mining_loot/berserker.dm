@@ -25,8 +25,9 @@
 	clothing_flags = THICKMATERIAL|HEADINTERNALS
 
 /datum/armor/hooded_berserker
-	melee = 30
-	bullet = 30
+	blunt = 30
+	slash = 30
+	pierce = 30
 	laser = 10
 	energy = 20
 	bomb = 50
@@ -36,7 +37,8 @@
 	wound = 10
 
 /datum/armor/drake_empowerment
-	melee = 35
+	blunt = 35
+	slash = 35
 	laser = 30
 	energy = 20
 	bomb = 20

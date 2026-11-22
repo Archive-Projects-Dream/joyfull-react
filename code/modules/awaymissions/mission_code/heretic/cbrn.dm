@@ -4,8 +4,9 @@
 	armor_type = /datum/armor/utility_radiation/cbrn
 
 /datum/armor/utility_radiation/cbrn
-	melee = 60
-	bullet = 40
+	blunt = 60
+	slash = 60
+	pierce = 40
 	laser = 30
 	energy = 80
 	bomb = 20

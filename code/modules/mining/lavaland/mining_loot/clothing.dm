@@ -108,8 +108,9 @@
 	armor_type = /datum/armor/gloves_gauntlets
 
 /datum/armor/gloves_gauntlets
-	melee = 15
-	bullet = 25
+	blunt = 15
+	slash = 15
+	pierce = 25
 	laser = 15
 	energy = 15
 	bomb = 100

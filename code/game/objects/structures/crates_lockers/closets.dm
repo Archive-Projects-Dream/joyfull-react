@@ -101,8 +101,9 @@ GLOBAL_LIST_EMPTY(roundstart_station_closets)
 	VAR_PRIVATE/datum/closet_see_inside/closet_see_inside
 
 /datum/armor/structure_closet
-	melee = 20
-	bullet = 10
+	blunt = 20
+	slash = 20
+	pierce = 10
 	laser = 10
 	bomb = 10
 	fire = 70

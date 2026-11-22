@@ -51,8 +51,9 @@
 	COOLDOWN_DECLARE(sound_cooldown)
 
 /datum/armor/mecha_vim
-	melee = 70
-	bullet = 40
+	blunt = 70
+	slash = 70
+	pierce = 40
 	laser = 40
 	bomb = 30
 	fire = 80

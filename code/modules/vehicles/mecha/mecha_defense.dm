@@ -353,7 +353,10 @@
 	if(!final_force)
 		return 0
 
-	var/damage_taken = take_damage(final_force, attacking_item.damtype, MELEE, 1, get_dir(src, user))
+	var/attack_flag = attacking_item.get_attack_armor_flag()
+	var/damage_taken = 0
+	if(attack_flag != PIERCE || final_force >= damage_deflection)
+		damage_taken = take_damage(final_force, attacking_item.damtype, attack_flag, 1, get_dir(src, user))
 	try_damage_component(damage_taken, user.zone_selected)
 
 	var/hit_verb = length(attacking_item.attack_verb_simple) ? "[pick(attacking_item.attack_verb_simple)]" : "hit"

@@ -340,10 +340,11 @@
 /datum/armor/giant_wrench
 	acid = 30
 	bomb = 100
-	bullet = 30
+	pierce = 30
 	fire = 100
 	laser = 30
-	melee = 30
+	blunt = 30
+	slash = 30
 
 /obj/item/shovel/giant_wrench/Initialize(mapload)
 	. = ..()

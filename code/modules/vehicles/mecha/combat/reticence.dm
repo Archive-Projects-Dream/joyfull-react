@@ -25,8 +25,9 @@
 	color = "#87878715"
 
 /datum/armor/mecha_reticence
-	melee = 40
-	bullet = 40
+	blunt = 40
+	slash = 40
+	pierce = 40
 	laser = 50
 	energy = 20
 	fire = 100

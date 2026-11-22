@@ -90,8 +90,9 @@
 	COOLDOWN_DECLARE(pressure_push_cooldown)
 
 /datum/armor/machinery_door
-	melee = 30
-	bullet = 30
+	blunt = 30
+	slash = 30
+	pierce = 30
 	laser = 20
 	energy = 20
 	bomb = 10

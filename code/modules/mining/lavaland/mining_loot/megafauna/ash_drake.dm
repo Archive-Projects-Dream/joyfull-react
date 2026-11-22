@@ -31,8 +31,9 @@
 	custom_materials = list(/datum/material/bone = SHEET_MATERIAL_AMOUNT * 10)
 
 /datum/armor/cloak_drake
-	melee = 65
-	bullet = 15
+	blunt = 65
+	slash = 65
+	pierce = 15
 	laser = 40
 	energy = 40
 	bomb = 70

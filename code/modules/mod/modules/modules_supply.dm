@@ -487,8 +487,9 @@
 	var/static/list/keep_turfs
 
 /datum/armor/mod_ash_accretion
-	melee = 3 // 50 armor when fully covered in ash, equal to two plates on an explorer suit
-	bullet = 1
+	blunt = 3 // 50 armor when fully covered in ash, equal to two plates on an explorer suit
+	slash = 3 // 50 armor when fully covered in ash, equal to two plates on an explorer suit
+	pierce = 1
 	laser = 2
 	energy = 2
 	bomb = 3
@@ -612,7 +613,8 @@
 	var/hide_amount = 2 // These are rather rare as of now, should be increased later once other methods of crossing lava are removed
 
 /datum/armor/mod_sphere_transform
-	melee = 20 // Can get up to 70 armor when ash covered and ballin, which is as good as a HECK suit... but you can't really attack anymore
+	blunt = 20 // Can get up to 70 armor when ash covered and ballin, which is as good as a HECK suit... but you can't really attack anymore
+	slash = 20 // Can get up to 70 armor when ash covered and ballin, which is as good as a HECK suit... but you can't really attack anymore
 	bomb = 20
 
 /obj/item/mod/module/sphere_transform/on_install()

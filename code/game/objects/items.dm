@@ -955,6 +955,10 @@ GAME_VERB_SRC(/obj/item, verb_pickup, oview(1), "Pick up", null)
 /obj/item/proc/get_sharpness()
 	return sharpness
 
+/// The armor flag (BLUNT / SLASH / PIERCE) this item's physical hits are checked against, based on its sharpness
+/obj/item/proc/get_attack_armor_flag()
+	return get_armor_flag_from_sharpness(get_sharpness())
+
 /obj/item/proc/get_dismember_sound()
 	if(damtype == BURN)
 		. = /datum/sound_effect/sear

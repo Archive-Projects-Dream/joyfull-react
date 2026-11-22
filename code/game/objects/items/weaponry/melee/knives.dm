@@ -302,8 +302,9 @@
 	custom_materials = list(/datum/material/alloy/plasmaglass = SHEET_MATERIAL_AMOUNT)
 
 /datum/armor/shiv_plasma
-	melee = 25
-	bullet = 25
+	blunt = 25
+	slash = 25
+	pierce = 25
 	laser = 25
 	energy = 25
 	bomb = 25
@@ -322,8 +323,9 @@
 	custom_materials = list(/datum/material/alloy/titaniumglass = SHEET_MATERIAL_AMOUNT)
 
 /datum/armor/shiv_titanium
-	melee = 25
-	bullet = 25
+	blunt = 25
+	slash = 25
+	pierce = 25
 	laser = 25
 	energy = 25
 	bomb = 25
@@ -345,8 +347,9 @@
 	custom_materials = list(/datum/material/alloy/plastitaniumglass = SHEET_MATERIAL_AMOUNT)
 
 /datum/armor/shiv_plastitanium
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 50
 	energy = 50
 	bomb = 50

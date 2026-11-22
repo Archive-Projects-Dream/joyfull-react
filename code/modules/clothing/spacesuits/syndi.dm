@@ -7,8 +7,9 @@
 	armor_type = /datum/armor/space_syndicate
 
 /datum/armor/space_syndicate
-	melee = 40
-	bullet = 50
+	blunt = 40
+	slash = 40
+	pierce = 50
 	laser = 30
 	energy = 40
 	bomb = 30

@@ -23,8 +23,9 @@
 	COOLDOWN_DECLARE(burn_damage_cd)
 
 /datum/armor/structure_plasticflaps
-	melee = 100
-	bullet = 80
+	blunt = 100
+	slash = 100
+	pierce = 80
 	laser = 80
 	energy = 100
 	bomb = 50
@@ -42,7 +43,8 @@
 	flaps_alpha = 150
 
 /datum/armor/structure_plasticflaps/kitchen
-	melee = 50
+	blunt = 50
+	slash = 50
 	fire = 20
 	acid = 20
 

@@ -22,8 +22,9 @@
 	var/dramatically_disappearing = FALSE
 
 /datum/armor/structure_grille
-	melee = 50
-	bullet = 70
+	blunt = 50
+	slash = 50
+	pierce = 70
 	laser = 70
 	energy = 100
 	bomb = 10

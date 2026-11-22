@@ -26,8 +26,9 @@
 MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/mining_weather_monitor, 28)
 
 /datum/armor/weather_tower
-	melee = 80
-	bullet = 50
+	blunt = 80
+	slash = 80
+	pierce = 50
 	laser = 50
 	energy = 50
 	fire = 100
@@ -35,8 +36,9 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/mining_weather_monitor, 28)
 	bomb = 100
 
 /datum/armor/weather_tower/constructed
-	melee = 50
-	bullet = 30
+	blunt = 50
+	slash = 50
+	pierce = 30
 	laser = 30
 	energy = 30
 

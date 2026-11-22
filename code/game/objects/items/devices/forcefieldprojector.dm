@@ -111,7 +111,7 @@
 	var/obj/item/forcefield_projector/generator
 
 /datum/armor/structure_projected_forcefield
-	bullet = 25
+	pierce = 25
 	laser = 50
 	energy = 50
 	bomb = 25

@@ -66,8 +66,9 @@
 	return ..()
 
 /datum/armor/secure_safe
-	melee = 30
-	bullet = 30
+	blunt = 30
+	slash = 30
+	pierce = 30
 	laser = 20
 	energy = 20
 	bomb = 30
@@ -177,8 +178,9 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/structure/secure_safe, 32)
 	material_flags = MATERIAL_EFFECTS
 
 /datum/armor/safe_caps_spare
-	melee = 100
-	bullet = 100
+	blunt = 100
+	slash = 100
+	pierce = 100
 	laser = 100
 	energy = 100
 	bomb = 70

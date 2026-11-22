@@ -16,8 +16,9 @@
 	armor_type = /datum/armor/suit_armor
 
 /datum/armor/suit_armor
-	melee = 35
-	bullet = 30
+	blunt = 35
+	slash = 35
+	pierce = 30
 	laser = 30
 	energy = 40
 	bomb = 25
@@ -85,8 +86,9 @@
 	resistance_flags = FIRE_PROOF | ACID_PROOF
 
 /datum/armor/vest_marine
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 30
 	energy = 25
 	bomb = 50
@@ -96,8 +98,9 @@
 	wound = 20
 
 /datum/armor/pmc
-	melee = 40
-	bullet = 50
+	blunt = 40
+	slash = 40
+	pierce = 50
 	laser = 60
 	energy = 50
 	bomb = 50
@@ -163,8 +166,9 @@
 	strip_delay = 8 SECONDS
 
 /datum/armor/armor_hos
-	melee = 30
-	bullet = 30
+	blunt = 30
+	slash = 30
+	pierce = 30
 	laser = 30
 	energy = 40
 	bomb = 25
@@ -237,8 +241,9 @@
 		. += emissive_appearance(icon_file, "[icon_state]-emissive", src, alpha = src.alpha, effect_type = EMISSIVE_SPECULAR)
 
 /datum/armor/armor_secjacket //Gotta compensate those extra covered limbs
-	melee = 25
-	bullet = 25
+	blunt = 25
+	slash = 25
+	pierce = 25
 	laser = 25
 	energy = 35
 	bomb = 20
@@ -268,8 +273,9 @@
 	item_flags = NONE
 
 /datum/armor/vest_capcarapace
-	melee = 50
-	bullet = 40
+	blunt = 50
+	slash = 50
+	pierce = 40
 	laser = 50
 	energy = 50
 	bomb = 25
@@ -320,8 +326,9 @@
 	AddComponent(/datum/component/item_equipped_movement_rustle)
 
 /datum/armor/armor_riot
-	melee = 50
-	bullet = 10
+	blunt = 50
+	slash = 50
+	pierce = 10
 	laser = 10
 	energy = 10
 	fire = 80
@@ -341,7 +348,8 @@
 	custom_materials = list(/datum/material/plastic = SHEET_MATERIAL_AMOUNT * 10.8)
 
 /datum/armor/balloon_vest
-	melee = 10
+	blunt = 10
+	slash = 10
 	laser = 10
 	energy = 10
 	fire = 60
@@ -374,8 +382,9 @@
 	equip_delay_other = 5 SECONDS
 
 /datum/armor/armor_bulletproof
-	melee = 15
-	bullet = 60
+	blunt = 15
+	slash = 15
+	pierce = 60
 	laser = 10
 	energy = 10
 	bomb = 40
@@ -398,8 +407,9 @@
 	var/hit_reflect_chance = 50
 
 /datum/armor/armor_laserproof
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 	laser = 60
 	energy = 60
 	fire = 100
@@ -452,8 +462,9 @@
 //All of the armor below is mostly unused
 
 /datum/armor/armor_swat
-	melee = 40
-	bullet = 30
+	blunt = 40
+	slash = 40
+	pierce = 30
 	laser = 30
 	energy = 40
 	bomb = 50
@@ -481,8 +492,9 @@
 	AddElement(/datum/element/equipment_bodypart_texture, BODY_ZONE_CHEST, texture_type)
 
 /datum/armor/armor_heavy
-	melee = 80
-	bullet = 80
+	blunt = 80
+	slash = 80
+	pierce = 80
 	laser = 50
 	energy = 50
 	bomb = 100
@@ -499,8 +511,9 @@
 	armor_type = /datum/armor/armor_tdome
 
 /datum/armor/armor_tdome
-	melee = 80
-	bullet = 80
+	blunt = 80
+	slash = 80
+	pierce = 80
 	laser = 50
 	energy = 50
 	bomb = 100
@@ -527,8 +540,9 @@
 	heat_protection = null
 
 /datum/armor/tdome_holosuit
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 
 /obj/item/clothing/suit/armor/tdome/holosuit/red
 	desc = "Reddish armor."
@@ -578,8 +592,9 @@
 	armor_type = /datum/armor/knight_greyscale
 
 /datum/armor/knight_greyscale
-	melee = 35
-	bullet = 10
+	blunt = 35
+	slash = 35
+	pierce = 10
 	laser = 10
 	energy = 10
 	bomb = 10
@@ -604,8 +619,9 @@
 	allowed |= /obj/item/clothing/suit/apron::allowed
 
 /datum/armor/vest_durathread
-	melee = 20
-	bullet = 10
+	blunt = 20
+	slash = 20
+	pierce = 10
 	laser = 30
 	energy = 40
 	bomb = 15
@@ -622,8 +638,9 @@
 	item_flags = NONE
 
 /datum/armor/vest_russian
-	melee = 25
-	bullet = 30
+	blunt = 25
+	slash = 25
+	pierce = 30
 	energy = 10
 	bomb = 10
 	fire = 20
@@ -643,8 +660,9 @@
 	item_flags = NONE
 
 /datum/armor/vest_russian_coat
-	melee = 25
-	bullet = 20
+	blunt = 25
+	slash = 25
+	pierce = 20
 	laser = 20
 	energy = 30
 	bomb = 20
@@ -672,8 +690,9 @@
 	)
 
 /datum/armor/armor_elder_atmosian
-	melee = 25
-	bullet = 20
+	blunt = 25
+	slash = 25
+	pierce = 20
 	laser = 30
 	energy = 30
 	bomb = 85
@@ -692,8 +711,9 @@
 	armor_type = /datum/armor/armor_centcom_formal
 
 /datum/armor/armor_centcom_formal
-	melee = 35
-	bullet = 40
+	blunt = 35
+	slash = 35
+	pierce = 40
 	laser = 40
 	energy = 50
 	bomb = 35
@@ -725,8 +745,9 @@
 	armor_type = /datum/armor/coat_militia
 
 /datum/armor/coat_militia
-	melee = 40
-	bullet = 40
+	blunt = 40
+	slash = 40
+	pierce = 40
 	laser = 30
 	energy = 25
 	bomb = 50
@@ -754,8 +775,9 @@
 	AddElement(/datum/element/adjust_fishing_difficulty, 5)
 
 /datum/armor/military
-	melee = 45
-	bullet = 25
+	blunt = 45
+	slash = 45
+	pierce = 25
 	laser = 25
 	energy = 25
 	bomb = 25
@@ -774,8 +796,9 @@
 	slowdown = 0.8
 
 /datum/armor/armor_warlord
-	melee = 70
-	bullet = 60
+	blunt = 70
+	slash = 70
+	pierce = 60
 	laser = 70
 	energy = 70
 	bomb = 40
@@ -806,8 +829,9 @@
 	armor_type = /datum/armor/watermelon_fr
 
 /datum/armor/watermelon
-	melee = 15
-	bullet = 10
+	blunt = 15
+	slash = 15
+	pierce = 10
 	energy = 10
 	bomb = 10
 	fire = 0
@@ -815,8 +839,9 @@
 	wound = 5
 
 /datum/armor/watermelon_fr
-	melee = 15
-	bullet = 10
+	blunt = 15
+	slash = 15
+	pierce = 10
 	energy = 10
 	bomb = 10
 	fire = 15
@@ -875,8 +900,9 @@
 	armor_type = /datum/armor/barrelmelon_fr
 
 /datum/armor/barrelmelon
-	melee = 25
-	bullet = 20
+	blunt = 25
+	slash = 25
+	pierce = 20
 	energy = 15
 	bomb = 10
 	fire = 0
@@ -884,8 +910,9 @@
 	wound = 10
 
 /datum/armor/barrelmelon_fr
-	melee = 25
-	bullet = 20
+	blunt = 25
+	slash = 25
+	pierce = 20
 	energy = 15
 	bomb = 10
 	fire = 20

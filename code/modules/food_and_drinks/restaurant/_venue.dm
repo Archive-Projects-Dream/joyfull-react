@@ -177,8 +177,9 @@
 	var/datum/weakref/turned_on_portal
 
 /datum/armor/restaurant_portal
-	melee = 50
-	bullet = 30
+	blunt = 50
+	slash = 50
+	pierce = 30
 	laser = 50
 	energy = 20
 	bomb = 20

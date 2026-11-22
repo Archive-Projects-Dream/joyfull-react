@@ -19,7 +19,8 @@
 	random_sensor = FALSE
 
 /datum/armor/clothing_under/rank_security
-	melee = 10
+	blunt = 10
+	slash = 10
 	fire = 30
 	acid = 30
 	wound = 10
@@ -153,7 +154,8 @@
 	strip_delay = 6 SECONDS
 
 /datum/armor/clothing_under/security_head_of_security
-	melee = 10
+	blunt = 10
+	slash = 10
 	fire = 50
 	acid = 50
 	wound = 10
@@ -231,7 +233,8 @@
 /datum/armor/clothing_under/sec_uniform_spacepol
 	fire = 10
 	acid = 10
-	melee = 10
+	blunt = 10
+	slash = 10
 	wound = 10
 
 /obj/item/clothing/under/rank/prisoner

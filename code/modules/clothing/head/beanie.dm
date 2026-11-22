@@ -77,8 +77,9 @@
 	var/datum/weakref/beanie_owner = null
 
 /datum/armor/beanie_durathread
-	melee = 15
-	bullet = 5
+	blunt = 15
+	slash = 15
+	pierce = 5
 	laser = 15
 	energy = 25
 	bomb = 10

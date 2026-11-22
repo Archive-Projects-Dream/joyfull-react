@@ -563,8 +563,9 @@
 	bodyshapes_with_variations = BODYSHAPE_CERULEAN
 
 /datum/armor/armor_changeling
-	melee = 40
-	bullet = 40
+	blunt = 40
+	slash = 40
+	pierce = 40
 	laser = 40
 	energy = 50
 	bomb = 10
@@ -588,8 +589,9 @@
 	flags_inv = HIDEEARS|HIDEHAIR|HIDEEYES|HIDEFACIALHAIR|HIDEFACE|HIDESNOUT
 
 /datum/armor/helmet_changeling
-	melee = 40
-	bullet = 40
+	blunt = 40
+	slash = 40
+	pierce = 40
 	laser = 40
 	energy = 50
 	bomb = 10
@@ -634,8 +636,9 @@
 		create_reagents(50, REFILLABLE)
 
 /datum/armor/changeling_hivehead
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 	laser = 10
 	energy = 10
 	bio = 50

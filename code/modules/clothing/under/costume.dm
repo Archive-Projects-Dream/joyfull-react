@@ -354,7 +354,8 @@
 	can_adjust = FALSE
 
 /datum/armor/clothing_under/costume_russian_officer
-	melee = 10
+	blunt = 10
+	slash = 10
 	fire = 30
 	acid = 30
 

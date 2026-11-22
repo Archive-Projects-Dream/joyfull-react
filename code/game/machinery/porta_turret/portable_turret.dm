@@ -111,8 +111,9 @@ DEFINE_BITFIELD(turret_flags, list(
 	COOLDOWN_DECLARE(disabled_time)
 
 /datum/armor/machinery_porta_turret
-	melee = 50
-	bullet = 30
+	blunt = 50
+	slash = 50
+	pierce = 30
 	laser = 30
 	energy = 30
 	bomb = 30
@@ -822,8 +823,9 @@ DEFINE_BITFIELD(turret_flags, list(
 	return 0
 
 /datum/armor/syndicate_turret
-	melee = 40
-	bullet = 40
+	blunt = 40
+	slash = 40
+	pierce = 40
 	laser = 60
 	energy = 60
 	bomb = 60
@@ -868,8 +870,9 @@ DEFINE_BITFIELD(turret_flags, list(
 	armor_type = /datum/armor/syndicate_shuttle
 
 /datum/armor/syndicate_shuttle
-	melee = 50
-	bullet = 30
+	blunt = 50
+	slash = 50
+	pierce = 30
 	laser = 30
 	energy = 30
 	bomb = 80
