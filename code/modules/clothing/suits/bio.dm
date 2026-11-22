@@ -82,8 +82,9 @@
 	icon_state = "bio_security"
 
 /datum/armor/bio_hood_security
-	melee = 25
-	bullet = 15
+	blunt = 25
+	slash = 25
+	pierce = 15
 	laser = 25
 	energy = 35
 	bomb = 25
@@ -96,8 +97,9 @@
 	icon_state = "bio_security"
 
 /datum/armor/bio_suit_security
-	melee = 25
-	bullet = 15
+	blunt = 25
+	slash = 25
+	pierce = 15
 	laser = 25
 	energy = 35
 	bomb = 25

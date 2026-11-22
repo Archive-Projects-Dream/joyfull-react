@@ -11,8 +11,9 @@
 	has_visor = TRUE
 
 /datum/armor/space_pirate
-	melee = 30
-	bullet = 50
+	blunt = 30
+	slash = 30
+	pierce = 50
 	laser = 30
 	energy = 40
 	bomb = 30

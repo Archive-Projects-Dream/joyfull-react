@@ -29,7 +29,8 @@
 	var/sheetAmount = 10 //how much it takes to construct us.
 
 /datum/armor/structure_mineral_door
-	melee = 10
+	blunt = 10
+	slash = 10
 	energy = 100
 	bomb = 10
 	fire = 50

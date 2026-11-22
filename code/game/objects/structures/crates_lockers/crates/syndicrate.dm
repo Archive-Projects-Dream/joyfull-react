@@ -15,8 +15,9 @@
 
 /// if the crate takes damage it will explode 25% of the time
 /datum/armor/crate_syndicrate
-	melee = 30
-	bullet = 50
+	blunt = 30
+	slash = 30
+	pierce = 50
 	laser = 50
 	energy = 100
 

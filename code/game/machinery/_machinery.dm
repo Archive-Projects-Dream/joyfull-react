@@ -156,8 +156,9 @@
 	var/appearance_power_state = -1
 
 /datum/armor/obj_machinery
-	melee = 25
-	bullet = 10
+	blunt = 25
+	slash = 25
+	pierce = 10
 	laser = 10
 	fire = 50
 	acid = 70

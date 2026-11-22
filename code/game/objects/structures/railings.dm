@@ -19,8 +19,9 @@
 	var/item_deconstruct = /obj/item/stack/rods
 
 /datum/armor/structure_railing
-	melee = 35
-	bullet = 50
+	blunt = 35
+	slash = 35
+	pierce = 50
 	laser = 50
 	energy = 100
 	bomb = 10

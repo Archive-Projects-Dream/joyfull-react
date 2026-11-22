@@ -33,7 +33,8 @@
 		set_turf_to_area(loc, GLOB.areas_by_type[/area/space/nearstation])
 
 /datum/armor/structure_lattice
-	melee = 50
+	blunt = 50
+	slash = 50
 	fire = 80
 	acid = 50
 

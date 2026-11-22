@@ -85,8 +85,9 @@ MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/vitals_reader, 32)
 MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/vitals_reader/advanced, 32)
 
 /datum/armor/obj_machinery/vitals_reader
-	melee = 30
-	bullet = 20
+	blunt = 30
+	slash = 30
+	pierce = 20
 	laser = 20
 	energy = 30
 	bomb = 10

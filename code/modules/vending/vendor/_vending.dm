@@ -194,7 +194,8 @@
 	var/static/datum/id_trim/job/big_boss_trim = /datum/id_trim/job/captain
 
 /datum/armor/machinery_vending
-	melee = 20
+	blunt = 20
+	slash = 20
 	fire = 50
 	acid = 70
 

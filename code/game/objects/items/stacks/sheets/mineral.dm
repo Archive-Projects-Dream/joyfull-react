@@ -582,8 +582,9 @@ GLOBAL_LIST_INIT(metalhydrogen_recipes, list(
 	. += GLOB.metalhydrogen_recipes
 
 /datum/armor/metal_hydrogen_sheet
-	melee = 100
-	bullet = 100
+	blunt = 100
+	slash = 100
+	pierce = 100
 	laser = 100
 	energy = 100
 	bomb = 100

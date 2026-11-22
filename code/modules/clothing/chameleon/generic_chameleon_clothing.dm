@@ -8,8 +8,9 @@ do { \
 
 // Cham jumpsuit
 /datum/armor/clothing_under/chameleon
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 	laser = 10
 	fire = 50
 	acid = 50
@@ -44,8 +45,9 @@ do { \
 
 // Cham suit / armor
 /datum/armor/suit_chameleon
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 	laser = 10
 	fire = 50
 	acid = 50
@@ -77,8 +79,9 @@ do { \
 
 // Cham glasses
 /datum/armor/glasses_chameleon
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 	laser = 10
 	fire = 50
 	acid = 50
@@ -103,8 +106,9 @@ do { \
 
 // Cham gloves
 /datum/armor/gloves_chameleon
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 	laser = 10
 	fire = 50
 	acid = 50
@@ -132,8 +136,9 @@ do { \
 
 // Cham hat
 /datum/armor/head_chameleon
-	melee = 5
-	bullet = 5
+	blunt = 5
+	slash = 5
+	pierce = 5
 	laser = 5
 	fire = 50
 	acid = 50
@@ -171,8 +176,9 @@ do { \
 
 // Cham mask, voice changer included
 /datum/armor/mask_chameleon
-	melee = 5
-	bullet = 5
+	blunt = 5
+	slash = 5
+	pierce = 5
 	laser = 5
 	bio = 100
 	fire = 50
@@ -265,8 +271,9 @@ do { \
 
 // Cham shoes, including chameleon noslips
 /datum/armor/shoes_chameleon
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 	laser = 10
 	bio = 90
 	fire = 50

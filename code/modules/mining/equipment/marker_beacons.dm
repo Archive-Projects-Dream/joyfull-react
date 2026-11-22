@@ -82,8 +82,9 @@ GLOBAL_LIST_INIT(marker_beacon_colors, sort_list(list(
 	var/picked_color
 
 /datum/armor/structure_marker_beacon
-	melee = 50
-	bullet = 75
+	blunt = 50
+	slash = 50
+	pierce = 75
 	laser = 75
 	energy = 75
 	bomb = 25

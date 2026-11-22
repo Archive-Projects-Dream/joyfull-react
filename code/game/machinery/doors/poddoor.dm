@@ -37,8 +37,9 @@
 	return ..()
 
 /datum/armor/door_poddoor
-	melee = 50
-	bullet = 100
+	blunt = 50
+	slash = 50
+	pierce = 100
 	laser = 100
 	energy = 100
 	bomb = 50

@@ -11,7 +11,8 @@
 	bodyshapes_with_variations = BODYSHAPE_CERULEAN
 
 /datum/armor/clothing_under/syndicate
-	melee = 10
+	blunt = 10
+	slash = 10
 	fire = 50
 	acid = 40
 	wound = 10
@@ -41,8 +42,9 @@
 	AddElement(/datum/element/adjust_fishing_difficulty, -4) //extra-tactical
 
 /datum/armor/clothing_under/syndicate_bloodred
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 	laser = 10
 	energy = 10
 	fire = 50
@@ -150,7 +152,8 @@
 	resistance_flags = NONE
 
 /datum/armor/clothing_under/syndicate_soviet
-	melee = 10
+	blunt = 10
+	slash = 10
 
 /obj/item/clothing/under/syndicate/combat
 	name = "combat uniform"
@@ -169,7 +172,8 @@
 	resistance_flags = NONE
 
 /datum/armor/clothing_under/syndicate_rus_army
-	melee = 5
+	blunt = 5
+	slash = 5
 
 /obj/item/clothing/under/syndicate/scrubs
 	name = "tactical scrubs"
@@ -186,7 +190,8 @@
 	AddElement(/datum/element/adjust_fishing_difficulty, -3) //FISH DOCTOR?!
 
 /datum/armor/clothing_under/syndicate_scrubs
-	melee = 10
+	blunt = 10
+	slash = 10
 	bio = 50
 	fire = 50
 	acid = 40

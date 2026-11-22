@@ -29,8 +29,9 @@
 MAPPING_DIRECTIONAL_HELPERS(/obj/structure/fireaxecabinet, INTERCOM_FIRECABINET) // [HORIZON-EDIT]
 
 /datum/armor/structure_fireaxecabinet
-	melee = 50
-	bullet = 20
+	blunt = 50
+	slash = 50
+	pierce = 20
 	energy = 100
 	bomb = 10
 	fire = 90

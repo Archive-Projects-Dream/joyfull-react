@@ -24,8 +24,9 @@
 	var/obj/item/transfer_valve/bomb_attached
 
 /datum/armor/ridden_wheelchair
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 	laser = 10
 	bomb = 10
 	fire = 20
@@ -202,8 +203,9 @@
 	unfolded_type = /obj/vehicle/ridden/wheelchair/gold
 
 /datum/armor/wheelchair_gold
-	melee = 20
-	bullet = 20
+	blunt = 20
+	slash = 20
+	pierce = 20
 	laser = 20
 	bomb = 20
 	fire = 30

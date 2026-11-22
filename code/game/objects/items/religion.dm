@@ -278,8 +278,9 @@
 	armor_type = /datum/armor/plate_crusader
 
 /datum/armor/plate_crusader
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 50
 	energy = 50
 	bomb = 60
@@ -307,8 +308,9 @@
 	worn_y_offset = 6
 
 /datum/armor/crusader_prophet
-	melee = 60
-	bullet = 60
+	blunt = 60
+	slash = 60
+	pierce = 60
 	laser = 60
 	energy = 60
 	bomb = 70
@@ -396,8 +398,9 @@
 	max_heat_protection_temperature = SHOES_MAX_TEMP_PROTECT
 
 /datum/armor/shoes_plate
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 50
 	energy = 50
 	bomb = 60

@@ -19,8 +19,9 @@
 	equip_delay_other = 6 SECONDS
 
 /datum/armor/chaplainsuit_armor
-	melee = 50
-	bullet = 10
+	blunt = 50
+	slash = 50
+	pierce = 10
 	laser = 10
 	energy = 10
 	fire = 80
@@ -244,8 +245,9 @@
 
 
 /datum/armor/armor_crusader
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 50
 	energy = 50
 	bomb = 60

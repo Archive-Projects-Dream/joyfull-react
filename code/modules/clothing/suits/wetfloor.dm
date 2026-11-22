@@ -28,7 +28,8 @@
 	custom_materials = list(/datum/material/plastic = HALF_SHEET_MATERIAL_AMOUNT)
 
 /datum/armor/suit_caution
-	melee = 5
+	blunt = 5
+	slash = 5
 
 /obj/item/clothing/suit/caution/Initialize(mapload)
 	. = ..()

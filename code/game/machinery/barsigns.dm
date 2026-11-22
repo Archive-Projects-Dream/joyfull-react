@@ -16,8 +16,9 @@
 	var/disassemble_result = /obj/item/wallframe/barsign
 
 /datum/armor/sign_barsign
-	melee = 20
-	bullet = 20
+	blunt = 20
+	slash = 20
+	pierce = 20
 	laser = 20
 	energy = 100
 	fire = 50

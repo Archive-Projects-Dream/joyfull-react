@@ -223,7 +223,8 @@ GLOBAL_LIST_INIT(prglass_recipes, list ( \
 	return list(/datum/reagent/silicon = 10, /datum/reagent/toxin/plasma = 10, /datum/reagent/iron = 10)
 
 /datum/armor/sheet_plasmarglass
-	melee = 20
+	blunt = 20
+	slash = 20
 	fire = 80
 	acid = 100
 
@@ -336,7 +337,8 @@ GLOBAL_LIST_INIT(plastitaniumglass_recipes, list(
 	embed_chance = 65
 
 /datum/armor/item_shard
-	melee = 100
+	blunt = 100
+	slash = 100
 	energy = 100
 	fire = 50
 	acid = 100

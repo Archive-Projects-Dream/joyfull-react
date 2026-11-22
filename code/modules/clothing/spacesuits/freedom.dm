@@ -13,8 +13,9 @@
 	visor_dirt = null
 
 /datum/armor/space_freedom
-	melee = 20
-	bullet = 40
+	blunt = 20
+	slash = 20
+	pierce = 40
 	laser = 30
 	energy = 40
 	bomb = 100

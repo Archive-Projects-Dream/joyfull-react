@@ -84,8 +84,9 @@
 		AddElement(/datum/element/equipment_bodypart_texture, BODY_ZONE_HEAD, texture_type)
 
 /datum/armor/eldritch_armor
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 50
 	energy = 50
 	bomb = 35
@@ -198,8 +199,9 @@
 	texture_type = /datum/bodypart_texture/mesh/black
 
 /datum/armor/eldritch_armor/ash
-	melee = 40
-	bullet = 60
+	blunt = 40
+	slash = 40
+	pierce = 60
 	laser = 50
 	energy = 50
 	bomb = 100
@@ -329,8 +331,9 @@
 	texture_type = /datum/bodypart_texture/mesh/bombsuit
 
 /datum/armor/eldritch_armor/blade
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 50
 	energy = 50
 	bomb = 50
@@ -410,8 +413,9 @@
 	AddElement(/datum/element/radiation_protected_clothing)
 
 /datum/armor/eldritch_armor/cosmic
-	melee = 20
-	bullet = 30
+	blunt = 20
+	slash = 20
+	pierce = 30
 	laser = 60
 	energy = 60
 	bomb = 35
@@ -469,8 +473,9 @@
 	texture_type = null
 
 /datum/armor/eldritch_armor/flesh
-	melee = 70
-	bullet = 40
+	blunt = 70
+	slash = 70
+	pierce = 40
 	laser = 30
 	energy = 30
 	bomb = 35
@@ -518,8 +523,9 @@
 	flags_inv = parent_type::flags_inv | HIDEANTENNAE
 
 /datum/armor/eldritch_armor/lock
-	melee = 40
-	bullet = 40
+	blunt = 40
+	slash = 40
+	pierce = 40
 	laser = 40
 	energy = 40
 	bomb = 40
@@ -792,8 +798,9 @@
 	texture_type = /datum/bodypart_texture/mesh/firesuit
 
 /datum/armor/eldritch_armor/moon
-	melee = 0
-	bullet = 0
+	blunt = 0
+	slash = 0
+	pierce = 0
 	laser = 0
 	energy = 0
 	bomb = 0
@@ -1041,8 +1048,9 @@
 		set_armor(/datum/armor/eldritch_armor/rust)
 
 /datum/armor/eldritch_armor/rust
-	melee = 30
-	bullet = 30
+	blunt = 30
+	slash = 30
+	pierce = 30
 	laser = 30
 	energy = 30
 	bomb = 50
@@ -1052,8 +1060,9 @@
 	wound = 30
 
 /datum/armor/eldritch_armor/rust/on_rust
-	melee = 60
-	bullet = 60
+	blunt = 60
+	slash = 60
+	pierce = 60
 	laser = 60
 	energy = 60
 	bomb = 100
@@ -1116,8 +1125,9 @@
 	texture_type = null
 
 /datum/armor/eldritch_armor/void
-	melee = 40
-	bullet = 40
+	blunt = 40
+	slash = 40
+	pierce = 40
 	laser = 50
 	energy = 50
 	bomb = 40
@@ -1139,8 +1149,9 @@
 	armor_type = /datum/armor/cult_hoodie_void
 
 /datum/armor/cult_hoodie_void
-	melee = 30
-	bullet = 30
+	blunt = 30
+	slash = 30
+	pierce = 30
 	laser = 30
 	energy = 30
 	bomb = 15
@@ -1167,8 +1178,9 @@
 	var/hood_up = FALSE
 
 /datum/armor/cultrobes_void
-	melee = 30
-	bullet = 30
+	blunt = 30
+	slash = 30
+	pierce = 30
 	laser = 30
 	energy = 30
 	bomb = 15

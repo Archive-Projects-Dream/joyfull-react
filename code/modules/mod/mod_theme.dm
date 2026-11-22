@@ -178,8 +178,9 @@
 	mod.wearer?.refresh_obscured()
 
 /datum/armor/mod_theme
-	melee = 10
-	bullet = 5
+	blunt = 10
+	slash = 10
+	pierce = 5
 	laser = 5
 	energy = 5
 	bio = 100
@@ -275,8 +276,9 @@
 	)
 
 /datum/armor/mod_theme_civilian
-	melee = 5
-	bullet = 5
+	blunt = 5
+	slash = 5
+	pierce = 5
 	laser = 5
 	energy = 5
 	bio = 50
@@ -374,8 +376,9 @@
 	)
 
 /datum/armor/mod_theme_engineering
-	melee = 10
-	bullet = 5
+	blunt = 10
+	slash = 10
+	pierce = 5
 	laser = 20
 	energy = 10
 	bomb = 10
@@ -441,8 +444,9 @@
 	)
 
 /datum/armor/mod_theme_atmospheric
-	melee = 10
-	bullet = 5
+	blunt = 10
+	slash = 10
+	pierce = 5
 	laser = 10
 	energy = 15
 	bomb = 10
@@ -511,8 +515,9 @@
 	)
 
 /datum/armor/mod_theme_advanced
-	melee = 15
-	bullet = 5
+	blunt = 15
+	slash = 15
+	pierce = 5
 	laser = 20
 	energy = 15
 	bomb = 50
@@ -619,8 +624,9 @@
 	allowed_suit_storage = GLOB.mining_suit_allowed
 
 /datum/armor/mod_theme_mining
-	melee = 20
-	bullet = 5
+	blunt = 20
+	slash = 20
+	pierce = 5
 	laser = 5
 	energy = 5
 	bomb = 30
@@ -686,8 +692,9 @@
 	cerulean_flipper_palette = NO_FLIPPERS
 
 /datum/armor/mod_theme_loader
-	melee = 15
-	bullet = 5
+	blunt = 15
+	slash = 15
+	pierce = 5
 	laser = 5
 	energy = 5
 	bomb = 10
@@ -792,8 +799,9 @@
 	)
 
 /datum/armor/mod_theme_medical
-	melee = 5
-	bullet = 5
+	blunt = 5
+	slash = 5
+	pierce = 5
 	laser = 5
 	energy = 5
 	bomb = 10
@@ -871,8 +879,9 @@
 	)
 
 /datum/armor/mod_theme_rescue
-	melee = 10
-	bullet = 10
+	blunt = 10
+	slash = 10
+	pierce = 10
 	laser = 5
 	energy = 5
 	bomb = 10
@@ -943,8 +952,9 @@
 	cerulean_flipper_palette = "#7a0bb7"
 
 /datum/armor/mod_theme_research
-	melee = 20
-	bullet = 15
+	blunt = 20
+	slash = 20
+	pierce = 15
 	laser = 5
 	energy = 5
 	bomb = 100
@@ -1008,8 +1018,9 @@
 	)
 
 /datum/armor/mod_theme_security
-	melee = 35
-	bullet = 15
+	blunt = 35
+	slash = 35
+	pierce = 15
 	laser = 30
 	energy = 40
 	bomb = 25
@@ -1073,8 +1084,9 @@
 	)
 
 /datum/armor/mod_theme_safeguard
-	melee = 45
-	bullet = 25
+	blunt = 45
+	slash = 45
+	pierce = 25
 	laser = 30
 	energy = 40
 	bomb = 40
@@ -1144,8 +1156,9 @@
 	)
 
 /datum/armor/mod_theme_magnate
-	melee = 40
-	bullet = 50
+	blunt = 40
+	slash = 40
+	pierce = 50
 	laser = 50
 	energy = 60
 	bomb = 50
@@ -1210,8 +1223,9 @@
 	cerulean_tail_palette = list("medical" = list("#7e1c29", "#adad95", "#d9d7c7"))
 
 /datum/armor/mod_theme_cosmohonk
-	melee = 5
-	bullet = 5
+	blunt = 5
+	slash = 5
+	pierce = 5
 	laser = 20
 	energy = 20
 	bomb = 10
@@ -1314,8 +1328,9 @@
 	)
 
 /datum/armor/mod_theme_syndicate
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 40
 	energy = 50
 	bomb = 40
@@ -1387,8 +1402,9 @@
 	cerulean_flipper_palette = "#34333a"
 
 /datum/armor/mod_theme_elite
-	melee = 60
-	bullet = 60
+	blunt = 60
+	slash = 60
+	pierce = 60
 	laser = 50
 	energy = 50
 	bomb = 55
@@ -1458,8 +1474,9 @@
 	cerulean_flipper_palette = "#1e1e32"
 
 /datum/armor/mod_theme_infiltrator
-	melee = 40
-	bullet = 50
+	blunt = 40
+	slash = 40
+	pierce = 50
 	laser = 30
 	energy = 30
 	bomb = 35
@@ -1545,8 +1562,9 @@
 	cerulean_flipper_palette = "#3d667a"
 
 /datum/armor/mod_theme_interdyne
-	melee = 30
-	bullet = 30
+	blunt = 30
+	slash = 30
+	pierce = 30
 	laser = 30
 	energy = 30
 	bomb = 20
@@ -1618,8 +1636,9 @@
 	cerulean_flipper_palette = "#47bfff"
 
 /datum/armor/mod_theme_enchanted
-	melee = 40
-	bullet = 40
+	blunt = 40
+	slash = 40
+	pierce = 40
 	laser = 50
 	energy = 50
 	bomb = 35
@@ -1687,8 +1706,9 @@
 	cerulean_flipper_palette = "#21a52e"
 
 /datum/armor/mod_theme_ninja
-	melee = 40
-	bullet = 30
+	blunt = 40
+	slash = 40
+	pierce = 30
 	laser = 20
 	energy = 30
 	bomb = 30
@@ -1757,8 +1777,9 @@
 	cerulean_flipper_palette = "#573431"
 
 /datum/armor/mod_theme_prototype
-	melee = 20
-	bullet = 5
+	blunt = 20
+	slash = 20
+	pierce = 5
 	laser = 10
 	energy = 10
 	bomb = 50
@@ -1823,8 +1844,9 @@
 	)
 
 /datum/armor/mod_theme_glitch
-	melee = 40
-	bullet = 50
+	blunt = 40
+	slash = 40
+	pierce = 50
 	laser = 50
 	energy = 15
 	bomb = 65
@@ -1918,8 +1940,9 @@
 	)
 
 /datum/armor/mod_theme_responsory
-	melee = 50
-	bullet = 40
+	blunt = 50
+	slash = 50
+	pierce = 40
 	laser = 50
 	energy = 50
 	bomb = 50
@@ -1999,8 +2022,9 @@
 	)
 
 /datum/armor/mod_theme_apocryphal
-	melee = 80
-	bullet = 80
+	blunt = 80
+	slash = 80
+	pierce = 80
 	laser = 50
 	energy = 60
 	bomb = 100
@@ -2068,8 +2092,9 @@
 	cerulean_flipper_palette = "#2b2c38"
 
 /datum/armor/mod_theme_corporate
-	melee = 65
-	bullet = 65
+	blunt = 65
+	slash = 65
+	pierce = 65
 	laser = 55
 	energy = 50
 	bomb = 60
@@ -2132,8 +2157,9 @@
 	cerulean_flipper_palette = "#7ed2ff"
 
 /datum/armor/mod_theme_chrono
-	melee = 60
-	bullet = 60
+	blunt = 60
+	slash = 60
+	pierce = 60
 	laser = 60
 	energy = 60
 	bomb = 30
@@ -2201,8 +2227,9 @@
 	cerulean_flipper_palette = "#001775"
 
 /datum/armor/mod_theme_debug
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 50
 	energy = 50
 	bomb = 100
@@ -2262,8 +2289,9 @@
 	)
 
 /datum/armor/mod_theme_administrative
-	melee = 100
-	bullet = 100
+	blunt = 100
+	slash = 100
+	pierce = 100
 	laser = 100
 	energy = 100
 	bomb = 100

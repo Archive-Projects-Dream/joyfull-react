@@ -25,7 +25,8 @@
 	var/squeak = TRUE
 
 /datum/armor/mecha_honker
-	melee = -20
+	blunt = -20
+	slash = -20
 	fire = 100
 	acid = 100
 
@@ -74,8 +75,9 @@
 	)
 
 /datum/armor/honker_dark
-	melee = 40
-	bullet = 40
+	blunt = 40
+	slash = 40
+	pierce = 40
 	laser = 50
 	energy = 35
 	bomb = 20

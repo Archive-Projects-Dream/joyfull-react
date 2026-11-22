@@ -63,7 +63,8 @@
 	var/bounty_text = ""
 
 /datum/armor/machinery_newscaster
-	melee = 50
+	blunt = 50
+	slash = 50
 	fire = 50
 	acid = 30
 

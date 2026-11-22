@@ -13,8 +13,9 @@
 	min_cold_protection_temperature = FIRE_SUIT_MIN_TEMP_PROTECT
 
 /datum/armor/clothing_under/syndicate/coldres
-	melee = 20
-	bullet = 10
+	blunt = 20
+	slash = 20
+	pierce = 10
 	energy = 5
 	fire = 25
 	acid = 25

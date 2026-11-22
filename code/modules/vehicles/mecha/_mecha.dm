@@ -199,8 +199,9 @@
 	var/toppled = FALSE
 
 /datum/armor/sealed_mecha
-	melee = 20
-	bullet = 10
+	blunt = 20
+	slash = 20
+	pierce = 10
 	bomb = 10
 	fire = 100
 	acid = 100

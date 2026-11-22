@@ -305,7 +305,11 @@
 	if(final_force <= 0)
 		return 0
 
-	var/damage = take_damage(final_force, attacking_item.damtype, MELEE, 1, get_dir(src, user))
+	var/attack_flag = attacking_item.get_attack_armor_flag()
+	// PIERCE isn't covered by the melee deflection check in run_atom_armor (bullets use it too), so pointy weapons are checked here
+	var/damage = 0
+	if(attack_flag != PIERCE || final_force >= damage_deflection)
+		damage = take_damage(final_force, attacking_item.damtype, attack_flag, 1, get_dir(src, user))
 	//only witnesses close by and the victim see a hit message.
 	user.visible_message(span_danger("[user] hits [src] with [attacking_item][damage ? "." : ", without leaving a mark!"]"), \
 		span_danger("You hit [src] with [attacking_item][damage ? "." : ", without leaving a mark!"]"), null, COMBAT_MESSAGE_RANGE)
@@ -331,7 +335,7 @@
 
 	var/armor_block = min(run_armor_check(
 			def_zone = targeting,
-			attack_flag = MELEE,
+			attack_flag = attacking_item.get_attack_armor_flag(),
 			absorb_text = span_notice("Your armor has protected your [targeting_human_readable]!"),
 			soften_text = span_warning("Your armor has softened a hit to your [targeting_human_readable]!"),
 			armour_penetration = attacking_item.armour_penetration,

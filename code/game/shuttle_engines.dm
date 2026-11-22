@@ -29,8 +29,9 @@
 	var/static/list/connections = list(COMSIG_TURF_ADDED_TO_SHUTTLE = PROC_REF(on_turf_added_to_shuttle))
 
 /datum/armor/power_shuttle_engine
-	melee = 100
-	bullet = 10
+	blunt = 100
+	slash = 100
+	pierce = 10
 	laser = 10
 	fire = 50
 	acid = 70

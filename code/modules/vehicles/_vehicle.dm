@@ -39,8 +39,9 @@
 	var/exit_sound
 
 /datum/armor/obj_vehicle
-	melee = 30
-	bullet = 30
+	blunt = 30
+	slash = 30
+	pierce = 30
 	laser = 30
 	bomb = 30
 	fire = 60

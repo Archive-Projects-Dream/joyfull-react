@@ -61,8 +61,9 @@
 
 //Standard Expressions to make keycard doors basically un-cheeseable
 /datum/armor/door_puzzle
-	melee = 100
-	bullet = 100
+	blunt = 100
+	slash = 100
+	pierce = 100
 	laser = 100
 	energy = 100
 	bomb = 100
@@ -235,8 +236,9 @@
 	return ..() + list(NAMEOF(src, queue_size), NAMEOF(src, puzzle_id))
 
 /datum/armor/structure_light_puzzle
-	melee = 100
-	bullet = 100
+	blunt = 100
+	slash = 100
+	pierce = 100
 	laser = 100
 	energy = 100
 	bomb = 100

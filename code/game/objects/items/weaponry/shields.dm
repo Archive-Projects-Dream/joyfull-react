@@ -34,8 +34,9 @@
 	var/shield_bash_sound = 'sound/effects/shieldbash.ogg'
 
 /datum/armor/item_shield
-	melee = 50
-	bullet = 50
+	blunt = 50
+	slash = 50
+	pierce = 50
 	laser = 50
 	bomb = 30
 	fire = 80
@@ -160,8 +161,9 @@
 	max_integrity = 30
 
 /datum/armor/item_shield/riot
-	melee = 80
-	bullet = 20
+	blunt = 80
+	slash = 80
+	pierce = 20
 	laser = 20
 
 /obj/item/shield/riot
@@ -451,8 +453,9 @@
 		return COMPONENT_BLOCK_ITEM_DISARM_ATTACK
 
 /datum/armor/item_shield/ballistic
-	melee = 30
-	bullet = 85
+	blunt = 30
+	slash = 30
+	pierce = 85
 	bomb = 10
 	laser = 80
 
@@ -481,8 +484,9 @@
 	return ITEM_INTERACT_SUCCESS
 
 /datum/armor/item_shield/improvised
-	melee = 40
-	bullet = 30
+	blunt = 40
+	slash = 40
+	pierce = 30
 	laser = 30
 
 /obj/item/shield/improvised

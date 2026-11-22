@@ -13,8 +13,9 @@
 	AddComponent(/datum/component/martial_art_giver, /datum/martial_art/boxing/hunter)
 
 /datum/armor/gloves_mitts
-	melee = 25
-	bullet = 5
+	blunt = 25
+	slash = 25
+	pierce = 5
 	laser = 5
 	energy = 5
 	bomb = 100

@@ -71,8 +71,9 @@
 	armor_type = /datum/armor/machinery_atmospherics
 
 /datum/armor/machinery_atmospherics
-	melee = 25
-	bullet = 10
+	blunt = 25
+	slash = 25
+	pierce = 10
 	laser = 10
 	energy = 100
 	fire = 100

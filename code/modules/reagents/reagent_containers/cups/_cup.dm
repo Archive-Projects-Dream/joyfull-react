@@ -622,7 +622,8 @@
 	AddElement(/datum/element/cuffable_item)
 
 /datum/armor/cup_bucket
-	melee = 10
+	blunt = 10
+	slash = 10
 	fire = 75
 	acid = 50
 
@@ -635,7 +636,8 @@
 	armor_type = /datum/armor/bucket_wooden
 
 /datum/armor/bucket_wooden
-	melee = 10
+	blunt = 10
+	slash = 10
 	acid = 50
 
 /obj/item/reagent_containers/cup/bucket/item_interaction(mob/living/user, obj/item/tool, list/modifiers)

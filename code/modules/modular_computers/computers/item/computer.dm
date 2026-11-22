@@ -128,7 +128,7 @@
 	var/overlays_icon = 'icons/obj/machines/computer.dmi'
 
 /datum/armor/item_modular_computer
-	bullet = 20
+	pierce = 20
 	laser = 20
 	energy = 100
 

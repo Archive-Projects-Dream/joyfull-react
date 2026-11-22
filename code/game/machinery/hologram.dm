@@ -95,8 +95,9 @@ Possible to do for anyone motivated enough:
 	var/can_hear_flags = NONE
 
 /datum/armor/machinery_holopad
-	melee = 50
-	bullet = 20
+	blunt = 50
+	slash = 50
+	pierce = 20
 	laser = 20
 	energy = 20
 	fire = 50

@@ -26,8 +26,9 @@
 	voice_activated = TRUE
 
 /datum/armor/door_password
-	melee = 100
-	bullet = 100
+	blunt = 100
+	slash = 100
+	pierce = 100
 	laser = 100
 	energy = 100
 	bomb = 100

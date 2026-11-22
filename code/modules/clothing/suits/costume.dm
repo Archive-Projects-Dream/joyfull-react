@@ -88,8 +88,9 @@
 	allowed = GLOB.security_vest_allowed
 
 /datum/armor/costume_justice
-	melee = 35
-	bullet = 30
+	blunt = 35
+	slash = 35
+	pierce = 30
 	laser = 30
 	energy = 40
 	bomb = 25
@@ -329,7 +330,8 @@
 	resistance_flags = NONE
 
 /datum/armor/carp_costume_spaceproof
-	melee = -20
+	blunt = -20
+	slash = -20
 	bio = 100
 	fire = 60
 	acid = 75
@@ -350,7 +352,8 @@
 	flags_cover = HEADCOVERSEYES|HEADCOVERSMOUTH|PEPPERPROOF
 
 /datum/armor/carp_hood_spaceproof
-	melee = -20
+	blunt = -20
+	slash = -20
 	bio = 100
 	fire = 60
 	acid = 75
@@ -616,8 +619,9 @@
 	bodyshapes_with_variations = NONE
 
 /datum/armor/suit_coordinator
-	melee = 25
-	bullet = 15
+	blunt = 25
+	slash = 25
+	pierce = 15
 	laser = 25
 	energy = 35
 	bomb = 25

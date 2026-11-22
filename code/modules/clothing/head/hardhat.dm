@@ -32,8 +32,9 @@
 	COOLDOWN_DECLARE(disabled_time)
 
 /datum/armor/utility_hardhat
-	melee = 15
-	bullet = 5
+	blunt = 15
+	slash = 15
+	pierce = 5
 	laser = 20
 	energy = 10
 	bomb = 20

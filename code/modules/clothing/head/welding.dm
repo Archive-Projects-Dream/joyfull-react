@@ -24,7 +24,8 @@
 		AddElement(/datum/element/adjust_fishing_difficulty, 8)
 
 /datum/armor/utility_welding
-	melee = 10
+	blunt = 10
+	slash = 10
 	fire = 100
 	acid = 60
 

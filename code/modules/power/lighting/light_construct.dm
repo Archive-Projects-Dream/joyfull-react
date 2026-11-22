@@ -22,8 +22,9 @@
 	var/cell_connectors = TRUE
 
 /datum/armor/structure_light_construct
-	melee = 50
-	bullet = 10
+	blunt = 50
+	slash = 50
+	pierce = 10
 	laser = 10
 	fire = 80
 	acid = 50

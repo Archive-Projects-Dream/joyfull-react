@@ -31,8 +31,9 @@
 	var/static/list/turf_traits = list(TRAIT_TURF_IGNORE_SLOWDOWN, TRAIT_TURF_IGNORE_SLIPPERY, TRAIT_IMMERSE_STOPPED)
 
 /datum/armor/half_wall
-	melee = 50
-	bullet = 70
+	blunt = 50
+	slash = 50
+	pierce = 70
 	laser = 70
 	energy = 100
 	bomb = 10

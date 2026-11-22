@@ -29,12 +29,10 @@ GLOBAL_LIST_INIT(armor_by_type, generate_armor_type_cache())
 	VAR_PROTECTED/bio = 0
 	VAR_PROTECTED/bomb = 0
 	VAR_PROTECTED/blunt = 0
-	VAR_PROTECTED/bullet = 0  // TEMP: legacy, maps to pierce. Remove after migration
 	VAR_PROTECTED/consume = 0
 	VAR_PROTECTED/energy = 0
 	VAR_PROTECTED/laser = 0
 	VAR_PROTECTED/fire = 0
-	VAR_PROTECTED/melee = 0   // TEMP: legacy, maps to blunt/slash. Remove after migration
 	VAR_PROTECTED/pierce = 0
 	VAR_PROTECTED/slash = 0
 	VAR_PROTECTED/wound = 0
@@ -71,7 +69,6 @@ GLOBAL_LIST_INIT(armor_by_type, generate_armor_type_cache())
 /datum/armor/CanProcCall(procname)
 	return FALSE
 
-/// NOTE: all generate_new_* procs read values through get_rating(), so legacy melee/bullet get folded into blunt/slash/pierce in the new datum.
 /// Generate a brand new armor datum with the modifiers given, if ARMOR_ALL is specified only that modifier is used
 /datum/armor/proc/generate_new_with_modifiers(list/modifiers)
 	var/datum/armor/new_armor = new
@@ -147,19 +144,7 @@ GLOBAL_LIST_INIT(armor_by_type, generate_armor_type_cache())
 	if(!(rating in ARMOR_LIST_ALL))
 		CRASH("Attempted to get a rating '[rating]' that doesn't exist")
 
-	// Prefer new physical types. Fall back to legacy melee/bullet while migration is in progress.
-	var/value = vars[rating]
-	if(value)
-		return value
-	switch(rating)
-		if(BLUNT)
-			return vars["melee"] || 0
-		if(SLASH)
-			// Slightly lower than full melee so pure-slash weapons (knives) aren't over-armored against by "melee" values
-			return round((vars["melee"] || 0) * 0.85)
-		if(PIERCE)
-			return vars["bullet"] || 0
-	return 0
+	return vars[rating]
 
 /datum/armor/immune/get_rating(rating)
 	return 100
@@ -248,11 +233,6 @@ GLOBAL_LIST_INIT(armor_by_type, generate_armor_type_cache())
 			return "PIERCE"
 		if(SLASH)
 			return "SLASH"
-		// legacy
-		if(BULLET)
-			return "PIERCE"
-		if(MELEE)
-			return "BLUNT"
 		if(WOUND)
 			return "WOUNDING"
 	CRASH("Unknown armor type '[armor_type]'")

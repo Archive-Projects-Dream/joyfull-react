@@ -12,7 +12,7 @@
 	reagent = /datum/reagent/blob/synchronous_mesh
 
 /datum/blobstrain/reagent/synchronous_mesh/damage_reaction(obj/structure/blob/B, damage, damage_type, damage_flag)
-	if(damage_flag == MELEE || damage_flag == BULLET || damage_flag == LASER) //the cause isn't fire or bombs, so split the damage
+	if(ARMOR_IS_PHYSICAL(damage_flag) || damage_flag == LASER) //the cause isn't fire or bombs, so split the damage
 		var/damagesplit = 1 //maximum split is 9, reducing the damage each blob takes to 11% but doing that damage to 9 blobs
 		var/list/blob_structures = orange(1, B)
 		for(var/obj/structure/blob/C in blob_structures)

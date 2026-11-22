@@ -65,8 +65,9 @@
 	rad_insulation = RAD_NO_INSULATION
 
 /datum/armor/poddoor_shutters
-	melee = 20
-	bullet = 20
+	blunt = 20
+	slash = 20
+	pierce = 20
 	laser = 20
 	energy = 75
 	bomb = 25

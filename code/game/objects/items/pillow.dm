@@ -196,7 +196,8 @@
 	var/obj/item/pillow/suit_pillow/unstoppably_plushed
 
 /datum/armor/suit_pillow_suit
-	melee = 5
+	blunt = 5
+	slash = 5
 	acid = 75
 
 
@@ -223,7 +224,8 @@
 	custom_materials = list(/datum/material/plastic = HALF_SHEET_MATERIAL_AMOUNT)
 
 /datum/armor/head_pillow_hood
-	melee = 5
+	blunt = 5
+	slash = 5
 	acid = 75
 
 /obj/item/clothing/neck/pillow_tag

@@ -29,8 +29,9 @@
 	exit_sound = 'sound/vehicles/clown_car/door_open.ogg'
 
 /datum/armor/car_clowncar
-	melee = 70
-	bullet = 40
+	blunt = 70
+	slash = 70
+	pierce = 40
 	laser = 40
 	bomb = 30
 	fire = 80

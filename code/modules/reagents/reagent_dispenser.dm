@@ -82,7 +82,7 @@
 /obj/structure/reagent_dispensers/take_damage(damage_amount, damage_type = BRUTE, damage_flag = 0, sound_effect = 1, attack_dir)
 	. = ..()
 	if(. && atom_integrity > 0)
-		if(tank_volume && (damage_flag == BULLET || damage_flag == LASER))
+		if(tank_volume && (damage_flag == PIERCE || damage_flag == LASER))
 			boom()
 
 /obj/structure/reagent_dispensers/item_interaction(mob/living/user, obj/item/tool, list/modifiers)

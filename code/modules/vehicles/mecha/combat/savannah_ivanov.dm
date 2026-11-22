@@ -41,8 +41,9 @@
 	var/flying = FALSE
 
 /datum/armor/mecha_savannah_ivanov
-	melee = 45
-	bullet = 40
+	blunt = 45
+	slash = 45
+	pierce = 40
 	laser = 30
 	energy = 30
 	bomb = 40

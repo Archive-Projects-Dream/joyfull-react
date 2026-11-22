@@ -113,8 +113,9 @@
 	max_integrity = 90
 
 /datum/armor/structure_candela_beacon
-	melee = 25
-	bullet = 25
+	blunt = 25
+	slash = 25
+	pierce = 25
 	laser = 25
 	energy = 25
 	bomb = 75

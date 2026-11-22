@@ -12,8 +12,9 @@
 	var/tamperproof = 0
 
 /datum/armor/crate_secure
-	melee = 15
-	bullet = 25
+	blunt = 15
+	slash = 15
+	pierce = 25
 	laser = 25
 	energy = 50
 	fire = 40

@@ -30,8 +30,9 @@
 	var/phase_state = "phazon-phase"
 
 /datum/armor/mecha_phazon
-	melee = 30
-	bullet = 30
+	blunt = 30
+	slash = 30
+	pierce = 30
 	laser = 30
 	energy = 30
 	bomb = 30

@@ -340,9 +340,11 @@ Simple datum which is instanced once per type and is used for every object of sa
 		// Based on density, with a bonus/malus for matching flexibility
 		// We cap divergence at 4 (reduced by hardness above 6 for REALLY dense stuff) to make it not extremely punishing on light fabrics or heavy materials
 		// Iron at a baseline of density of 6 and flexibility of 4 has divergence of 4, so (1 + 0.2) / (0.8 + 0.4) = 1
-		MELEE = (1 + (density - 4) * 0.1) / (0.8 + min(4 - max(0, hardness - 6), abs(flexibility - density)) * 0.1),
+		BLUNT = (1 + (density - 4) * 0.1) / (0.8 + min(4 - max(0, hardness - 6), abs(flexibility - density)) * 0.1),
+		// Same formula as blunt for now
+		SLASH = (1 + (density - 4) * 0.1) / (0.8 + min(4 - max(0, hardness - 6), abs(flexibility - density)) * 0.1),
 		// Hardness and density, with flexibility actually being detrimental
-		BULLET = (1 + (density - 4) * 0.025 + (hardness - 4) * 0.075) / (1 - max(0, flexibility - 2) * 0.1),
+		PIERCE = (1 + (density - 4) * 0.025 + (hardness - 4) * 0.075) / (1 - max(0, flexibility - 2) * 0.1),
 		// 0.6 ~ 1 for reflectivity below 4, 1 ~ 1.4 for reflectivity above 6, reduced for transparent materials
 		LASER = 1 + MATERIAL_PROPERTY_DIVERGENCE(reflectivity, 4, 6) * 0.1 - (255 - alpha) / 50 * 0.2,
 		// Essentially laser but with contribution split between reflectivity and inverse electric conductivity

@@ -150,8 +150,9 @@
 	shrapnel_type = /obj/projectile/bullet/shrapnel/short_range
 
 /datum/armor/closet_supplypod
-	melee = 30
-	bullet = 50
+	blunt = 30
+	slash = 30
+	pierce = 50
 	laser = 50
 	energy = 100
 	bomb = 100

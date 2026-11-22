@@ -57,8 +57,9 @@
 
 // weaker overall but better against energy
 /datum/armor/head_helmet_matrix
-	melee = 15
-	bullet = 15
+	blunt = 15
+	slash = 15
+	pierce = 15
 	laser = 45
 	energy = 60
 	bomb = 15

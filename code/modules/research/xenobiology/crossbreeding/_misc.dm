@@ -133,8 +133,9 @@ Slimecrossing Items
 	armor_type = /datum/armor/structure_ice_stasis
 
 /datum/armor/structure_ice_stasis
-	melee = 30
-	bullet = 50
+	blunt = 30
+	slash = 30
+	pierce = 50
 	laser = -50
 	energy = -50
 	fire = -80
