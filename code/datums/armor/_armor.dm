@@ -71,6 +71,7 @@ GLOBAL_LIST_INIT(armor_by_type, generate_armor_type_cache())
 /datum/armor/CanProcCall(procname)
 	return FALSE
 
+/// NOTE: all generate_new_* procs read values through get_rating(), so legacy melee/bullet get folded into blunt/slash/pierce in the new datum.
 /// Generate a brand new armor datum with the modifiers given, if ARMOR_ALL is specified only that modifier is used
 /datum/armor/proc/generate_new_with_modifiers(list/modifiers)
 	var/datum/armor/new_armor = new
@@ -81,12 +82,12 @@ GLOBAL_LIST_INIT(armor_by_type, generate_armor_type_cache())
 		if(!modifier_all)
 			return src
 		for(var/mod in all_keys)
-			new_armor.vars[mod] = vars[mod] + modifier_all
+			new_armor.vars[mod] = get_rating(mod) + modifier_all
 		return new_armor
 
 	for(var/modifier in modifiers)
 		if(modifier in all_keys)
-			new_armor.vars[modifier] = vars[modifier] + modifiers[modifier]
+			new_armor.vars[modifier] = get_rating(modifier) + modifiers[modifier]
 		else
 			stack_trace("Attempt to call generate_new_with_modifiers with illegal modifier '[modifier]'! Ignoring it")
 	return new_armor
@@ -104,12 +105,12 @@ GLOBAL_LIST_INIT(armor_by_type, generate_armor_type_cache())
 		if(!multiplier_all)
 			return src
 		for(var/multiplier in all_keys)
-			new_armor.vars[multiplier] = vars[multiplier] * multiplier_all
+			new_armor.vars[multiplier] = get_rating(multiplier) * multiplier_all
 		return new_armor
 
 	for(var/multiplier in multipliers)
 		if(multiplier in all_keys)
-			new_armor.vars[multiplier] = vars[multiplier] * multipliers[multiplier]
+			new_armor.vars[multiplier] = get_rating(multiplier) * multipliers[multiplier]
 		else
 			stack_trace("Attempt to call generate_new_with_multipliers with illegal multiplier '[multiplier]'! Ignoring it")
 	return new_armor
@@ -134,7 +135,7 @@ GLOBAL_LIST_INIT(armor_by_type, generate_armor_type_cache())
 		if(armor_rating in values)
 			new_armor.vars[armor_rating] = values[armor_rating]
 		else
-			new_armor.vars[armor_rating] = vars[armor_rating]
+			new_armor.vars[armor_rating] = get_rating(armor_rating)
 	return new_armor
 
 /datum/armor/immune/generate_new_with_specific(list/values)
@@ -167,7 +168,7 @@ GLOBAL_LIST_INIT(armor_by_type, generate_armor_type_cache())
 /datum/armor/proc/get_rating_list(inverse = FALSE)
 	var/ratings = list()
 	for(var/rating in ARMOR_LIST_ALL)
-		var/value = vars[rating]
+		var/value = get_rating(rating)
 		if(inverse)
 			value *= -1
 		ratings[rating] = value
@@ -200,7 +201,7 @@ GLOBAL_LIST_INIT(armor_by_type, generate_armor_type_cache())
 /// Checks if any of the armor values are non-zero, so this technically also counts negative armor!
 /datum/armor/proc/has_any_armor()
 	for(var/rating in ARMOR_LIST_ALL)
-		if(vars[rating])
+		if(get_rating(rating))
 			return TRUE
 	return FALSE
 
