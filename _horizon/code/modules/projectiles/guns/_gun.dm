@@ -94,6 +94,15 @@
 	if(LAZYLEN(safety_examine))
 		. += safety_examine
 
+/// Detailed description (double shift-click): firing pin removal hint
+/obj/item/gun/examine_more(mob/user)
+	. = ..()
+	if(!pinless && pin)
+		if(pin.pin_removable)
+			. += span_info("[pin] looks like [pin.p_they()] could be removed with some <b>tools</b>.")
+		else
+			. += span_info("[pin] looks like [pin.p_theyre()] firmly locked in, [pin.p_they()] look[pin.p_s()] impossible to remove.")
+
 /obj/item/gun/add_weapon_description()
 	AddElement(/datum/element/weapon_description, PROC_REF(add_notes_gun))
 

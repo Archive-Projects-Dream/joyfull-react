@@ -252,22 +252,12 @@
  *
  **/
 /obj/item/gun/ballistic/proc/add_notes_ballistic()
-	// [HORIZON-EDIT] Chamber pressure line (was in examine)
-	var/pressure_readout = "an indescribable"
-	switch(pressure_threshold)
-		if(-INFINITY to AMMO_CASING_PRESSURE_LOW)
-			pressure_readout = "a low"
-		if(AMMO_CASING_PRESSURE_MEDIUM)
-			pressure_readout = "a standard"
-		if(AMMO_CASING_PRESSURE_EXTREME to INFINITY)
-			pressure_readout = "an extreme"
-	var/pressure_line = "\nIt should be able to handle [pressure_readout] amount of chamber pressure."
 	if(magazine) // Make sure you have a magazine, to get the notes from
-		return "[pressure_line]\n[magazine.add_notes_box()]"
+		return "\n[magazine.add_notes_box()]"
 	else if(chambered) // if you don't have a magazine, is there something chambered?
-		return "[pressure_line]\n[chambered.add_notes_ammo()]"
+		return "\n[chambered.add_notes_ammo()]"
 	else // we have a very expensive mechanical paperweight.
-		return "[pressure_line]\nThe lack of magazine and usable cartridge in chamber makes its usefulness questionable, at best."
+		return "\nThe lack of magazine and usable cartridge in chamber makes its usefulness questionable, at best."
 
 /obj/item/gun/ballistic/vv_edit_var(vname, vval)
 	. = ..()
@@ -720,9 +710,11 @@
 	if (bolt_locked)
 		. += "The [bolt_wording] is locked back." // [HORIZON-EDIT] shortened
 	if (suppressor)
-		. += "It has a suppressor [can_unsuppress ? "attached that can be removed with <b>alt+click</b>." : "that is integral or can't otherwise be removed."]"
+		// [HORIZON-EDIT] Short line, the removal hint is in examine_more. Original, disabled:
+		// . += "It has a suppressor [can_unsuppress ? "attached that can be removed with <b>alt+click</b>." : "that is integral or can't otherwise be removed."]"
+		. += "It has a suppressor attached."
 
-	// [HORIZON-EDIT] Chamber pressure moved to add_notes_ballistic (the "look closer" weapon description)
+	// [HORIZON-EDIT] Chamber pressure and the suppressor hint moved to examine_more (double shift-click), see _horizon/.../_ballistic.dm
 
 	if(chambered && !hidden_chambered && chambered.casing_pressure > pressure_threshold && !never_misfire)
 		. += span_danger("You get the feeling this might explode if you fire it with the currently loaded round...")

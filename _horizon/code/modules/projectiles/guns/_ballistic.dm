@@ -320,6 +320,21 @@
 		bullets += magazine.ammo_count(countempties)
 	return bullets
 
+/// Detailed description (double shift-click): suppressor removal hint and chamber pressure
+/obj/item/gun/ballistic/examine_more(mob/user)
+	. = ..()
+	if(suppressor)
+		. += span_info("The suppressor [can_unsuppress ? "can be removed with <b>alt+click</b>." : "is integral or can't otherwise be removed."]")
+	var/pressure_readout = "an indescribable"
+	switch(pressure_threshold)
+		if(-INFINITY to AMMO_CASING_PRESSURE_LOW)
+			pressure_readout = "a low"
+		if(AMMO_CASING_PRESSURE_MEDIUM)
+			pressure_readout = "a standard"
+		if(AMMO_CASING_PRESSURE_EXTREME to INFINITY)
+			pressure_readout = "an extreme"
+	. += "It should be able to handle [pressure_readout] amount of chamber pressure."
+
 /obj/item/gun/ballistic/examine(mob/user)
 	. = ..()
 	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
