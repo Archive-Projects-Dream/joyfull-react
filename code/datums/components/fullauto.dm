@@ -259,7 +259,7 @@
 	if(get_dist(shooter, target) <= 0)
 		target = get_step(shooter, shooter.dir) //Shoot in the direction faced if the mouse is on the same tile as we are.
 		target_loc = target
-	else if(!CAN_THEY_SEE(target, shooter))
+	else if(!CAN_SEE_RANGED(target, shooter, (maxviewdist(shooter.client.view) - 1) / 2)) // [HORIZON-FIX] autofire range follows the client's actual viewport, not a fixed 7 tiles
 		stop_autofiring() //Elvis has left the building.
 		return FALSE
 	shooter.face_atom(target)

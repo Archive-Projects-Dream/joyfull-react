@@ -334,12 +334,12 @@
 		return
 
 	if(special_mags)
-		. += "[icon_state]_mag_[initial(magazine.icon_state)]"
+		. += "[initial(icon_state)]_mag_[initial(magazine.icon_state)]"
 		if(mag_display_ammo && !magazine.ammo_count())
-			. += "[icon_state]_mag_empty"
+			. += "[initial(icon_state)]_mag_empty"
 		return
 
-	. += "[icon_state]_mag"
+	. += "[initial(icon_state)]_mag"
 	if(!mag_display_ammo)
 		return
 
